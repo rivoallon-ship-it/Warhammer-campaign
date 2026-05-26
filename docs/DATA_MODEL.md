@@ -1,0 +1,268 @@
+# DATA_MODEL.md
+## Les Couronnes Brisées
+### Modèle de données Supabase — MVP en ligne
+
+## 1. Objectif du modèle
+
+Le modèle doit gérer : comptes utilisateurs, profils joueurs, campagnes 2 à 6 joueurs, cartes générées automatiquement, lobby, capitales, ordres secrets, révélation, batailles, explorations, fortifications, Gloire, historique et tours sans limite.
+
+L’authentification est gérée par Supabase Auth. Les données applicatives sont stockées dans PostgreSQL.
+
+## 2. Tables du MVP
+
+| Table | Rôle |
+|---|---|
+| `profiles` | Profil public de l’utilisateur |
+| `campaigns` | Campagnes créées |
+| `campaign_players` | Joueurs inscrits dans une campagne |
+| `territories` | Territoires générés pour une campagne |
+| `territory_adjacencies` | Connexions entre territoires |
+| `campaign_turns` | Tours de campagne |
+| `orders` | Ordres secrets |
+| `battles` | Batailles générées |
+| `explorations` | Explorations générées |
+| `campaign_logs` | Historique simple |
+
+## 3. `profiles`
+
+Champs :
+
+| Champ | Type | Obligatoire | Description |
+|---|---|---|---|
+| `id` | uuid | Oui | Identique à `auth.users.id` |
+| `display_name` | text | Oui | Pseudo public |
+| `avatar` | text | Non | Avatar ou icône |
+| `favorite_color` | text | Non | Couleur préférée |
+| `created_at` | timestamptz | Oui | Date de création |
+| `updated_at` | timestamptz | Oui | Date de mise à jour |
+
+Contraintes : `id` référence `auth.users(id)` avec suppression cascade.
+
+## 4. `campaigns`
+
+| Champ | Type | Obligatoire | Description |
+|---|---|---|---|
+| `id` | uuid | Oui | Identifiant unique |
+| `name` | text | Oui | Nom de campagne |
+| `invite_code` | text | Oui | Code court unique |
+| `owner_user_id` | uuid | Oui | Créateur |
+| `status` | text | Oui | Statut global |
+| `current_phase` | text | Oui | Phase actuelle |
+| `season_number` | int | Oui | Saison actuelle |
+| `current_turn_number` | int | Oui | Tour actuel |
+| `player_count` | int | Oui | Nombre de joueurs attendu |
+| `map_width` | int | Oui | Largeur carte |
+| `map_height` | int | Oui | Hauteur carte |
+| `map_template` | text | Oui | Template carte |
+| `created_at` | timestamptz | Oui | Création |
+| `updated_at` | timestamptz | Oui | Mise à jour |
+
+Contraintes : `invite_code` unique, `player_count` entre 2 et 6, largeur/hauteur > 0, `owner_user_id` référence `auth.users(id)`.
+
+`status` : `lobby`, `active`, `season_end`, `finished`, `archived`.
+
+`current_phase` : `lobby`, `orders`, `revealed`, `resolving`, `end_turn`, `season_summary`, `finished`.
+
+## 5. Configuration des cartes
+
+À stocker dans `/lib/maps/map-configs.ts` :
+
+```ts
+export const MAP_CONFIGS = {
+  2: { width: 3, height: 3, template: "auto_2p", capitalSlots: ["A1", "C3"] },
+  3: { width: 4, height: 3, template: "auto_3p", capitalSlots: ["A1", "A4", "C2"] },
+  4: { width: 4, height: 4, template: "auto_4p", capitalSlots: ["A1", "A4", "D1", "D4"] },
+  5: { width: 5, height: 4, template: "auto_5p", capitalSlots: ["A1", "A5", "D1", "D5", "B3"], fortifiedCapitalSlots: ["B3"] },
+  6: { width: 6, height: 4, template: "auto_6p", capitalSlots: ["A1", "A6", "D1", "D6", "B3", "C4"], fortifiedCapitalSlots: ["B3", "C4"] },
+} as const;
+```
+
+## 6. `campaign_players`
+
+| Champ | Type | Obligatoire | Description |
+|---|---|---|---|
+| `id` | uuid | Oui | Identifiant joueur-campagne |
+| `campaign_id` | uuid | Oui | Campagne |
+| `user_id` | uuid | Oui | Utilisateur |
+| `display_name` | text | Oui | Pseudo campagne |
+| `aos_faction` | text | Non | Faction AoS |
+| `color` | text | Non | Couleur |
+| `role` | text | Oui | `player` ou `game_master` |
+| `status` | text | Oui | `pending`, `active`, `rejected`, `left` |
+| `starting_capital_code` | text | Non | Capitale choisie |
+| `glory` | int | Oui | Gloire actuelle |
+| `is_ready` | boolean | Oui | Prêt dans le lobby |
+| `created_at` | timestamptz | Oui | Entrée |
+| `updated_at` | timestamptz | Oui | Mise à jour |
+
+Contraintes : `campaign_id` référence `campaigns`, `user_id` référence `auth.users`, unique `(campaign_id, user_id)`. Règles applicatives : couleur/capitale uniques parmi joueurs actifs, pas plus de joueurs actifs que `player_count`.
+
+## 7. `territories`
+
+| Champ | Type | Obligatoire | Description |
+|---|---|---|---|
+| `id` | uuid | Oui | Identifiant territoire |
+| `campaign_id` | uuid | Oui | Campagne |
+| `code` | text | Oui | Ex. `A1` |
+| `name` | text | Oui | Nom narratif |
+| `type` | text | Oui | Type |
+| `position_x` | int | Oui | Colonne |
+| `position_y` | int | Oui | Ligne |
+| `owner_campaign_player_id` | uuid | Non | Propriétaire, null si neutre |
+| `is_fortified` | boolean | Oui | Fortifié |
+| `has_garrison` | boolean | Oui | Réservé futures versions |
+| `local_faction` | text | Non | `dragon`, `giant` ou null |
+| `created_at` | timestamptz | Oui | Création |
+| `updated_at` | timestamptz | Oui | Mise à jour |
+
+Types : `capital`, `village`, `ruins`, `fort`, `magic_tower`, `dragon`, `giant`, `wild`.
+
+Contraintes : unique `(campaign_id, code)`, positions > 0.
+
+## 8. Répartition des territoires
+
+| Joueurs | capital | dragon | giant | village | ruins | fort | magic_tower | wild |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 2 | 1 | 1 | 1 | 1 | 1 | 0 | 2 |
+| 3 | 3 | 1 | 1 | 2 | 2 | 1 | 0 | 2 |
+| 4 | 4 | 2 | 2 | 2 | 2 | 1 | 1 | 2 |
+| 5 | 5 | 2 | 2 | 3 | 3 | 2 | 1 | 2 |
+| 6 | 6 | 3 | 3 | 3 | 3 | 2 | 2 | 2 |
+
+## 9. Banque de noms
+
+Capitales : Bastion du Nord, Citadelle de l’Est, Forteresse de l’Ouest, Porte du Sud, Bastion Central, Rempart des Cendres.
+
+Dragons : Nid des Dragons, Pic des Cendres, Caverne du Vieux Wyrm, Crête des Écailles, Sanctuaire des Ailes.
+
+Géants : Camp des Géants, Plaine des Titans, Taverne des Ossements, Gorge du Colosse, Marteau des Terres Brisées.
+
+Villages : Village Brûlé, Hameau des Brumes, Marché des Exilés, Refuge des Pêcheurs, Poste des Cendres.
+
+Ruines : Ruines Célestes, Temple Englouti, Sanctuaire Fendu, Tombeau des Rois Perdus, Autel des Couronnes.
+
+Forts : Fort du Tonnerre, Bastion Rouge, Muraille des Vents, Tour de Guet Brisée, Rempart des Éclats.
+
+Tours magiques : Tour Arcanique, Observatoire d’Azyr, Flèche des Orages, Spire des Astres.
+
+Sauvages : Forêt des Murmures, Canyon Rouge, Marais Hurlant, Landes Grises, Bois des Lueurs.
+
+## 10. `territory_adjacencies`
+
+Champs : `id`, `campaign_id`, `territory_code`, `adjacent_territory_code`.
+
+Adjacence orthogonale seulement. Stocker les deux sens. Unique `(campaign_id, territory_code, adjacent_territory_code)`.
+
+## 11. `campaign_turns`
+
+Champs : `id`, `campaign_id`, `season_number`, `turn_number`, `phase`, `army_base_points`, `event_name`, `event_description`, `started_at`, `ended_at`.
+
+Phase : `orders`, `revealed`, `resolving`, `end_turn`, `finished`.
+
+Unique `(campaign_id, turn_number)`.
+
+```ts
+export function getArmyBasePoints(turnNumber: number): number {
+  if (turnNumber <= 2) return 750;
+  if (turnNumber <= 4) return 1000;
+  if (turnNumber <= 6) return 1250;
+  return 1500;
+}
+```
+
+## 12. `orders`
+
+Champs : `id`, `campaign_id`, `turn_id`, `campaign_player_id`, `action_type`, `source_territory_id`, `target_territory_id`, `status`, `submitted_at`, `revealed_at`, `created_at`, `updated_at`.
+
+`action_type` : `attack`, `explore`, `fortify`.
+
+`status` : `draft`, `submitted`, `revealed`, `resolved`.
+
+Unique `(turn_id, campaign_player_id)`.
+
+Règles de visibilité : avant révélation, propriétaire seulement ; après révélation, tous les joueurs actifs.
+
+## 13. `battles`
+
+Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `territory_id`, `attacker_campaign_player_id`, `defender_campaign_player_id`, `status`, `winner_campaign_player_id`, `army_base_points`, `defender_bonus`, `result_notes`, `created_at`, `resolved_at`.
+
+`status` : `pending`, `played`, `cancelled`.
+
+Si attaquant gagne : territoire attaquant, attaquant +3, défenseur +1. Si défenseur gagne : territoire inchangé, défenseur +2, attaquant +1. Retirer fortification après bataille.
+
+## 14. `explorations`
+
+Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `campaign_player_id`, `territory_id`, `status`, `dice_result`, `success`, `created_at`, `resolved_at`.
+
+`status` : `pending`, `resolved`. D6 1-2 échec, 3-6 succès. Joueur +1 Gloire dans tous les cas. Succès = territoire au joueur.
+
+## 15. `campaign_logs`
+
+Champs : `id`, `campaign_id`, `turn_id`, `type`, `title`, `description`, `created_by_user_id`, `created_at`.
+
+Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launched`, `orders_revealed`, `battle_created`, `battle_result`, `exploration_result`, `territory_fortified`, `turn_finished`, `season_finished`, `campaign_archived`.
+
+## 16. Fonctions métier attendues
+
+- `createCampaign` : créer campagne, code, config carte, créateur game_master actif, log.
+- `joinCampaign` : vérifier code/lobby/place/couleur/capitale puis créer joueur pending, log.
+- `approvePlayer` : maître seulement, pending -> active, log.
+- `launchCampaign` : vérifier conditions, générer carte, créer tour 1, status active, phase orders, log.
+- `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
+- `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale.
+- `revealOrders` : maître, tous submitted, ordres revealed, batailles/explorations/fortifications, phase resolving, log.
+- `resolveExploration` : maître, D6, Gloire, territoire si succès, status resolved, log.
+- `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, status played, log.
+- `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.
+
+## 17. SQL conceptuel
+
+Le fichier final sera `/supabase/schema.sql`.
+
+```sql
+create extension if not exists "pgcrypto";
+
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  display_name text not null,
+  avatar text,
+  favorite_color text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table campaigns (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  invite_code text not null unique,
+  owner_user_id uuid not null references auth.users(id) on delete cascade,
+  status text not null default 'lobby',
+  current_phase text not null default 'lobby',
+  season_number int not null default 1,
+  current_turn_number int not null default 0,
+  player_count int not null check (player_count between 2 and 6),
+  map_width int not null check (map_width > 0),
+  map_height int not null check (map_height > 0),
+  map_template text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  check (status in ('lobby', 'active', 'season_end', 'finished', 'archived')),
+  check (current_phase in ('lobby', 'orders', 'revealed', 'resolving', 'end_turn', 'season_summary', 'finished'))
+);
+```
+
+## 18. RLS — règles fonctionnelles
+
+Activer RLS sur toutes les tables applicatives.
+
+Règle générale : un utilisateur lit les données d’une campagne uniquement s’il est membre (`campaign_players.user_id = auth.uid()` et status `pending` ou `active`).
+
+Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, explorations, territoires : lecture par membres, modification par maître ou fonctions métier.
+
+## 19. Données dérivées
+
+Statut d’ordre, classement et joueur le plus faible peuvent être calculés depuis les tables plutôt que stockés.
+
+## 20. Points d’attention Codex
+
+Ne pas supposer 4 joueurs, ne pas coder une carte 4x4 fixe, ne pas bloquer au tour 6, ne pas révéler les ordres avant l’action du maître, ne pas coder héros/mercenaires/détachements dans le MVP.

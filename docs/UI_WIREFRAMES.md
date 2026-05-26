@@ -1,0 +1,176 @@
+# UI_WIREFRAMES.md
+## Les Couronnes Brisées
+### Wireframes fonctionnels du MVP
+
+## 1. Objectif
+
+Décrire les écrans principaux du MVP pour guider Codex : pages, informations, boutons, états et actions. Ce document ne définit pas le design graphique final.
+
+## 2. Routes MVP
+
+```text
+/
+/signup
+/login
+/dashboard
+/campaigns/new
+/campaigns/join
+/campaigns/[campaignId]
+/campaigns/[campaignId]/lobby
+/campaigns/[campaignId]/map
+/campaigns/[campaignId]/orders
+/campaigns/[campaignId]/reveal
+/campaigns/[campaignId]/results
+```
+
+## 3. Composants UI communs
+
+`Button`, `Card`, `Input`, `Select`, `Badge`, `PageHeader`, `LoadingState`, `ErrorState`, `EmptyState`, `ConfirmDialog`.
+
+Badges utiles : Lobby, Active, Archivée, Ordres, Résolution, Prêt, En attente, Validé, À jouer, Résolu, Neutre, Fortifié, Maître, Joueur.
+
+## 4. Accueil `/`
+
+Objectif : présenter l’application et orienter.
+
+Wireframe :
+
+```text
+Header : Logo / Les Couronnes Brisées / Connexion
+
+Hero :
+Les Couronnes Brisées
+Gestionnaire de campagne Age of Sigmar
+Crée une campagne, invite tes joueurs, donne tes ordres en secret et conquiers la carte.
+[Créer un compte] [Se connecter] [Rejoindre une campagne]
+
+Comment ça marche ?
+1. Crée une campagne
+2. Invite tes joueurs
+3. Donnez vos ordres
+4. Jouez les batailles
+```
+
+Actions : créer compte -> `/signup`, connexion -> `/login`, rejoindre -> `/campaigns/join`.
+
+## 5. Inscription `/signup`
+
+Champs : email, mot de passe, pseudo. Bouton : Créer mon compte. Lien : déjà un compte ? Se connecter.
+
+États : loading, email invalide, mot de passe invalide, pseudo vide, succès -> dashboard.
+
+## 6. Connexion `/login`
+
+Champs : email, mot de passe. Bouton : Se connecter. Lien : créer compte.
+
+États : loading, identifiants invalides, succès -> dashboard.
+
+## 7. Dashboard personnel `/dashboard`
+
+Afficher : Bonjour, utilisateur ; boutons Créer une campagne, Rejoindre avec un code ; sections Campagnes actives, Campagnes en lobby, Campagnes terminées/archivées.
+
+Carte campagne : nom, badge statut, rôle, saison/tour, phase, bouton ouvrir.
+
+États : loading, aucune campagne, erreur.
+
+## 8. Créer une campagne `/campaigns/new`
+
+Champs : nom de campagne, nombre de joueurs 2 à 6.
+
+Afficher aperçu dynamique : 2 = 3x3 9 territoires ; 3 = 4x3 12 ; 4 = 4x4 16 ; 5 = 5x4 20 ; 6 = 6x4 24.
+
+Texte : Campagne ouverte, pas de limite automatique de tours.
+
+Boutons : Créer la campagne, Annuler. Après création -> lobby.
+
+## 9. Rejoindre une campagne `/campaigns/join`
+
+Étape 1 : code invitation + bouton chercher.
+
+Étape 2 après code valide : nom campagne, joueurs attendus/places, pseudo dans la campagne, faction AoS, couleur, capitale souhaitée, bouton demander.
+
+États : code invalide, campagne inexistante, plus en lobby, pleine, couleur/capitale prise, demande envoyée.
+
+## 10. Lobby `/campaigns/[campaignId]/lobby`
+
+Afficher : nom, Lobby, code, copier code, joueurs x/y.
+
+Liste joueurs : nom, faction, couleur, capitale, badges prêt/statut. Demandes pending avec Accepter/Refuser pour le maître.
+
+Bloc Mes réglages : pseudo, faction, couleur, capitale, enregistrer, prêt/pas prêt.
+
+Actions maître : Lancer la campagne, avec messages si impossible : joueur manquant, pas prêt, couleur doublon, capitale doublon. Confirmation obligatoire.
+
+## 11. Dashboard campagne `/campaigns/[campaignId]`
+
+Afficher : nom, Saison 1 — Tour X, phase, points d’armée, carte miniature, classement, statut des ordres, actions, historique récent.
+
+Actions joueur : Donner mes ordres, Voir les batailles, Voir carte.
+
+Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
+
+## 12. Carte interactive `/campaigns/[campaignId]/map`
+
+Layout desktop : carte à gauche, fiche territoire à droite, légende en bas.
+
+Mobile : carte en haut, fiche en dessous, légende repliable possible.
+
+Case : code, nom court, icône type, propriétaire, badges type/fortifié.
+
+Fiche : code, nom, type, propriétaire, statut, faction locale, adjacents, bonus narratif.
+
+États : aucun territoire sélectionné, sélectionné, erreur.
+
+## 13. Donner mes ordres `/campaigns/[campaignId]/orders`
+
+Étapes : choisir action (`Attaquer`, `Explorer`, `Fortifier`), choisir source, choisir cible, résumé, valider.
+
+N’afficher que les sources contrôlées et cibles valides. Si ordre validé : montrer résumé + bouton Modifier mon ordre.
+
+États : aucun territoire contrôlé, aucune cible valide, ordre validé/modifié, phase incorrecte.
+
+## 14. Révélation `/campaigns/[campaignId]/reveal`
+
+Avant révélation : liste statuts joueurs. Bouton révéler désactivé si tous pas validés.
+
+Quand tous validés : bouton Révéler les ordres + confirmation.
+
+Après révélation : tableau joueur/action/source/cible + bouton voir résultats à résoudre.
+
+## 15. Résultats `/campaigns/[campaignId]/results`
+
+Section Explorations : carte exploration, D6, bouton Résoudre.
+
+Section Batailles : attaquant, défenseur, territoire, points, bonus, vainqueur, notes, bouton Valider résultat.
+
+Section Fin de tour : bouton Finir le tour, message si impossible.
+
+Version joueur non maître : lecture seule.
+
+## 16. Historique
+
+Sur dashboard campagne : afficher les 5 à 10 derniers événements, groupés par tour si possible.
+
+## 17. États globaux
+
+Chaque page avec données : loading, erreur avec réessayer, vide, accès refusé.
+
+## 18. Responsive
+
+Desktop : panneaux côte à côte. Tablette : compact. Mobile : tout empilé, carte scrollable horizontalement, boutons pleine largeur.
+
+## 19. Style provisoire
+
+Fantasy lisible, parchemin léger, couleurs chaudes, contraste suffisant, pas trop sombre ni chargé.
+
+## 20. Priorité design MVP
+
+Lisibilité, compréhension des actions, carte claire, statut des ordres, résolution simple. La beauté vient après.
+
+## 21. À ne pas faire
+
+Pas de chat, boutique, héros, mercenaires, alliances, diplomatie, éditeur de carte, upload images, animations complexes, drag and drop obligatoire.
+
+## 22. Définition d’un écran réussi
+
+L’utilisateur comprend où il est, ce qu’il doit faire, l’action principale, pourquoi une action est bloquée, et ce qui se passe après validation.

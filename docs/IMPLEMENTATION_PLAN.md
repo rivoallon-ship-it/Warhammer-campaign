@@ -1,0 +1,273 @@
+# IMPLEMENTATION_PLAN.md
+## Les Couronnes Brisées
+### Plan de développement du MVP en ligne
+
+## 1. Objectif
+
+Construire une application web en ligne permettant de gérer une campagne narrative Warhammer Age of Sigmar : comptes, campagnes 2 à 6 joueurs, cartes dynamiques, lobby, ordres secrets, révélation, batailles, explorations, résultats, Gloire et tours ouverts.
+
+## 2. Stack technique
+
+Frontend : Next.js, React, TypeScript, Tailwind CSS.
+
+Backend/données : Supabase Auth, Supabase PostgreSQL, Row Level Security. Realtime optionnel après MVP.
+
+Hébergement : Vercel + Supabase Cloud.
+
+## 3. Documents de référence
+
+- `docs/PRODUCT_SPEC.md`
+- `docs/DATA_MODEL.md`
+- `docs/IMPLEMENTATION_PLAN.md`
+- `docs/CODEX_INSTRUCTIONS.md`
+- `docs/UI_WIREFRAMES.md`
+- `docs/MAP_DESIGN.md`
+
+Priorité : CODEX_INSTRUCTIONS, IMPLEMENTATION_PLAN, DATA_MODEL, PRODUCT_SPEC, UI_WIREFRAMES, MAP_DESIGN.
+
+## 4. Principes
+
+Avancer par lots. Chaque lot doit être limité, testable et compilable. Garder le MVP strict. Séparer logique métier et interface dans `/lib`.
+
+## 5. Structure cible
+
+```text
+/aos-campaign-app
+  /app
+    /(auth)
+      /login
+      /signup
+    /dashboard
+    /campaigns
+      /new
+      /join
+      /[campaignId]
+        /lobby
+        /map
+        /orders
+        /reveal
+        /results
+  /components
+    /auth
+    /campaign
+    /map
+    /orders
+    /ui
+  /lib
+    /supabase
+    /campaigns
+    /maps
+    /orders
+    /resolution
+  /types
+    database.ts
+    campaign.ts
+  /docs
+  /supabase
+    schema.sql
+```
+
+## Lot 1 — Initialisation du projet
+
+Objectif : squelette Next.js TypeScript Tailwind.
+
+Tâches : créer l’app, Tailwind, ESLint, structure de dossiers, page d’accueil, layout global, composants UI `Button`, `Card`, `Input`, `Select`, `Badge`, `PageHeader`.
+
+Critères : app démarre, accueil s’affiche, composants existent, lint/build passent.
+
+## Lot 2 — Configuration Supabase
+
+Créer `/lib/supabase/client.ts`, `/lib/supabase/server.ts`, `.env.example`, documenter `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Ne pas exposer de secret.
+
+## Lot 3 — Schéma SQL Supabase
+
+Créer `/supabase/schema.sql` avec tables : `profiles`, `campaigns`, `campaign_players`, `territories`, `territory_adjacencies`, `campaign_turns`, `orders`, `battles`, `explorations`, `campaign_logs`. Ajouter contraintes, clés étrangères, checks, RLS et policies simples.
+
+## Lot 4 — Authentification
+
+Pages `/signup`, `/login`, `/dashboard`. Inscription avec email, mot de passe, pseudo. Création automatique `profiles`. Connexion, déconnexion, routes protégées.
+
+## Lot 5 — Dashboard personnel
+
+Afficher les campagnes de l’utilisateur par statut : lobby, active, finished/archived. Boutons créer/rejoindre/ouvrir/modifier profil.
+
+## Lot 6 — Création de campagne modulaire
+
+Page `/campaigns/new`. Champs : nom, nombre de joueurs 2 à 6. Créer `MAP_CONFIGS` dans `/lib/maps/map-configs.ts`. À la création : `invite_code`, `map_width`, `map_height`, `map_template`, ligne `campaigns`, créateur `game_master` actif. Redirection lobby.
+
+## Lot 7 — Rejoindre une campagne
+
+Page `/campaigns/join`. Champs : code, pseudo, faction, couleur, capitale. Vérifier campagne lobby, place, couleur/capitale disponibles, capitale autorisée. Créer joueur `pending`.
+
+## Lot 8 — Lobby
+
+Page `/campaigns/[campaignId]/lobby`. Afficher joueurs actifs/pending, code, places, couleurs, factions, capitales, statuts prêt. Maître accepte/refuse. Joueurs se mettent prêts. Lancement uniquement si conditions respectées.
+
+## Lot 9 — Génération automatique de carte
+
+Créer `/lib/maps/generate-map.ts`, `territory-names.ts`, `territory-distribution.ts`, `map-utils.ts`. Générer codes, coordonnées, capitales, propriétaires, fortifications centrales, types, noms, adjacences orthogonales, insert DB.
+
+## Lot 10 — Lancement de campagne
+
+Au clic Lancer : vérifier lobby, appeler `generateMap`, créer tour 1, `army_base_points=750`, status active, phase orders, `current_turn_number=1`, log.
+
+## Lot 11 — Dashboard de campagne
+
+Page `/campaigns/[campaignId]`. Afficher nom, Saison/Tour, phase, points d’armée, carte miniature, classement, statut ordres, actions selon rôle/phase, historique récent.
+
+## Lot 12 — Carte interactive dynamique
+
+Page `/campaigns/[campaignId]/map`. Grille dynamique `map_width` x `map_height`, couleurs, neutres, types, noms/codes, fortifications, fiche au clic. Ne jamais supposer 4x4.
+
+## Lot 13 — Ordres secrets
+
+Page `/campaigns/[campaignId]/orders`. Actions `attack`, `explore`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification possible en phase orders.
+
+## Lot 14 — Visibilité des ordres
+
+Avant révélation : propriétaire seulement pour les détails, autres = statut. Après révélation : tous les membres actifs voient tous les ordres.
+
+## Lot 15 — Révélation
+
+Page `/campaigns/[campaignId]/reveal`. Maître, phase orders, tous submitted. Effets : ordres revealed, batailles, explorations, fortifications, phase resolving, log.
+
+## Lot 16 — Génération batailles/explorations
+
+`attack` -> `battles`; `explore` -> `explorations`; `fortify` -> `territories.is_fortified=true` + log. Attaques multiples : créer toutes les batailles et alerte.
+
+## Lot 17 — Résolution des explorations
+
+Page `/campaigns/[campaignId]/results`. Maître saisit D6. 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur. Status resolved, log.
+
+## Lot 18 — Résolution des batailles
+
+Maître saisit vainqueur + notes. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire inchangé, +2/+1. Retirer fortification. Status played, log.
+
+## Lot 19 — Fin de tour
+
+Maître finit si toutes explorations resolved et batailles played/cancelled. Clôturer tour, créer suivant, incrémenter, recalculer points, phase orders, log. Ne jamais bloquer au tour 6.
+
+## Lot 20 — Historique simple
+
+Composant `CampaignLog`. Afficher campagne créée, joueur rejoint/accepté, lancement, ordres révélés, explorations, batailles, fortifications, tours terminés.
+
+## Lot 21 — Qualité UX et responsive
+
+Navigation, loading/error/empty states, confirmations, responsive, lisibilité carte, badges, icônes, erreurs Supabase. Confirmations pour lancer, révéler, saisir résultat, finir tour, retirer/refuser joueur.
+
+## Backlog post-MVP
+
+V2 héros ; V3 Dragons/Géants/mercenaires ; V4 détachements ; V5 diplomatie ; V6 cartes avancées.
+
+## Prompts recommandés pour Codex
+
+### Prompt 1
+
+```text
+Tu vas développer l’application Les Couronnes Brisées.
+
+Lis les fichiers :
+- docs/PRODUCT_SPEC.md
+- docs/DATA_MODEL.md
+- docs/IMPLEMENTATION_PLAN.md
+- docs/CODEX_INSTRUCTIONS.md
+- docs/UI_WIREFRAMES.md
+- docs/MAP_DESIGN.md
+
+Commence uniquement par le Lot 1 de IMPLEMENTATION_PLAN.md.
+Crée le squelette Next.js TypeScript Tailwind, la structure de dossiers, une page d’accueil, un layout global et les composants UI de base.
+Ne configure pas Supabase. Ne code pas l’authentification. Ne code pas les campagnes.
+À la fin, vérifie lint/build et résume les fichiers créés.
+```
+
+### Prompt 2
+
+```text
+Implémente uniquement le Lot 2. Ajoute la configuration Supabase côté client et serveur, `.env.example`, sans exposer de clé secrète.
+```
+
+### Prompt 3
+
+```text
+Implémente uniquement le Lot 3. Crée `supabase/schema.sql` selon `docs/DATA_MODEL.md` avec tables, contraintes, clés étrangères, checks et RLS de base.
+```
+
+### Prompt 4
+
+```text
+Implémente uniquement le Lot 4. Ajoute signup, login, dashboard, inscription, connexion, déconnexion et création automatique du profil.
+```
+
+### Prompt 5
+
+```text
+Implémente uniquement le Lot 5. Le dashboard affiche les campagnes de l’utilisateur par statut et les boutons créer/rejoindre.
+```
+
+### Prompt 6
+
+```text
+Implémente uniquement le Lot 6. Page création campagne 2 à 6 joueurs, MAP_CONFIGS, invite_code unique, créateur game_master actif, redirection lobby.
+```
+
+### Prompt 7
+
+```text
+Implémente uniquement le Lot 7. Page rejoindre avec code, pseudo, faction, couleur, capitale. Vérifications et création pending.
+```
+
+### Prompt 8
+
+```text
+Implémente uniquement le Lot 8. Lobby avec joueurs, demandes, prêt, accept/refuse, lancement conditionnel.
+```
+
+### Prompt 9
+
+```text
+Implémente les Lots 9 et 10. Génération carte, territoires, capitales, adjacences, tour 1, status active, phase orders.
+```
+
+### Prompt 10
+
+```text
+Implémente les Lots 11 et 12. Dashboard campagne et carte interactive dynamique. Ne suppose jamais 4x4.
+```
+
+### Prompt 11
+
+```text
+Implémente les Lots 13 et 14. Ordres secrets, validation, visibilité avant/après révélation.
+```
+
+### Prompt 12
+
+```text
+Implémente les Lots 15 et 16. Révélation par maître, génération batailles/explorations/fortifications, phase resolving.
+```
+
+### Prompt 13
+
+```text
+Implémente les Lots 17 et 18. Résolution explorations et batailles, Gloire, territoires, logs.
+```
+
+### Prompt 14
+
+```text
+Implémente les Lots 19 et 20. Fin de tour et historique. Campagne sans fin automatique.
+```
+
+### Prompt 15
+
+```text
+Implémente le Lot 21. Polish UX responsive, états, confirmations, badges, icônes. Ne change pas les règles métier.
+```
+
+## Définition du MVP terminé
+
+Le scénario de bout en bout doit fonctionner : compte, campagne 2-6, invitation, lobby, lancement, carte, ordres secrets, révélation, batailles/explorations, résultats, Gloire, tour suivant, campagne continue.
+
+## Qualité
+
+Avant de considérer le MVP utilisable : `npm run lint` et `npm run build` doivent passer ou les exceptions être documentées.

@@ -14,6 +14,10 @@ export type CampaignPhase =
   | "season_summary"
   | "finished";
 
+export type CampaignPlayerRole = "player" | "game_master";
+
+export type CampaignPlayerStatus = "pending" | "active" | "rejected" | "left";
+
 export type OrderAction = "attack" | "explore" | "fortify";
 
 export type TerritoryType =

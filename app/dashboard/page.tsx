@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOutAction } from "@/app/(auth)/actions";
+import { updateProfileAction } from "@/app/dashboard/actions";
+import { DashboardCampaignSection } from "@/components/campaign/dashboard-campaign-section";
 import {
   Badge,
   Button,
@@ -9,12 +11,26 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Input,
   PageHeader,
+  buttonVariants,
 } from "@/components/ui";
+import {
+  getDashboardCampaigns,
+  groupDashboardCampaigns,
+} from "@/lib/campaigns/dashboard-service";
 import { ensureProfile, getProfile } from "@/lib/profiles/profile-service";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams?: Promise<{
+    profileError?: string;
+    profileSuccess?: string;
+  }>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,7 +42,14 @@ export default async function DashboardPage() {
 
   const { profile, error: profileError } = await getProfile(supabase, user.id);
   const activeProfile = profile ?? (await ensureProfile(supabase, user));
+  const { campaigns, error: campaignsError } = await getDashboardCampaigns(
+    supabase,
+    user.id,
+  );
+  const groupedCampaigns = groupDashboardCampaigns(campaigns);
   const displayName = activeProfile?.display_name ?? user.email ?? "Joueur";
+  const favoriteColor = activeProfile?.favorite_color ?? "";
+  const avatar = activeProfile?.avatar ?? "";
   const createdAt = activeProfile?.created_at
     ? new Intl.DateTimeFormat("fr-FR", {
         day: "2-digit",
@@ -55,17 +78,19 @@ export default async function DashboardPage() {
         <PageHeader
           eyebrow="Dashboard"
           title={`Bonjour, ${displayName}`}
-          description="Tes campagnes apparaîtront ici quand les lots de création, invitation et lobby seront activés."
+          description="Retrouve tes campagnes, ton rôle, ton statut de lobby et ton profil joueur."
         />
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button type="button" disabled>
+          <Link href="/campaigns/new" className={buttonVariants()}>
             Créer une campagne
-          </Button>
-          <Button type="button" variant="secondary" disabled>
+          </Link>
+          <Link
+            href="/campaigns/join"
+            className={buttonVariants({ variant: "secondary" })}
+          >
             Rejoindre avec un code
-          </Button>
-          <Badge variant="warning">Disponible au lot campagnes</Badge>
+          </Link>
         </div>
 
         <section className="mt-10 grid gap-4 lg:grid-cols-[1fr_2fr]">
@@ -78,15 +103,39 @@ export default async function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {profileError ? (
+              {profileError || params?.profileError ? (
                 <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
-                  Profil recréé depuis ton compte Auth.
+                  {params?.profileError ?? "Profil recréé depuis ton compte Auth."}
                 </p>
               ) : null}
-              <div>
-                <p className="text-sm font-semibold text-[#302720]">Pseudo</p>
-                <p className="mt-1 text-sm text-[#5d5148]">{displayName}</p>
-              </div>
+              {params?.profileSuccess ? (
+                <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                  {params.profileSuccess}
+                </p>
+              ) : null}
+              <form action={updateProfileAction} className="space-y-4">
+                <Input
+                  label="Pseudo"
+                  name="displayName"
+                  required
+                  defaultValue={displayName}
+                />
+                <Input
+                  label="Couleur favorite"
+                  name="favoriteColor"
+                  placeholder="Rouge, bleu, vert..."
+                  defaultValue={favoriteColor}
+                />
+                <Input
+                  label="Avatar ou icône"
+                  name="avatar"
+                  placeholder="Ex. couronne, marteau, étoile..."
+                  defaultValue={avatar}
+                />
+                <Button type="submit" variant="outline" className="w-full">
+                  Modifier mon profil
+                </Button>
+              </form>
               <div>
                 <p className="text-sm font-semibold text-[#302720]">Email</p>
                 <p className="mt-1 text-sm text-[#5d5148]">{user.email}</p>
@@ -104,34 +153,53 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle>État des campagnes</CardTitle>
               <CardDescription>
-                La création et l’invitation de campagnes arrivent dans les lots
-                suivants.
+                Vue synthétique de tes campagnes par statut.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                {[
-                  "Campagnes actives",
-                  "Campagnes en lobby",
-                  "Campagnes archivées",
-                ].map((title) => (
-                  <div
-                    key={title}
-                    className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
-                  >
-                    <h2 className="text-sm font-semibold text-[#302720]">
-                      {title}
-                    </h2>
-                    <p className="mt-2 text-sm text-[#6a5e54]">
-                      Aucune campagne pour le moment.
-                    </p>
+              {campaignsError ? (
+                <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+                  Impossible de charger tes campagnes pour le moment.
+                </p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
+                    <p className="text-2xl font-bold">{groupedCampaigns.active.length}</p>
+                    <p className="mt-1 text-sm text-[#6a5e54]">Actives</p>
                   </div>
-                ))}
-              </div>
+                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
+                    <p className="text-2xl font-bold">{groupedCampaigns.lobby.length}</p>
+                    <p className="mt-1 text-sm text-[#6a5e54]">En lobby</p>
+                  </div>
+                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
+                    <p className="text-2xl font-bold">
+                      {groupedCampaigns.archived.length}
+                    </p>
+                    <p className="mt-1 text-sm text-[#6a5e54]">Archivées</p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>
 
+        <div className="mt-12 space-y-10">
+          <DashboardCampaignSection
+            title="Campagnes actives"
+            campaigns={groupedCampaigns.active}
+            emptyText="Aucune campagne active pour le moment."
+          />
+          <DashboardCampaignSection
+            title="Campagnes en lobby"
+            campaigns={groupedCampaigns.lobby}
+            emptyText="Aucune campagne en préparation."
+          />
+          <DashboardCampaignSection
+            title="Campagnes terminées ou archivées"
+            campaigns={groupedCampaigns.archived}
+            emptyText="Aucune campagne terminée ou archivée."
+          />
+        </div>
       </div>
     </main>
   );

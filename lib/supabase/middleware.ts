@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
 import { getSupabasePublicKey, getSupabaseUrl } from "./env";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/campaigns"];
 const authRoutes = ["/login", "/signup"];
 
 function isRouteMatch(pathname: string, routes: string[]) {

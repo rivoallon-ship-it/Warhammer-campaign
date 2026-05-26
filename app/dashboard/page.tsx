@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
   PageHeader,
-  buttonVariants,
 } from "@/components/ui";
+import { ensureProfile, getProfile } from "@/lib/profiles/profile-service";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -24,10 +24,16 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const displayName =
-    typeof user.user_metadata.display_name === "string"
-      ? user.user_metadata.display_name
-      : user.email;
+  const { profile, error: profileError } = await getProfile(supabase, user.id);
+  const activeProfile = profile ?? (await ensureProfile(supabase, user));
+  const displayName = activeProfile?.display_name ?? user.email ?? "Joueur";
+  const createdAt = activeProfile?.created_at
+    ? new Intl.DateTimeFormat("fr-FR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(activeProfile.created_at))
+    : null;
 
   return (
     <main className="min-h-screen bg-[#f7f0e2] px-6 py-8 text-[#211a16]">
@@ -53,32 +59,79 @@ export default async function DashboardPage() {
         />
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link href="/campaigns/new" className={buttonVariants()}>
+          <Button type="button" disabled>
             Créer une campagne
-          </Link>
-          <Link
-            href="/campaigns/join"
-            className={buttonVariants({ variant: "secondary" })}
-          >
+          </Button>
+          <Button type="button" variant="secondary" disabled>
             Rejoindre avec un code
-          </Link>
+          </Button>
+          <Badge variant="warning">Disponible au lot campagnes</Badge>
         </div>
 
-        <section className="mt-10 grid gap-4 md:grid-cols-3">
-          {["Campagnes actives", "Campagnes en lobby", "Campagnes archivées"].map(
-            (title) => (
-              <Card key={title}>
-                <CardHeader>
-                  <CardTitle>{title}</CardTitle>
-                  <CardDescription>Aucune campagne pour le moment.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="neutral">Vide</Badge>
-                </CardContent>
-              </Card>
-            ),
-          )}
+        <section className="mt-10 grid gap-4 lg:grid-cols-[1fr_2fr]">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profil utilisateur</CardTitle>
+              <CardDescription>
+                Ces informations viennent de Supabase Auth et de la table
+                profiles.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {profileError ? (
+                <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+                  Profil recréé depuis ton compte Auth.
+                </p>
+              ) : null}
+              <div>
+                <p className="text-sm font-semibold text-[#302720]">Pseudo</p>
+                <p className="mt-1 text-sm text-[#5d5148]">{displayName}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#302720]">Email</p>
+                <p className="mt-1 text-sm text-[#5d5148]">{user.email}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant={user.email_confirmed_at ? "success" : "warning"}>
+                  {user.email_confirmed_at ? "Email confirmé" : "Email à confirmer"}
+                </Badge>
+                {createdAt ? <Badge variant="neutral">Profil créé le {createdAt}</Badge> : null}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>État des campagnes</CardTitle>
+              <CardDescription>
+                La création et l’invitation de campagnes arrivent dans les lots
+                suivants.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                {[
+                  "Campagnes actives",
+                  "Campagnes en lobby",
+                  "Campagnes archivées",
+                ].map((title) => (
+                  <div
+                    key={title}
+                    className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
+                  >
+                    <h2 className="text-sm font-semibold text-[#302720]">
+                      {title}
+                    </h2>
+                    <p className="mt-2 text-sm text-[#6a5e54]">
+                      Aucune campagne pour le moment.
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </section>
+
       </div>
     </main>
   );

@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ensureProfile } from "@/lib/profiles/profile-service";
 import { createClient } from "@/lib/supabase/server";
 
 function getFormValue(formData: FormData, key: string) {
@@ -15,6 +16,28 @@ function redirectWithMessage(
   message: string,
 ) {
   redirect(`${path}?${type}=${encodeURIComponent(message)}`);
+}
+
+function getAuthErrorMessage(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes("invalid login credentials")) {
+    return "Email ou mot de passe incorrect.";
+  }
+
+  if (normalizedMessage.includes("email not confirmed")) {
+    return "Confirme ton email avant de te connecter.";
+  }
+
+  if (normalizedMessage.includes("user already registered")) {
+    return "Un compte existe déjà avec cet email.";
+  }
+
+  if (normalizedMessage.includes("password")) {
+    return "Le mot de passe n'est pas accepté.";
+  }
+
+  return message;
 }
 
 export async function signUpAction(formData: FormData) {
@@ -54,7 +77,7 @@ export async function signUpAction(formData: FormData) {
   });
 
   if (error) {
-    redirectWithMessage("/signup", "error", error.message);
+    redirectWithMessage("/signup", "error", getAuthErrorMessage(error.message));
   }
 
   redirectWithMessage(
@@ -67,22 +90,32 @@ export async function signUpAction(formData: FormData) {
 export async function loginAction(formData: FormData) {
   const email = getFormValue(formData, "email");
   const password = getFormValue(formData, "password");
+  const nextPath = getFormValue(formData, "next") || "/dashboard";
 
   if (!email || !password) {
     redirectWithMessage("/login", "error", "Email et mot de passe requis.");
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    redirectWithMessage("/login", "error", error.message);
+    redirectWithMessage("/login", "error", getAuthErrorMessage(error.message));
   }
 
-  redirect("/dashboard");
+  if (data.user) {
+    await ensureProfile(supabase, data.user);
+  }
+
+  const safeNextPath =
+    nextPath.startsWith("/") && !nextPath.startsWith("//")
+      ? nextPath
+      : "/dashboard";
+
+  redirect(safeNextPath);
 }
 
 export async function signOutAction() {

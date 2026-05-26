@@ -15,6 +15,7 @@ type LoginPageProps = {
   searchParams?: Promise<{
     error?: string;
     success?: string;
+    next?: string;
   }>;
 };
 
@@ -54,6 +55,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             ) : null}
 
             <form action={loginAction} className="space-y-4">
+              <input type="hidden" name="next" value={params?.next ?? "/dashboard"} />
               <Input
                 label="Email"
                 name="email"

@@ -6,4 +6,442 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Database = Record<string, never>;
+export type Database = {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string;
+          display_name: string;
+          avatar: string | null;
+          favorite_color: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          display_name: string;
+          avatar?: string | null;
+          favorite_color?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          display_name?: string;
+          avatar?: string | null;
+          favorite_color?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      campaigns: {
+        Row: {
+          id: string;
+          name: string;
+          invite_code: string;
+          owner_user_id: string;
+          status: string;
+          current_phase: string;
+          season_number: number;
+          current_turn_number: number;
+          player_count: number;
+          map_width: number;
+          map_height: number;
+          map_template: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          invite_code: string;
+          owner_user_id: string;
+          status?: string;
+          current_phase?: string;
+          season_number?: number;
+          current_turn_number?: number;
+          player_count: number;
+          map_width: number;
+          map_height: number;
+          map_template: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          invite_code?: string;
+          owner_user_id?: string;
+          status?: string;
+          current_phase?: string;
+          season_number?: number;
+          current_turn_number?: number;
+          player_count?: number;
+          map_width?: number;
+          map_height?: number;
+          map_template?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      campaign_players: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          user_id: string;
+          display_name: string;
+          aos_faction: string | null;
+          color: string | null;
+          role: string;
+          status: string;
+          starting_capital_code: string | null;
+          glory: number;
+          is_ready: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          user_id: string;
+          display_name: string;
+          aos_faction?: string | null;
+          color?: string | null;
+          role?: string;
+          status?: string;
+          starting_capital_code?: string | null;
+          glory?: number;
+          is_ready?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          user_id?: string;
+          display_name?: string;
+          aos_faction?: string | null;
+          color?: string | null;
+          role?: string;
+          status?: string;
+          starting_capital_code?: string | null;
+          glory?: number;
+          is_ready?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      territories: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          code: string;
+          name: string;
+          type: string;
+          position_x: number;
+          position_y: number;
+          owner_campaign_player_id: string | null;
+          is_fortified: boolean;
+          has_garrison: boolean;
+          local_faction: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          code: string;
+          name: string;
+          type: string;
+          position_x: number;
+          position_y: number;
+          owner_campaign_player_id?: string | null;
+          is_fortified?: boolean;
+          has_garrison?: boolean;
+          local_faction?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          code?: string;
+          name?: string;
+          type?: string;
+          position_x?: number;
+          position_y?: number;
+          owner_campaign_player_id?: string | null;
+          is_fortified?: boolean;
+          has_garrison?: boolean;
+          local_faction?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      territory_adjacencies: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          territory_code: string;
+          adjacent_territory_code: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          territory_code: string;
+          adjacent_territory_code: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          territory_code?: string;
+          adjacent_territory_code?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      campaign_turns: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          season_number: number;
+          turn_number: number;
+          phase: string;
+          army_base_points: number;
+          event_name: string | null;
+          event_description: string | null;
+          started_at: string;
+          ended_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          season_number?: number;
+          turn_number: number;
+          phase?: string;
+          army_base_points: number;
+          event_name?: string | null;
+          event_description?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          season_number?: number;
+          turn_number?: number;
+          phase?: string;
+          army_base_points?: number;
+          event_name?: string | null;
+          event_description?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Relationships: [];
+      };
+      orders: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          turn_id: string;
+          campaign_player_id: string;
+          action_type: string;
+          source_territory_id: string | null;
+          target_territory_id: string | null;
+          status: string;
+          submitted_at: string | null;
+          revealed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          turn_id: string;
+          campaign_player_id: string;
+          action_type: string;
+          source_territory_id?: string | null;
+          target_territory_id?: string | null;
+          status?: string;
+          submitted_at?: string | null;
+          revealed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          turn_id?: string;
+          campaign_player_id?: string;
+          action_type?: string;
+          source_territory_id?: string | null;
+          target_territory_id?: string | null;
+          status?: string;
+          submitted_at?: string | null;
+          revealed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      battles: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          turn_id: string;
+          order_id: string;
+          territory_id: string;
+          attacker_campaign_player_id: string;
+          defender_campaign_player_id: string;
+          status: string;
+          winner_campaign_player_id: string | null;
+          army_base_points: number;
+          defender_bonus: string | null;
+          result_notes: string | null;
+          created_at: string;
+          resolved_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          turn_id: string;
+          order_id: string;
+          territory_id: string;
+          attacker_campaign_player_id: string;
+          defender_campaign_player_id: string;
+          status?: string;
+          winner_campaign_player_id?: string | null;
+          army_base_points: number;
+          defender_bonus?: string | null;
+          result_notes?: string | null;
+          created_at?: string;
+          resolved_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          turn_id?: string;
+          order_id?: string;
+          territory_id?: string;
+          attacker_campaign_player_id?: string;
+          defender_campaign_player_id?: string;
+          status?: string;
+          winner_campaign_player_id?: string | null;
+          army_base_points?: number;
+          defender_bonus?: string | null;
+          result_notes?: string | null;
+          created_at?: string;
+          resolved_at?: string | null;
+        };
+        Relationships: [];
+      };
+      explorations: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          turn_id: string;
+          order_id: string;
+          campaign_player_id: string;
+          territory_id: string;
+          status: string;
+          dice_result: number | null;
+          success: boolean | null;
+          created_at: string;
+          resolved_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          turn_id: string;
+          order_id: string;
+          campaign_player_id: string;
+          territory_id: string;
+          status?: string;
+          dice_result?: number | null;
+          success?: boolean | null;
+          created_at?: string;
+          resolved_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          turn_id?: string;
+          order_id?: string;
+          campaign_player_id?: string;
+          territory_id?: string;
+          status?: string;
+          dice_result?: number | null;
+          success?: boolean | null;
+          created_at?: string;
+          resolved_at?: string | null;
+        };
+        Relationships: [];
+      };
+      campaign_logs: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          turn_id: string | null;
+          type: string;
+          title: string;
+          description: string | null;
+          created_by_user_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          turn_id?: string | null;
+          type: string;
+          title: string;
+          description?: string | null;
+          created_by_user_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          turn_id?: string | null;
+          type?: string;
+          title?: string;
+          description?: string | null;
+          created_by_user_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: {
+      is_campaign_owner: {
+        Args: { target_campaign_id: string };
+        Returns: boolean;
+      };
+      is_campaign_member: {
+        Args: { target_campaign_id: string };
+        Returns: boolean;
+      };
+      is_active_campaign_member: {
+        Args: { target_campaign_id: string };
+        Returns: boolean;
+      };
+      is_campaign_master: {
+        Args: { target_campaign_id: string };
+        Returns: boolean;
+      };
+      owns_campaign_player: {
+        Args: { target_campaign_player_id: string };
+        Returns: boolean;
+      };
+    };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+};

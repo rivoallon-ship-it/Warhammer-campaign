@@ -214,10 +214,14 @@ npm run build
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-Ne jamais exposer de clé Supabase `service_role` côté client.
+Utiliser `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` pour les nouveaux projets Supabase.
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté pour compatibilité avec les anciennes clés.
+
+Ne jamais exposer de clé Supabase `service_role` ou `sb_secret_*` côté client.
 
 ## 15. Définition du MVP terminé
 

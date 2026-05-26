@@ -231,9 +231,15 @@ export default async function CampaignPage({
                   <Button type="button" className="w-full" disabled>
                     Donner mes ordres
                   </Button>
-                  <Button type="button" variant="outline" className="w-full" disabled>
+                  <Link
+                    href={`/campaigns/${campaign.id}/map`}
+                    className={buttonVariants({
+                      variant: "outline",
+                      className: "w-full",
+                    })}
+                  >
                     Voir la carte
-                  </Button>
+                  </Link>
                 </>
               ) : null}
               {isGameMaster && campaign.current_phase === "orders" ? (

@@ -684,6 +684,16 @@ with check (
   )
 );
 
+drop policy if exists "Campaign members insert join logs" on public.campaign_logs;
+create policy "Campaign members insert join logs"
+on public.campaign_logs for insert
+to authenticated
+with check (
+  created_by_user_id = auth.uid()
+  and type = 'player_joined'
+  and public.is_campaign_member(campaign_id)
+);
+
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on public.profiles to authenticated;
 grant select, insert, update, delete on public.campaigns to authenticated;

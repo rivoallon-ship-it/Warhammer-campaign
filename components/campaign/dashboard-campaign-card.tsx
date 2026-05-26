@@ -38,6 +38,11 @@ type DashboardCampaignCardProps = {
 };
 
 export function DashboardCampaignCard({ campaign }: DashboardCampaignCardProps) {
+  const campaignHref =
+    campaign.status === "lobby"
+      ? `/campaigns/${campaign.id}/lobby`
+      : `/campaigns/${campaign.id}`;
+
   return (
     <Card>
       <CardHeader>
@@ -76,7 +81,7 @@ export function DashboardCampaignCard({ campaign }: DashboardCampaignCardProps) 
           </div>
         </dl>
         <Link
-          href={`/campaigns/${campaign.id}`}
+          href={campaignHref}
           className={buttonVariants({ variant: "outline", className: "w-full" })}
         >
           Ouvrir

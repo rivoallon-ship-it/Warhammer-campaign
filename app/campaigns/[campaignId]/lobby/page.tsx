@@ -16,10 +16,14 @@ type LobbyPageProps = {
   params: Promise<{
     campaignId: string;
   }>;
+  searchParams?: Promise<{
+    joined?: string;
+  }>;
 };
 
-export default async function LobbyPage({ params }: LobbyPageProps) {
+export default async function LobbyPage({ params, searchParams }: LobbyPageProps) {
   const { campaignId } = await params;
+  const query = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -58,6 +62,11 @@ export default async function LobbyPage({ params }: LobbyPageProps) {
           title={campaign.name}
           description="Le lobby complet arrive au Lot 8. Pour l’instant, cette page confirme la création et affiche les informations utiles."
         />
+        {query?.joined ? (
+          <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+            Demande envoyée. Le maître de campagne doit maintenant la valider.
+          </p>
+        ) : null}
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_2fr]">
           <Card>

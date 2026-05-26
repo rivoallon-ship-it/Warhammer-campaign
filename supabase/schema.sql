@@ -279,6 +279,19 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_user();
 
+insert into public.profiles (id, display_name, avatar)
+select
+  u.id,
+  coalesce(
+    nullif(trim(u.raw_user_meta_data ->> 'display_name'), ''),
+    nullif(trim(u.raw_user_meta_data ->> 'name'), ''),
+    split_part(u.email, '@', 1),
+    'Joueur'
+  ),
+  u.raw_user_meta_data ->> 'avatar_url'
+from auth.users u
+on conflict (id) do nothing;
+
 create or replace function public.is_campaign_owner(target_campaign_id uuid)
 returns boolean
 language sql

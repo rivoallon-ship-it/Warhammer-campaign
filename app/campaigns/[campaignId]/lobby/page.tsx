@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
+  launchCampaignAction,
   reviewJoinRequestAction,
   setLobbyReadyStateAction,
   updateLobbySettingsAction,
@@ -226,8 +227,8 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
               <CardHeader>
                 <CardTitle>Lancement</CardTitle>
                 <CardDescription>
-                  Le lancement effectif avec génération de carte arrive au Lot
-                  10. Les conditions sont déjà contrôlées ici.
+                  Quand tout est prêt, le lancement génère la carte et ouvre le
+                  tour 1.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -248,11 +249,22 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                   </ul>
                 )}
                 {lobby.isGameMaster ? (
-                  <Button type="button" className="w-full" disabled>
-                    {lobby.launchChecks.canLaunch
-                      ? "Lancement prêt au Lot 10"
-                      : "Lancer la campagne"}
-                  </Button>
+                  lobby.launchChecks.canLaunch ? (
+                    <form action={launchCampaignAction}>
+                      <input
+                        type="hidden"
+                        name="campaignId"
+                        value={lobby.campaign.id}
+                      />
+                      <Button type="submit" className="w-full">
+                        Lancer la campagne
+                      </Button>
+                    </form>
+                  ) : (
+                    <Button type="button" className="w-full" disabled>
+                      Lancer la campagne
+                    </Button>
+                  )
                 ) : (
                   <p className="text-sm text-[#6a5e54]">
                     Seul le maître de campagne pourra lancer la campagne.

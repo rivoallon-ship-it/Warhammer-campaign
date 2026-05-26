@@ -6,6 +6,7 @@ import {
   setLobbyReadyState,
   updateLobbySettings,
 } from "@/lib/campaigns/lobby-service";
+import { launchCampaign } from "@/lib/campaigns/launch-campaign";
 import { createClient } from "@/lib/supabase/server";
 
 function getFormValue(formData: FormData, key: string) {
@@ -91,4 +92,16 @@ export async function reviewJoinRequestAction(formData: FormData) {
   redirectToLobby(campaignId, {
     [reviewDecision === "approve" ? "approved" : "rejected"]: "1",
   });
+}
+
+export async function launchCampaignAction(formData: FormData) {
+  const campaignId = getFormValue(formData, "campaignId");
+  const { supabase, user } = await getAuthenticatedUser(campaignId);
+  const { error } = await launchCampaign(supabase, user, campaignId);
+
+  if (error) {
+    redirectToLobby(campaignId, { error });
+  }
+
+  redirect(`/campaigns/${campaignId}?launched=1`);
 }

@@ -252,6 +252,69 @@ export function generateMapRows(data: MapGenerationData) {
   return buildMapRows(data);
 }
 
+async function getExistingMapResult(
+  supabase: SupabaseClient<Database>,
+  campaign: CampaignRow,
+) {
+  const { data: existingTerritories, error: territoriesError } = await supabase
+    .from("territories")
+    .select("id")
+    .eq("campaign_id", campaign.id);
+
+  if (territoriesError) {
+    return {
+      result: null,
+      error: "Impossible de verifier la carte existante.",
+    };
+  }
+
+  if (!existingTerritories.length) {
+    return { result: null, error: null };
+  }
+
+  const expectedTerritoryCount = campaign.map_width * campaign.map_height;
+
+  if (existingTerritories.length !== expectedTerritoryCount) {
+    return {
+      result: null,
+      error: "La carte existante est incomplete.",
+    };
+  }
+
+  const { data: existingAdjacencies, error: adjacenciesError } = await supabase
+    .from("territory_adjacencies")
+    .select("id")
+    .eq("campaign_id", campaign.id);
+
+  if (adjacenciesError) {
+    return {
+      result: null,
+      error: "Impossible de verifier les adjacences existantes.",
+    };
+  }
+
+  const expectedAdjacencyCount = generateOrthogonalAdjacencies(
+    campaign.map_width,
+    campaign.map_height,
+  ).length;
+
+  if (existingAdjacencies.length !== expectedAdjacencyCount) {
+    return {
+      result: null,
+      error: "Les adjacences existantes sont incompletes.",
+    };
+  }
+
+  return {
+    result: {
+      territoryCount: existingTerritories.length,
+      adjacencyCount: existingAdjacencies.length,
+      error: null,
+    } satisfies GenerateMapResult,
+    error: null,
+  };
+}
+
 export async function generateMap(
   supabase: SupabaseClient<Database>,
   campaignId: string,
@@ -265,26 +328,19 @@ export async function generateMap(
     return { territoryCount: 0, adjacencyCount: 0, error: dataError };
   }
 
-  const { data: existingTerritories, error: existingError } = await supabase
-    .from("territories")
-    .select("id")
-    .eq("campaign_id", data.campaign.id)
-    .limit(1);
+  const { result: existingMapResult, error: existingMapError } =
+    await getExistingMapResult(supabase, data.campaign);
 
-  if (existingError) {
+  if (existingMapError) {
     return {
       territoryCount: 0,
       adjacencyCount: 0,
-      error: "Impossible de verifier la carte existante.",
+      error: existingMapError,
     };
   }
 
-  if (existingTerritories.length) {
-    return {
-      territoryCount: 0,
-      adjacencyCount: 0,
-      error: "La carte de cette campagne existe deja.",
-    };
+  if (existingMapResult) {
+    return existingMapResult;
   }
 
   const { rows, error: generationError } = generateMapRows(data);

@@ -290,9 +290,15 @@ export default async function CampaignPage({
                 </>
               ) : null}
               {isGameMaster && campaign.current_phase === "orders" ? (
-                <Button type="button" variant="secondary" className="w-full" disabled>
+                <Link
+                  href={`/campaigns/${campaign.id}/reveal`}
+                  className={buttonVariants({
+                    variant: "secondary",
+                    className: "w-full",
+                  })}
+                >
                   Révéler les ordres
-                </Button>
+                </Link>
               ) : null}
               {isGameMaster && campaign.current_phase === "resolving" ? (
                 <Button type="button" variant="secondary" className="w-full" disabled>

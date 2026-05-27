@@ -452,6 +452,17 @@ export type Database = {
           submitted_at: string | null;
         }[];
       };
+      reveal_current_turn_orders: {
+        Args: { target_campaign_id: string };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          battle_count: number;
+          exploration_count: number;
+          fortification_count: number;
+          multiple_attack_count: number;
+        }[];
+      };
       owns_campaign_player: {
         Args: { target_campaign_player_id: string };
         Returns: boolean;

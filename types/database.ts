@@ -463,6 +463,17 @@ export type Database = {
           multiple_attack_count: number;
         }[];
       };
+      resolve_exploration_result: {
+        Args: {
+          target_exploration_id: string;
+          submitted_dice_result: number;
+        };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          exploration_success: boolean | null;
+        }[];
+      };
       owns_campaign_player: {
         Args: { target_campaign_player_id: string };
         Returns: boolean;

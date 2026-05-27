@@ -301,9 +301,15 @@ export default async function CampaignPage({
                 </Link>
               ) : null}
               {isGameMaster && campaign.current_phase === "resolving" ? (
-                <Button type="button" variant="secondary" className="w-full" disabled>
+                <Link
+                  href={`/campaigns/${campaign.id}/results`}
+                  className={buttonVariants({
+                    variant: "secondary",
+                    className: "w-full",
+                  })}
+                >
                   Saisir les résultats
-                </Button>
+                </Link>
               ) : null}
               {isGameMaster && campaign.current_phase === "end_turn" ? (
                 <Button type="button" variant="secondary" className="w-full" disabled>

@@ -228,9 +228,18 @@ export default async function CampaignPage({
               ) : null}
               {canUseCampaignActions ? (
                 <>
-                  <Button type="button" className="w-full" disabled>
-                    Donner mes ordres
-                  </Button>
+                  {campaign.current_phase === "orders" ? (
+                    <Link
+                      href={`/campaigns/${campaign.id}/orders`}
+                      className={buttonVariants({ className: "w-full" })}
+                    >
+                      Donner mes ordres
+                    </Link>
+                  ) : (
+                    <Button type="button" className="w-full" disabled>
+                      Donner mes ordres
+                    </Button>
+                  )}
                   <Link
                     href={`/campaigns/${campaign.id}/map`}
                     className={buttonVariants({

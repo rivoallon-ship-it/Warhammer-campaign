@@ -486,6 +486,15 @@ export type Database = {
           winner_role: string | null;
         }[];
       };
+      finish_current_turn: {
+        Args: { target_campaign_id: string };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          next_turn_number: number | null;
+          next_army_base_points: number | null;
+        }[];
+      };
       owns_campaign_player: {
         Args: { target_campaign_player_id: string };
         Returns: boolean;

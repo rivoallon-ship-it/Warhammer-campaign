@@ -11,11 +11,12 @@ Copie-colle les fichiers `.sql` dans Supabase **dans cet ordre exact**.
 7. `07_reveal_orders_function.sql`
 8. `08_resolve_exploration_function.sql`
 9. `09_resolve_battle_function.sql`
-10. `10_rls_core.sql`
-11. `11_rls_players.sql`
-12. `12_rls_map_turns.sql`
-13. `13_rls_orders_resolution.sql`
-14. `14_logs_grants.sql`
+10. `09b_finish_turn_function.sql`
+11. `10_rls_core.sql`
+12. `11_rls_players.sql`
+13. `12_rls_map_turns.sql`
+14. `13_rls_orders_resolution.sql`
+15. `14_logs_grants.sql`
 
 Dans Supabase SQL Editor :
 

@@ -14,6 +14,8 @@ type ResolveExplorationRpcResult =
   Database["public"]["Functions"]["resolve_exploration_result"]["Returns"][number];
 type ResolveBattleRpcResult =
   Database["public"]["Functions"]["resolve_battle_result"]["Returns"][number];
+type FinishTurnRpcResult =
+  Database["public"]["Functions"]["finish_current_turn"]["Returns"][number];
 
 export type ExplorationResultItem = ExplorationRow & {
   player: CampaignPlayerRow | null;
@@ -37,18 +39,20 @@ export function getResultsReadiness(resultsData: ResultsPageData) {
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
   const pendingExplorationCount = explorations.filter(
-    (exploration) => exploration.status === "pending",
+    (exploration) => exploration.status !== "resolved",
   ).length;
   const resolvedExplorationCount = explorations.filter(
     (exploration) => exploration.status === "resolved",
   ).length;
   const pendingBattleCount = battles.filter(
-    (battle) => battle.status === "pending",
+    (battle) => !["played", "cancelled"].includes(battle.status),
   ).length;
   const blockers: string[] = [];
+  const finishTurnBlockers: string[] = [];
 
   if (!isGameMaster) {
     blockers.push("Seul le maître de campagne peut saisir les résultats.");
+    finishTurnBlockers.push("Seul le maître de campagne peut terminer le tour.");
   }
 
   if (campaign.status !== "active" || campaign.current_phase !== "resolving") {
@@ -59,11 +63,27 @@ export function getResultsReadiness(resultsData: ResultsPageData) {
     blockers.push("Le tour courant doit être en phase de résolution.");
   }
 
+  if (
+    campaign.status !== "active" ||
+    !["resolving", "end_turn"].includes(campaign.current_phase)
+  ) {
+    finishTurnBlockers.push("La campagne doit être en phase de résolution.");
+  }
+
+  if (!currentTurn || !["resolving", "end_turn"].includes(currentTurn.phase)) {
+    finishTurnBlockers.push("Le tour courant doit être en phase de résolution.");
+  }
+
   return {
     isGameMaster,
     canResolveResults: blockers.length === 0,
     canResolveExplorations: blockers.length === 0,
+    canFinishTurn:
+      finishTurnBlockers.length === 0 &&
+      pendingExplorationCount === 0 &&
+      pendingBattleCount === 0,
     blockers,
+    finishTurnBlockers,
     pendingExplorationCount,
     resolvedExplorationCount,
     pendingBattleCount,
@@ -285,6 +305,73 @@ export async function resolveBattle(
     return {
       result: null,
       error: result.error ?? "Résolution impossible.",
+    };
+  }
+
+  return { result, error: null };
+}
+
+export async function finishTurn(
+  supabase: SupabaseClient<Database>,
+  user: User,
+  campaignId: string,
+) {
+  if (!campaignId) {
+    return { result: null, error: "Campagne introuvable." };
+  }
+
+  const { resultsData, error } = await getResultsPageData(
+    supabase,
+    campaignId,
+    user.id,
+  );
+
+  if (error || !resultsData) {
+    return { result: null, error: error ?? "Campagne introuvable." };
+  }
+
+  const readiness = getResultsReadiness(resultsData);
+
+  if (!readiness.canFinishTurn) {
+    const blockers = [...readiness.finishTurnBlockers];
+
+    if (readiness.pendingExplorationCount > 0) {
+      blockers.push(
+        `${readiness.pendingExplorationCount} exploration(s) restent à résoudre.`,
+      );
+    }
+
+    if (readiness.pendingBattleCount > 0) {
+      blockers.push(
+        `${readiness.pendingBattleCount} bataille(s) restent à résoudre.`,
+      );
+    }
+
+    return { result: null, error: blockers.join(" ") };
+  }
+
+  const { data, error: rpcError } = await supabase.rpc("finish_current_turn", {
+    target_campaign_id: campaignId,
+  });
+
+  if (rpcError) {
+    return {
+      result: null,
+      error:
+        "La fonction SQL de fin de tour n'est pas encore installée dans Supabase.",
+    };
+  }
+
+  const result = data?.[0] as FinishTurnRpcResult | undefined;
+
+  if (!result) {
+    return { result: null, error: "Fin de tour impossible." };
+  }
+
+  if (!result.success) {
+    return {
+      result: null,
+      error: result.error ?? "Fin de tour impossible.",
     };
   }
 

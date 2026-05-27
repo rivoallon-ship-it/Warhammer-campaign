@@ -28,6 +28,8 @@ type CampaignPageProps = {
   }>;
   searchParams?: Promise<{
     launched?: string;
+    turnFinished?: string;
+    turn?: string;
   }>;
 };
 
@@ -198,6 +200,12 @@ export default async function CampaignPage({
             Campagne lancée. La carte a été générée et le tour 1 est ouvert.
           </p>
         ) : null}
+        {query?.turnFinished ? (
+          <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+            Tour terminé. Le tour {query.turn || campaign.current_turn_number} est
+            ouvert.
+          </p>
+        ) : null}
 
         <section className="mt-8 grid gap-4 lg:grid-cols-[1.45fr_0.9fr]">
           <Card>
@@ -312,9 +320,15 @@ export default async function CampaignPage({
                 </Link>
               ) : null}
               {isGameMaster && campaign.current_phase === "end_turn" ? (
-                <Button type="button" variant="secondary" className="w-full" disabled>
-                  Finir le tour
-                </Button>
+                <Link
+                  href={`/campaigns/${campaign.id}/results`}
+                  className={buttonVariants({
+                    variant: "secondary",
+                    className: "w-full",
+                  })}
+                >
+                  Finaliser le tour
+                </Link>
               ) : null}
               {!currentPlayer ? (
                 <Link

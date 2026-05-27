@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { FinishTurnForm } from "@/components/results/finish-turn-form";
 import { ResolveBattleForm } from "@/components/results/resolve-battle-form";
 import { ResolveExplorationForm } from "@/components/results/resolve-exploration-form";
 import {
@@ -337,6 +338,43 @@ export default async function ResultsPage({
                   <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
                     Aucune bataille à résoudre pour ce tour.
                   </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Fin de tour</CardTitle>
+                <CardDescription>
+                  Ouvre le tour suivant quand tous les résultats sont saisis.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {readiness.canFinishTurn ? (
+                  <div className="space-y-3">
+                    <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                      Toutes les explorations et batailles du tour sont résolues.
+                    </p>
+                    <FinishTurnForm campaignId={campaign.id} />
+                  </div>
+                ) : (
+                  <ul className="space-y-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                    {readiness.finishTurnBlockers.map((blocker) => (
+                      <li key={blocker}>{blocker}</li>
+                    ))}
+                    {readiness.pendingExplorationCount > 0 ? (
+                      <li>
+                        {readiness.pendingExplorationCount} exploration(s) restent
+                        à résoudre.
+                      </li>
+                    ) : null}
+                    {readiness.pendingBattleCount > 0 ? (
+                      <li>
+                        {readiness.pendingBattleCount} bataille(s) restent à
+                        résoudre.
+                      </li>
+                    ) : null}
+                  </ul>
                 )}
               </CardContent>
             </Card>

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import {
+  finishTurn,
   resolveBattle,
   resolveExploration,
 } from "@/lib/resolution/results-service";
@@ -77,4 +78,26 @@ export async function resolveBattleAction(formData: FormData) {
   redirectToResults(campaignId, {
     battle: result.winner_role === "attacker" ? "attacker" : "defender",
   });
+}
+
+export async function finishTurnAction(formData: FormData) {
+  const campaignId = getFormValue(formData, "campaignId");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/login?next=/campaigns/${campaignId}/results`);
+  }
+
+  const { result, error } = await finishTurn(supabase, user, campaignId);
+
+  if (error || !result) {
+    redirectToResults(campaignId, { error: error ?? "Fin de tour impossible." });
+  }
+
+  redirect(
+    `/campaigns/${campaignId}?turnFinished=1&turn=${result.next_turn_number ?? ""}`,
+  );
 }

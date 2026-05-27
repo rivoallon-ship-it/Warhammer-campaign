@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ResolveBattleForm } from "@/components/results/resolve-battle-form";
 import { ResolveExplorationForm } from "@/components/results/resolve-exploration-form";
 import {
   Badge,
@@ -23,6 +24,7 @@ type ResultsPageProps = {
   }>;
   searchParams?: Promise<{
     exploration?: string;
+    battle?: string;
     error?: string;
   }>;
 };
@@ -62,6 +64,19 @@ function getExplorationResultLabel(
   return success ? `Réussite sur ${diceResult}` : `Échec sur ${diceResult}`;
 }
 
+function getBattleResultLabel(
+  winnerCampaignPlayerId: string | null,
+  attackerCampaignPlayerId: string,
+  attackerName: string,
+  defenderName: string,
+) {
+  if (!winnerCampaignPlayerId) return "Vainqueur à saisir";
+
+  return winnerCampaignPlayerId === attackerCampaignPlayerId
+    ? `${attackerName} conquiert`
+    : `${defenderName} défend`;
+}
+
 function getFeedbackMessage(query?: Awaited<ResultsPageProps["searchParams"]>) {
   if (!query) return null;
 
@@ -78,6 +93,20 @@ function getFeedbackMessage(query?: Awaited<ResultsPageProps["searchParams"]>) {
     return {
       variant: "success" as const,
       text: "Exploration échouée. La Gloire du joueur a été mise à jour.",
+    };
+  }
+
+  if (query.battle === "attacker") {
+    return {
+      variant: "success" as const,
+      text: "Bataille résolue. Le territoire passe à l'attaquant et la Gloire a été mise à jour.",
+    };
+  }
+
+  if (query.battle === "defender") {
+    return {
+      variant: "success" as const,
+      text: "Bataille résolue. Le défenseur conserve le territoire et la Gloire a été mise à jour.",
     };
   }
 
@@ -219,9 +248,9 @@ export default async function ResultsPage({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {readiness.canResolveExplorations ? (
+                {readiness.canResolveResults ? (
                   <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
-                    Tu peux résoudre les explorations en attente.
+                    Tu peux résoudre les explorations et batailles en attente.
                   </p>
                 ) : (
                   <ul className="space-y-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
@@ -237,7 +266,7 @@ export default async function ResultsPage({
               <CardHeader>
                 <CardTitle>Batailles</CardTitle>
                 <CardDescription>
-                  La saisie des batailles arrive à l&apos;étape suivante.
+                  Choisis le vainqueur, puis applique la Gloire et la conquête.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -250,6 +279,14 @@ export default async function ResultsPage({
                       <div className="flex flex-wrap gap-2">
                         <Badge variant={getStatusVariant(battle.status)}>
                           {getStatusLabel(battle.status)}
+                        </Badge>
+                        <Badge variant="neutral">
+                          {getBattleResultLabel(
+                            battle.winner_campaign_player_id,
+                            battle.attacker_campaign_player_id,
+                            battle.attacker?.display_name ?? "Attaquant",
+                            battle.defender?.display_name ?? "Défenseur",
+                          )}
                         </Badge>
                         {battle.defender_bonus ? (
                           <Badge variant="warning">Fortifié</Badge>
@@ -264,6 +301,36 @@ export default async function ResultsPage({
                         {battle.attacker?.display_name ?? "Attaquant"} contre{" "}
                         {battle.defender?.display_name ?? "Défenseur"}
                       </p>
+                      {battle.defender_bonus ? (
+                        <p className="mt-2 text-sm text-[#644512]">
+                          {battle.defender_bonus}
+                        </p>
+                      ) : null}
+                      {battle.result_notes ? (
+                        <p className="mt-2 text-sm text-[#6a5e54]">
+                          Notes : {battle.result_notes}
+                        </p>
+                      ) : null}
+                      {readiness.canResolveResults && battle.status === "pending" ? (
+                        <div className="mt-4">
+                          <ResolveBattleForm
+                            campaignId={campaign.id}
+                            battleId={battle.id}
+                            attackerCampaignPlayerId={
+                              battle.attacker_campaign_player_id
+                            }
+                            attackerName={
+                              battle.attacker?.display_name ?? "Attaquant"
+                            }
+                            defenderCampaignPlayerId={
+                              battle.defender_campaign_player_id
+                            }
+                            defenderName={
+                              battle.defender?.display_name ?? "Défenseur"
+                            }
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   ))
                 ) : (

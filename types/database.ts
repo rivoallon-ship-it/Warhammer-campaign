@@ -474,6 +474,18 @@ export type Database = {
           exploration_success: boolean | null;
         }[];
       };
+      resolve_battle_result: {
+        Args: {
+          target_battle_id: string;
+          submitted_winner_campaign_player_id: string;
+          submitted_result_notes?: string | null;
+        };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          winner_role: string | null;
+        }[];
+      };
       owns_campaign_player: {
         Args: { target_campaign_player_id: string };
         Returns: boolean;

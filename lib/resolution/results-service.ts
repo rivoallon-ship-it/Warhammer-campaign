@@ -12,6 +12,8 @@ type ExplorationRow = Database["public"]["Tables"]["explorations"]["Row"];
 type BattleRow = Database["public"]["Tables"]["battles"]["Row"];
 type ResolveExplorationRpcResult =
   Database["public"]["Functions"]["resolve_exploration_result"]["Returns"][number];
+type ResolveBattleRpcResult =
+  Database["public"]["Functions"]["resolve_battle_result"]["Returns"][number];
 
 export type ExplorationResultItem = ExplorationRow & {
   player: CampaignPlayerRow | null;
@@ -59,6 +61,7 @@ export function getResultsReadiness(resultsData: ResultsPageData) {
 
   return {
     isGameMaster,
+    canResolveResults: blockers.length === 0,
     canResolveExplorations: blockers.length === 0,
     blockers,
     pendingExplorationCount,
@@ -194,6 +197,85 @@ export async function resolveExploration(
   }
 
   const result = data?.[0] as ResolveExplorationRpcResult | undefined;
+
+  if (!result) {
+    return { result: null, error: "Résolution impossible." };
+  }
+
+  if (!result.success) {
+    return {
+      result: null,
+      error: result.error ?? "Résolution impossible.",
+    };
+  }
+
+  return { result, error: null };
+}
+
+export async function resolveBattle(
+  supabase: SupabaseClient<Database>,
+  user: User,
+  campaignId: string,
+  battleId: string,
+  winnerCampaignPlayerId: string,
+  resultNotes: string,
+) {
+  if (!battleId) {
+    return { result: null, error: "Bataille introuvable." };
+  }
+
+  if (!winnerCampaignPlayerId) {
+    return { result: null, error: "Choisis le vainqueur de la bataille." };
+  }
+
+  const { resultsData, error } = await getResultsPageData(
+    supabase,
+    campaignId,
+    user.id,
+  );
+
+  if (error || !resultsData) {
+    return { result: null, error: error ?? "Campagne introuvable." };
+  }
+
+  const readiness = getResultsReadiness(resultsData);
+
+  if (!readiness.canResolveResults) {
+    return { result: null, error: readiness.blockers.join(" ") };
+  }
+
+  const battle = resultsData.battles.find((item) => item.id === battleId);
+
+  if (!battle) {
+    return { result: null, error: "Bataille introuvable pour ce tour." };
+  }
+
+  if (battle.status !== "pending") {
+    return { result: null, error: "Cette bataille est déjà résolue." };
+  }
+
+  if (
+    winnerCampaignPlayerId !== battle.attacker_campaign_player_id &&
+    winnerCampaignPlayerId !== battle.defender_campaign_player_id
+  ) {
+    return { result: null, error: "Le vainqueur doit participer à cette bataille." };
+  }
+
+  const { data, error: rpcError } = await supabase.rpc("resolve_battle_result", {
+    target_battle_id: battleId,
+    submitted_winner_campaign_player_id: winnerCampaignPlayerId,
+    submitted_result_notes: resultNotes,
+  });
+
+  if (rpcError) {
+    return {
+      result: null,
+      error:
+        "La fonction SQL de résolution de bataille n'est pas encore installée dans Supabase.",
+    };
+  }
+
+  const result = data?.[0] as ResolveBattleRpcResult | undefined;
 
   if (!result) {
     return { result: null, error: "Résolution impossible." };

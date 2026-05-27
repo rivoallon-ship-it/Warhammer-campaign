@@ -12,11 +12,12 @@ import {
   buttonVariants,
 } from "@/components/ui";
 import {
+  type CampaignOrderVisibilityRow,
   getCampaignDashboard,
+  getOrderVisibilityByPlayerId,
   getPlayerById,
   getRankedPlayers,
   getTerritoryStats,
-  getVisibleOrderByPlayerId,
 } from "@/lib/campaigns/campaign-dashboard-service";
 import { getColorLabel } from "@/lib/campaigns/join-campaign";
 import { createClient } from "@/lib/supabase/server";
@@ -66,6 +67,7 @@ function getTerritoryTypeLabel(type: string) {
 
 function getOrderStatusLabel(status?: string) {
   if (!status) return "En attente";
+  if (status === "pending") return "En attente";
   if (status === "draft") return "Brouillon";
   if (status === "submitted") return "Validé";
   if (status === "revealed") return "Révélé";
@@ -82,6 +84,42 @@ function getOrderStatusVariant(status?: string) {
   if (status === "draft") return "warning" as const;
 
   return "neutral" as const;
+}
+
+function getOrderActionLabel(actionType?: string | null) {
+  if (actionType === "attack") return "Attaquer";
+  if (actionType === "explore") return "Explorer";
+  if (actionType === "fortify") return "Fortifier";
+
+  return actionType ?? "Ordre";
+}
+
+function getPublicOrderStatus(status?: string) {
+  return status === "submitted" ? "submitted" : "pending";
+}
+
+function getOrderVisibilitySummary(order?: CampaignOrderVisibilityRow) {
+  if (!order || order.order_status === "pending") {
+    return "En attente";
+  }
+
+  if (!order.can_view_details) {
+    return order.order_status === "submitted" ? "Ordre validé" : "En attente";
+  }
+
+  if (!order.action_type) {
+    return "Ordre validé";
+  }
+
+  if (order.action_type === "fortify") {
+    return `${getOrderActionLabel(order.action_type)} ${
+      order.target_territory_code ?? "un territoire"
+    }`;
+  }
+
+  return `${getOrderActionLabel(order.action_type)} depuis ${
+    order.source_territory_code ?? "?"
+  } vers ${order.target_territory_code ?? "?"}`;
 }
 
 function formatDate(value: string) {
@@ -131,17 +169,17 @@ export default async function CampaignPage({
     pendingPlayers,
     currentTurn,
     territories,
-    orders,
+    orderVisibility,
     logs,
   } = dashboard;
   const playersById = getPlayerById(activePlayers);
   const rankedPlayers = getRankedPlayers(activePlayers);
   const territoryStats = getTerritoryStats(territories);
-  const visibleOrderByPlayerId = getVisibleOrderByPlayerId(orders);
-  const submittedOrderCount = activePlayers.filter((player) => {
-    const order = visibleOrderByPlayerId.get(player.id);
-    return ["submitted", "revealed", "resolved"].includes(order?.status ?? "");
-  }).length;
+  const orderVisibilityByPlayerId =
+    getOrderVisibilityByPlayerId(orderVisibility);
+  const submittedOrderCount = orderVisibility.filter((order) =>
+    ["submitted", "revealed", "resolved"].includes(order.order_status),
+  ).length;
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
   const canUseCampaignActions = campaign.status === "active" && currentPlayer;
@@ -411,7 +449,10 @@ export default async function CampaignPage({
             </CardHeader>
             <CardContent className="space-y-3">
               {activePlayers.map((player) => {
-                const order = visibleOrderByPlayerId.get(player.id);
+                const order = orderVisibilityByPlayerId.get(player.id);
+                const displayedStatus = order?.can_view_details
+                  ? order.order_status
+                  : getPublicOrderStatus(order?.order_status);
 
                 return (
                   <div
@@ -423,11 +464,11 @@ export default async function CampaignPage({
                         {player.display_name}
                       </p>
                       <p className="mt-1 text-sm text-[#6a5e54]">
-                        {order?.action_type ?? "Aucun ordre visible"}
+                        {getOrderVisibilitySummary(order)}
                       </p>
                     </div>
-                    <Badge variant={getOrderStatusVariant(order?.status)}>
-                      {getOrderStatusLabel(order?.status)}
+                    <Badge variant={getOrderStatusVariant(displayedStatus)}>
+                      {getOrderStatusLabel(displayedStatus)}
                     </Badge>
                   </div>
                 );

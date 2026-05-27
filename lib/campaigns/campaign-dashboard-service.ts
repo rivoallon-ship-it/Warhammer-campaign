@@ -7,6 +7,8 @@ type CampaignTurnRow = Database["public"]["Tables"]["campaign_turns"]["Row"];
 type TerritoryRow = Database["public"]["Tables"]["territories"]["Row"];
 type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type CampaignLogRow = Database["public"]["Tables"]["campaign_logs"]["Row"];
+export type CampaignOrderVisibilityRow =
+  Database["public"]["Functions"]["get_current_turn_order_visibility"]["Returns"][number];
 
 export type CampaignDashboardData = {
   campaign: CampaignRow;
@@ -16,6 +18,7 @@ export type CampaignDashboardData = {
   currentTurn: CampaignTurnRow | null;
   territories: TerritoryRow[];
   orders: OrderRow[];
+  orderVisibility: CampaignOrderVisibilityRow[];
   logs: CampaignLogRow[];
 };
 
@@ -49,6 +52,52 @@ export function getTerritoryStats(territories: TerritoryRow[]) {
 
 export function getVisibleOrderByPlayerId(orders: OrderRow[]) {
   return new Map(orders.map((order) => [order.campaign_player_id, order]));
+}
+
+export function getOrderVisibilityByPlayerId(
+  orderVisibility: CampaignOrderVisibilityRow[],
+) {
+  return new Map(
+    orderVisibility.map((visibility) => [
+      visibility.campaign_player_id,
+      visibility,
+    ]),
+  );
+}
+
+function buildOrderVisibilityFallback(
+  activePlayers: CampaignPlayerRow[],
+  orders: OrderRow[],
+  territories: TerritoryRow[],
+) {
+  const orderByPlayerId = getVisibleOrderByPlayerId(orders);
+  const territoryById = new Map(
+    territories.map((territory) => [territory.id, territory]),
+  );
+
+  return activePlayers.map((player) => {
+    const order = orderByPlayerId.get(player.id);
+    const source = order?.source_territory_id
+      ? territoryById.get(order.source_territory_id)
+      : null;
+    const target = order?.target_territory_id
+      ? territoryById.get(order.target_territory_id)
+      : null;
+
+    return {
+      campaign_player_id: player.id,
+      display_name: player.display_name,
+      order_id: order?.id ?? null,
+      order_status: order?.status ?? "pending",
+      can_view_details: Boolean(order),
+      action_type: order?.action_type ?? null,
+      source_territory_id: order?.source_territory_id ?? null,
+      source_territory_code: source?.code ?? null,
+      target_territory_id: order?.target_territory_id ?? null,
+      target_territory_code: target?.code ?? null,
+      submitted_at: order?.submitted_at ?? null,
+    } satisfies CampaignOrderVisibilityRow;
+  });
 }
 
 export async function getCampaignDashboard(
@@ -108,6 +157,19 @@ export async function getCampaignDashboard(
         .eq("campaign_id", campaign.id)
         .eq("turn_id", currentTurn.id)
     : { data: [] };
+  const fallbackOrderVisibility = buildOrderVisibilityFallback(
+    activePlayers,
+    orders ?? [],
+    territories ?? [],
+  );
+  const { data: orderVisibilityData } = currentTurn
+    ? await supabase.rpc("get_current_turn_order_visibility", {
+        target_campaign_id: campaign.id,
+      })
+    : { data: null };
+  const orderVisibility = orderVisibilityData?.length
+    ? orderVisibilityData
+    : fallbackOrderVisibility;
 
   const { data: logs } = await supabase
     .from("campaign_logs")
@@ -125,6 +187,7 @@ export async function getCampaignDashboard(
       currentTurn: currentTurn ?? null,
       territories: territories ?? [],
       orders: orders ?? [],
+      orderVisibility,
       logs: logs ?? [],
     } satisfies CampaignDashboardData,
     error: null,

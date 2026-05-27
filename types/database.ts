@@ -436,6 +436,22 @@ export type Database = {
         Args: { target_campaign_id: string };
         Returns: boolean;
       };
+      get_current_turn_order_visibility: {
+        Args: { target_campaign_id: string };
+        Returns: {
+          campaign_player_id: string;
+          display_name: string;
+          order_id: string | null;
+          order_status: string;
+          can_view_details: boolean;
+          action_type: string | null;
+          source_territory_id: string | null;
+          source_territory_code: string | null;
+          target_territory_id: string | null;
+          target_territory_code: string | null;
+          submitted_at: string | null;
+        }[];
+      };
       owns_campaign_player: {
         Args: { target_campaign_player_id: string };
         Returns: boolean;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { CampaignLog } from "@/components/campaign/campaign-log";
 import {
   Badge,
   Button,
@@ -122,15 +123,6 @@ function getOrderVisibilitySummary(order?: CampaignOrderVisibilityRow) {
   return `${getOrderActionLabel(order.action_type)} depuis ${
     order.source_territory_code ?? "?"
   } vers ${order.target_territory_code ?? "?"}`;
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
 }
 
 function ColorSwatch({ color }: { color: string }) {
@@ -502,38 +494,7 @@ export default async function CampaignPage({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique récent</CardTitle>
-              <CardDescription>
-                Derniers événements enregistrés sur la campagne.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {logs.length ? (
-                logs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
-                  >
-                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-                      <p className="font-semibold text-[#302720]">{log.title}</p>
-                      <Badge variant="neutral">{formatDate(log.created_at)}</Badge>
-                    </div>
-                    {log.description ? (
-                      <p className="mt-2 text-sm text-[#6a5e54]">
-                        {log.description}
-                      </p>
-                    ) : null}
-                  </div>
-                ))
-              ) : (
-                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
-                  Aucun événement enregistré pour le moment.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <CampaignLog logs={logs} />
         </section>
       </div>
     </main>

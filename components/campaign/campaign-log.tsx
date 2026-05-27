@@ -1,0 +1,140 @@
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
+import type { CampaignLogItem } from "@/lib/campaigns/campaign-dashboard-service";
+
+type CampaignLogProps = {
+  logs: CampaignLogItem[];
+};
+
+const logTypeLabels: Record<string, string> = {
+  campaign_created: "Campagne",
+  player_joined: "Demande",
+  player_approved: "Joueur",
+  campaign_launched: "Lancement",
+  orders_revealed: "Ordres",
+  battle_created: "Bataille",
+  battle_result: "Bataille",
+  exploration_result: "Exploration",
+  territory_fortified: "Fortification",
+  turn_finished: "Tour",
+  season_finished: "Saison",
+  campaign_archived: "Archive",
+};
+
+function getLogVariant(type: string) {
+  if (type === "battle_result" || type === "battle_created") {
+    return "danger" as const;
+  }
+
+  if (type === "exploration_result") return "success" as const;
+  if (type === "territory_fortified") return "warning" as const;
+  if (type === "orders_revealed" || type === "turn_finished") {
+    return "info" as const;
+  }
+
+  return "neutral" as const;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function getGroupLabel(log: CampaignLogItem) {
+  if (!log.turn) return "Campagne";
+
+  return `Saison ${log.turn.season_number} - Tour ${log.turn.turn_number}`;
+}
+
+function groupLogs(logs: CampaignLogItem[]) {
+  return logs.reduce<
+    {
+      label: string;
+      logs: CampaignLogItem[];
+    }[]
+  >((groups, log) => {
+    const label = getGroupLabel(log);
+    const existingGroup = groups.find((group) => group.label === label);
+
+    if (existingGroup) {
+      existingGroup.logs.push(log);
+    } else {
+      groups.push({ label, logs: [log] });
+    }
+
+    return groups;
+  }, []);
+}
+
+export function CampaignLog({ logs }: CampaignLogProps) {
+  const groups = groupLogs(logs);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Historique récent</CardTitle>
+        <CardDescription>
+          Les derniers événements importants de la campagne.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {groups.length ? (
+          <div className="space-y-5">
+            {groups.map((group) => (
+              <section key={group.label} className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Badge variant="neutral">{group.label}</Badge>
+                  <div className="h-px flex-1 bg-[#eadfce]" />
+                </div>
+                <ol className="space-y-3">
+                  {group.logs.map((log) => (
+                    <li
+                      key={log.id}
+                      className="grid gap-3 border-l-2 border-[#d8cbb7] pl-4 sm:grid-cols-[1fr_auto]"
+                    >
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant={getLogVariant(log.type)}>
+                            {logTypeLabels[log.type] ?? log.type}
+                          </Badge>
+                          <p className="font-semibold text-[#302720]">
+                            {log.title}
+                          </p>
+                        </div>
+                        {log.description ? (
+                          <p className="mt-2 text-sm leading-6 text-[#6a5e54]">
+                            {log.description}
+                          </p>
+                        ) : null}
+                      </div>
+                      <time
+                        className="text-sm font-semibold text-[#6a5e54]"
+                        dateTime={log.created_at}
+                      >
+                        {formatDate(log.created_at)}
+                      </time>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+            Aucun événement enregistré pour le moment.
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

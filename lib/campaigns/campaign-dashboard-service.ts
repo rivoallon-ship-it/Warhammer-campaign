@@ -9,6 +9,9 @@ type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type CampaignLogRow = Database["public"]["Tables"]["campaign_logs"]["Row"];
 export type CampaignOrderVisibilityRow =
   Database["public"]["Functions"]["get_current_turn_order_visibility"]["Returns"][number];
+export type CampaignLogItem = CampaignLogRow & {
+  turn: Pick<CampaignTurnRow, "season_number" | "turn_number"> | null;
+};
 
 export type CampaignDashboardData = {
   campaign: CampaignRow;
@@ -19,7 +22,7 @@ export type CampaignDashboardData = {
   territories: TerritoryRow[];
   orders: OrderRow[];
   orderVisibility: CampaignOrderVisibilityRow[];
-  logs: CampaignLogRow[];
+  logs: CampaignLogItem[];
 };
 
 export function getPlayerById(players: CampaignPlayerRow[]) {
@@ -176,7 +179,34 @@ export async function getCampaignDashboard(
     .select("*")
     .eq("campaign_id", campaign.id)
     .order("created_at", { ascending: false })
-    .limit(8);
+    .limit(10);
+  const logTurnIds = Array.from(
+    new Set(
+      (logs ?? [])
+        .map((log) => log.turn_id)
+        .filter((turnId): turnId is string => Boolean(turnId)),
+    ),
+  );
+  const { data: logTurns } = logTurnIds.length
+    ? await supabase
+        .from("campaign_turns")
+        .select("id, season_number, turn_number")
+        .eq("campaign_id", campaign.id)
+        .in("id", logTurnIds)
+    : { data: [] };
+  const logTurnById = new Map(
+    (logTurns ?? []).map((turn) => [
+      turn.id,
+      {
+        season_number: turn.season_number,
+        turn_number: turn.turn_number,
+      },
+    ]),
+  );
+  const logsWithTurns = (logs ?? []).map((log) => ({
+    ...log,
+    turn: log.turn_id ? (logTurnById.get(log.turn_id) ?? null) : null,
+  }));
 
   return {
     dashboard: {
@@ -188,7 +218,7 @@ export async function getCampaignDashboard(
       territories: territories ?? [],
       orders: orders ?? [],
       orderVisibility,
-      logs: logs ?? [],
+      logs: logsWithTurns,
     } satisfies CampaignDashboardData,
     error: null,
   };

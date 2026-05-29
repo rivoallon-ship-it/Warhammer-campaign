@@ -90,7 +90,10 @@ function getOrderStatusVariant(status?: string) {
 }
 
 function getOrderActionLabel(actionType?: string | null) {
-  if (actionType === "attack" || actionType === "explore") return "Conquérir";
+  if (actionType === "attack" || actionType === "explore" || actionType === "conquer") {
+    return "Conquérir";
+  }
+
   if (actionType === "fortify") return "Fortifier";
 
   return actionType ?? "Ordre";

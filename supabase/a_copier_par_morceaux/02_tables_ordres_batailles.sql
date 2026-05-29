@@ -43,7 +43,7 @@ create table if not exists public.orders (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (turn_id, campaign_player_id),
-  check (action_type in ('attack', 'explore', 'fortify')),
+  check (action_type in ('conquer', 'fortify')),
   check (status in ('draft', 'submitted', 'revealed', 'resolved'))
 );
 
@@ -69,4 +69,3 @@ create table if not exists public.battles (
     or winner_campaign_player_id = defender_campaign_player_id
   )
 );
-

@@ -126,9 +126,35 @@ create table if not exists public.orders (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (turn_id, campaign_player_id),
-  check (action_type in ('attack', 'explore', 'fortify')),
+  check (action_type in ('conquer', 'fortify')),
   check (status in ('draft', 'submitted', 'revealed', 'resolved'))
 );
+
+do $$
+declare
+  v_constraint_name text;
+begin
+  select conname
+  into v_constraint_name
+  from pg_constraint
+  where conrelid = 'public.orders'::regclass
+    and contype = 'c'
+    and pg_get_constraintdef(oid) like '%action_type%'
+  limit 1;
+
+  if v_constraint_name is not null then
+    execute format('alter table public.orders drop constraint %I', v_constraint_name);
+  end if;
+
+  update public.orders
+  set action_type = 'conquer'
+  where action_type in ('attack', 'explore');
+
+  alter table public.orders
+    add constraint orders_action_type_check
+    check (action_type in ('conquer', 'fortify'));
+end;
+$$;
 
 create table if not exists public.battles (
   id uuid primary key default gen_random_uuid(),
@@ -520,7 +546,7 @@ declare
   v_active_count int := 0;
   v_submitted_count int := 0;
   v_battle_count int := 0;
-  v_attack_battle_count int := 0;
+  v_enemy_battle_count int := 0;
   v_contested_battle_count int := 0;
   v_exploration_count int := 0;
   v_fortification_count int := 0;
@@ -593,23 +619,13 @@ begin
       and o.status = 'submitted'
       and (
         (
-          o.action_type in ('attack', 'explore')
+          o.action_type = 'conquer'
           and (
             source.id is null
             or target.id is null
             or source.owner_campaign_player_id is distinct from o.campaign_player_id
             or adjacency.id is null
-            or (
-              o.action_type = 'attack'
-              and (
-                target.owner_campaign_player_id is null
-                or target.owner_campaign_player_id = o.campaign_player_id
-              )
-            )
-            or (
-              o.action_type = 'explore'
-              and target.owner_campaign_player_id is not null
-            )
+            or target.owner_campaign_player_id = o.campaign_player_id
           )
         )
         or (
@@ -635,20 +651,25 @@ begin
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
       and (
-        o.action_type = 'attack'
-        or (o.action_type = 'explore' and target.owner_campaign_player_id is null)
+        o.action_type = 'conquer'
       )
     group by o.target_territory_id
     having count(*) > 1
   ) contested_targets;
 
   select count(*)
-  into v_attack_battle_count
+  into v_enemy_battle_count
   from public.orders o
   where o.campaign_id = v_campaign.id
     and o.turn_id = v_turn.id
     and o.status = 'submitted'
-    and o.action_type = 'attack';
+    and o.action_type = 'conquer'
+    and exists (
+      select 1
+      from public.territories target
+      where target.id = o.target_territory_id
+        and target.owner_campaign_player_id is not null
+    );
 
   with inserted_battles as (
     insert into public.battles (
@@ -678,7 +699,8 @@ begin
     where o.campaign_id = v_campaign.id
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
-      and o.action_type = 'attack'
+      and o.action_type = 'conquer'
+      and target.owner_campaign_player_id is not null
     returning id, campaign_id, order_id, attacker_campaign_player_id, defender_campaign_player_id
   )
   insert into public.battle_participants (
@@ -703,7 +725,7 @@ begin
     where o.campaign_id = v_campaign.id
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
-      and o.action_type = 'explore'
+      and o.action_type = 'conquer'
       and target.owner_campaign_player_id is null
     group by o.target_territory_id
     having count(*) > 1
@@ -716,7 +738,7 @@ begin
     where o.campaign_id = v_campaign.id
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
-      and o.action_type = 'explore'
+      and o.action_type = 'conquer'
       and target.owner_campaign_player_id is null
     group by o.target_territory_id
   ),
@@ -738,7 +760,7 @@ begin
     where o.campaign_id = v_campaign.id
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
-      and o.action_type = 'explore'
+      and o.action_type = 'conquer'
       and noc.order_count > 1
   ),
   ranked_contenders as (
@@ -809,7 +831,7 @@ begin
   where o.campaign_id = v_campaign.id
     and o.turn_id = v_turn.id
     and o.status = 'submitted'
-    and o.action_type = 'explore'
+    and o.action_type = 'conquer'
     and target.owner_campaign_player_id is null
     and not exists (
       select 1
@@ -817,7 +839,7 @@ begin
       where rival.campaign_id = o.campaign_id
         and rival.turn_id = o.turn_id
         and rival.status = 'submitted'
-        and rival.action_type = 'explore'
+        and rival.action_type = 'conquer'
         and rival.target_territory_id = o.target_territory_id
         and rival.id <> o.id
     );
@@ -842,7 +864,7 @@ begin
     where o.campaign_id = v_campaign.id
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
-      and o.action_type = 'explore'
+      and o.action_type = 'conquer'
       and target.owner_campaign_player_id is null
       and not exists (
         select 1
@@ -850,7 +872,7 @@ begin
         where rival.campaign_id = o.campaign_id
           and rival.turn_id = o.turn_id
           and rival.status = 'submitted'
-          and rival.action_type = 'explore'
+          and rival.action_type = 'conquer'
           and rival.target_territory_id = o.target_territory_id
           and rival.id <> o.id
       )
@@ -919,7 +941,7 @@ begin
   join public.campaign_players cp on cp.id = ie.campaign_player_id
   join public.territories target on target.id = ie.territory_id;
 
-  v_battle_count := v_attack_battle_count + v_contested_battle_count;
+  v_battle_count := v_enemy_battle_count + v_contested_battle_count;
 
   update public.territories target
   set is_fortified = true,

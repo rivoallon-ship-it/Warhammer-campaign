@@ -146,7 +146,7 @@ function validateSubmittedOrder(
 
   return {
     order: {
-      actionType: targetTerritory.owner_campaign_player_id ? "attack" : "explore",
+      actionType: "conquer",
       sourceTerritoryId: sourceTerritory.id,
       targetTerritoryId: targetTerritory.id,
     },

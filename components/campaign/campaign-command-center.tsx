@@ -293,6 +293,12 @@ export function CampaignCommandCenter({
                 Clique sur tes territoires pour donner un ordre, puis sur une cible
                 adjacente pour conquérir.
               </CardDescription>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge variant="warning">Source</Badge>
+                <Badge variant="success">Cible valide</Badge>
+                <Badge variant="info">Adjacent</Badge>
+                <Badge variant="neutral">Neutre</Badge>
+              </div>
             </div>
             <Badge variant="neutral">
               {mapWidth} x {mapHeight} - {territories.length} territoires
@@ -554,18 +560,6 @@ export function CampaignCommandCenter({
                 ) : null}
               </div>
             ) : null}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Légende</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Badge variant="warning">Source</Badge>
-            <Badge variant="success">Cible valide</Badge>
-            <Badge variant="info">Adjacent</Badge>
-            <Badge variant="neutral">Neutre</Badge>
           </CardContent>
         </Card>
       </div>

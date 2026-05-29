@@ -2,16 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-  buttonVariants,
-} from "@/components/ui";
+import { Badge, Card, CardContent, buttonVariants } from "@/components/ui";
 import {
   type CampaignOrderVisibilityRow,
   getCampaignDashboard,
@@ -165,6 +156,18 @@ export default async function CampaignPage({
   const submittedOrderCount = orderVisibility.filter((order) =>
     ["submitted", "revealed", "resolved"].includes(order.order_status),
   ).length;
+  const controlledTerritoryCountByPlayerId = new Map<string, number>();
+
+  for (const territory of territories) {
+    if (!territory.owner_campaign_player_id) continue;
+
+    controlledTerritoryCountByPlayerId.set(
+      territory.owner_campaign_player_id,
+      (controlledTerritoryCountByPlayerId.get(territory.owner_campaign_player_id) ??
+        0) + 1,
+    );
+  }
+
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
   const canUseCampaignActions = campaign.status === "active" && currentPlayer;
@@ -190,38 +193,10 @@ export default async function CampaignPage({
   return (
     <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
       <div className="mx-auto max-w-7xl">
-        <PageHeader
-          eyebrow="Campagne"
-          title={campaign.name}
-          description="Vue de pilotage du tour courant, des joueurs, de la carte et de l’historique."
-        />
-
-        {query?.launched ? (
-          <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
-            Campagne lancée. La carte a été générée et le tour 1 est ouvert.
-          </p>
-        ) : null}
-        {query?.turnFinished ? (
-          <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
-            Tour terminé. Le tour {query.turn || campaign.current_turn_number} est
-            ouvert.
-          </p>
-        ) : null}
-        {query?.submitted ? (
-          <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
-            Ordre enregistré pour ce tour.
-          </p>
-        ) : null}
-        {query?.error ? (
-          <p className="mt-6 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
-            {query.error}
-          </p>
-        ) : null}
-
-        <section className="mt-8 grid gap-4 lg:grid-cols-[1.45fr_0.9fr]">
-          <Card>
-            <CardHeader>
-              <div className="mb-4 flex flex-wrap gap-2">
+        <header className="rounded-lg border border-[#d8cbb7] bg-[#fffaf0] p-4 shadow-sm">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+              <div className="flex flex-wrap gap-2">
                 <Badge variant={campaign.status === "active" ? "active" : "lobby"}>
                   {getStatusLabel(campaign.status)}
                 </Badge>
@@ -232,114 +207,142 @@ export default async function CampaignPage({
                   </Badge>
                 ) : null}
               </div>
-              <CardTitle>
-                Saison {campaign.season_number} — Tour{" "}
-                {campaign.current_turn_number || 1}
-              </CardTitle>
-              <CardDescription>
-                Armées à {currentTurn?.army_base_points ?? 750} points pour le
-                tour courant.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid gap-4 text-sm sm:grid-cols-4">
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                  <dt className="font-semibold text-[#302720]">Carte</dt>
-                  <dd className="mt-1 text-[#5d5148]">
-                    {campaign.map_width} x {campaign.map_height}
-                  </dd>
-                </div>
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                  <dt className="font-semibold text-[#302720]">Territoires</dt>
-                  <dd className="mt-1 text-[#5d5148]">{territoryStats.total}</dd>
-                </div>
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                  <dt className="font-semibold text-[#302720]">Neutres</dt>
-                  <dd className="mt-1 text-[#5d5148]">{territoryStats.neutral}</dd>
-                </div>
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                  <dt className="font-semibold text-[#302720]">Ordres</dt>
-                  <dd className="mt-1 text-[#5d5148]">
-                    {submittedOrderCount} / {activePlayers.length}
-                  </dd>
-                </div>
-              </dl>
-            </CardContent>
-          </Card>
+              <h1 className="mt-3 text-3xl font-bold tracking-normal text-[#211a16]">
+                {campaign.name}
+              </h1>
+              <p className="mt-2 text-sm text-[#6a5e54]">
+                Saison {campaign.season_number} - Tour{" "}
+                {campaign.current_turn_number || 1} -{" "}
+                {currentTurn?.army_base_points ?? 750} points
+              </p>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
-              <CardDescription>
-                Les actions disponibles suivent la phase de campagne.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {campaign.status === "lobby" ? (
+            <div className="flex flex-col gap-3 xl:items-end">
+              <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4 xl:grid-cols-4">
+                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                    Carte
+                  </span>
+                  <span className="font-bold text-[#302720]">
+                    {campaign.map_width} x {campaign.map_height}
+                  </span>
+                </span>
+                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                    Territoires
+                  </span>
+                  <span className="font-bold text-[#302720]">
+                    {territoryStats.total}
+                  </span>
+                </span>
+                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                    Neutres
+                  </span>
+                  <span className="font-bold text-[#302720]">
+                    {territoryStats.neutral}
+                  </span>
+                </span>
+                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                    Ordres
+                  </span>
+                  <span className="font-bold text-[#302720]">
+                    {submittedOrderCount} / {activePlayers.length}
+                  </span>
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap xl:justify-end">
+                {campaign.status === "lobby" ? (
+                  <Link
+                    href={`/campaigns/${campaign.id}/lobby`}
+                    className={buttonVariants({ size: "sm" })}
+                  >
+                    Ouvrir le lobby
+                  </Link>
+                ) : null}
+                {isGameMaster && campaign.current_phase === "orders" ? (
+                  <Link
+                    href={`/campaigns/${campaign.id}/reveal`}
+                    className={buttonVariants({
+                      variant: "secondary",
+                      size: "sm",
+                    })}
+                  >
+                    Révéler les ordres
+                  </Link>
+                ) : null}
+                {isGameMaster && campaign.current_phase === "resolving" ? (
+                  <Link
+                    href={`/campaigns/${campaign.id}/results`}
+                    className={buttonVariants({
+                      variant: "secondary",
+                      size: "sm",
+                    })}
+                  >
+                    Résultats
+                  </Link>
+                ) : null}
+                {isGameMaster && campaign.current_phase === "end_turn" ? (
+                  <Link
+                    href={`/campaigns/${campaign.id}/results`}
+                    className={buttonVariants({
+                      variant: "secondary",
+                      size: "sm",
+                    })}
+                  >
+                    Finir le tour
+                  </Link>
+                ) : null}
+                {!currentPlayer ? (
+                  <Link
+                    href={`/campaigns/join?code=${campaign.invite_code}`}
+                    className={buttonVariants({ size: "sm" })}
+                  >
+                    Rejoindre
+                  </Link>
+                ) : null}
                 <Link
-                  href={`/campaigns/${campaign.id}/lobby`}
-                  className={buttonVariants({ className: "w-full" })}
+                  href="/dashboard"
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
                 >
-                  Ouvrir le lobby
+                  Dashboard
                 </Link>
-              ) : null}
-              {canUseCampaignActions ? (
-                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
-                  {campaign.current_phase === "orders"
-                    ? "Les ordres se donnent maintenant directement sur la carte."
-                    : "La carte reste consultable, mais les ordres ne sont pas ouverts dans cette phase."}
-                </p>
-              ) : null}
-              {isGameMaster && campaign.current_phase === "orders" ? (
-                <Link
-                  href={`/campaigns/${campaign.id}/reveal`}
-                  className={buttonVariants({
-                    variant: "secondary",
-                    className: "w-full",
-                  })}
-                >
-                  Révéler les ordres
-                </Link>
-              ) : null}
-              {isGameMaster && campaign.current_phase === "resolving" ? (
-                <Link
-                  href={`/campaigns/${campaign.id}/results`}
-                  className={buttonVariants({
-                    variant: "secondary",
-                    className: "w-full",
-                  })}
-                >
-                  Saisir les résultats
-                </Link>
-              ) : null}
-              {isGameMaster && campaign.current_phase === "end_turn" ? (
-                <Link
-                  href={`/campaigns/${campaign.id}/results`}
-                  className={buttonVariants({
-                    variant: "secondary",
-                    className: "w-full",
-                  })}
-                >
-                  Finaliser le tour
-                </Link>
-              ) : null}
-              {!currentPlayer ? (
-                <Link
-                  href={`/campaigns/join?code=${campaign.invite_code}`}
-                  className={buttonVariants({ className: "w-full" })}
-                >
-                  Rejoindre cette campagne
-                </Link>
-              ) : null}
-              <Link
-                href="/dashboard"
-                className={buttonVariants({ variant: "outline", className: "w-full" })}
-              >
-                Retour au dashboard
-              </Link>
-            </CardContent>
-          </Card>
-        </section>
+              </div>
+            </div>
+          </div>
+
+          {canUseCampaignActions ? (
+            <p className="mt-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+              {campaign.current_phase === "orders"
+                ? "Sélectionne un territoire contrôlé sur la carte pour donner ton ordre."
+                : "La carte reste consultable, mais les ordres ne sont pas ouverts dans cette phase."}
+            </p>
+          ) : null}
+        </header>
+
+        {query?.launched ? (
+          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+            Campagne lancée. La carte a été générée et le tour 1 est ouvert.
+          </p>
+        ) : null}
+        {query?.turnFinished ? (
+          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+            Tour terminé. Le tour {query.turn || campaign.current_turn_number} est
+            ouvert.
+          </p>
+        ) : null}
+        {query?.submitted ? (
+          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+            Ordre enregistré pour ce tour.
+          </p>
+        ) : null}
+        {query?.error ? (
+          <p className="mt-4 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+            {query.error}
+          </p>
+        ) : null}
 
         <section className="mt-4">
           {territories.length ? (
@@ -384,73 +387,96 @@ export default async function CampaignPage({
             />
           ) : (
             <Card>
-              <CardHeader>
-                <CardTitle>Carte de campagne</CardTitle>
-                <CardDescription>
-                  La carte sera générée au lancement de la campagne.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
-                  Ouvre le lobby pour lancer la campagne quand tous les joueurs sont
-                  prêts.
+              <CardContent className="p-4">
+                <h2 className="text-lg font-bold text-[#302720]">
+                  Carte de campagne
+                </h2>
+                <p className="mt-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                  La carte sera générée au lancement de la campagne. Ouvre le lobby
+                  quand tous les joueurs sont prêts.
                 </p>
               </CardContent>
             </Card>
           )}
         </section>
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
+        <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
           <Card>
-            <CardHeader>
-              <CardTitle>Classement</CardTitle>
-              <CardDescription>
-                Gloire actuelle et territoires contrôlés par joueur.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {rankedPlayers.map((player, index) => {
-                const controlledTerritories = territories.filter(
-                  (territory) => territory.owner_campaign_player_id === player.id,
-                ).length;
+            <CardContent className="p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-[#302720]">
+                    Joueurs et ordres
+                  </h2>
+                  <p className="text-sm text-[#6a5e54]">
+                    Classement, territoire et statut du tour courant.
+                  </p>
+                </div>
+                <Badge variant="neutral">
+                  {submittedOrderCount} / {activePlayers.length} ordres
+                </Badge>
+              </div>
 
-                return (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between gap-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
-                  >
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="neutral">#{index + 1}</Badge>
-                        {player.color ? (
-                          <Badge variant="neutral" className="gap-2">
-                            <ColorSwatch color={player.color} />
-                            {getColorLabel(player.color)}
-                          </Badge>
-                        ) : null}
+              <div className="mt-4 space-y-3">
+                {rankedPlayers.map((player, index) => {
+                  const controlledTerritories =
+                    controlledTerritoryCountByPlayerId.get(player.id) ?? 0;
+                  const order = orderVisibilityByPlayerId.get(player.id);
+                  const displayedStatus = order?.can_view_details
+                    ? order.order_status
+                    : getPublicOrderStatus(order?.order_status);
+
+                  return (
+                    <div
+                      key={player.id}
+                      className="grid gap-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 lg:grid-cols-[minmax(0,1fr)_210px]"
+                    >
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="neutral">#{index + 1}</Badge>
+                          {player.color ? (
+                            <Badge variant="neutral" className="gap-2">
+                              <ColorSwatch color={player.color} />
+                              {getColorLabel(player.color)}
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <p className="mt-3 font-semibold text-[#302720]">
+                          {player.display_name}
+                        </p>
+                        <p className="mt-1 text-sm text-[#6a5e54]">
+                          {player.aos_faction ?? "Faction non renseignée"}
+                        </p>
+                        <p className="mt-2 text-sm text-[#6a5e54]">
+                          {controlledTerritories} territoire
+                          {controlledTerritories > 1 ? "s" : ""} contrôlé
+                          {controlledTerritories > 1 ? "s" : ""}
+                        </p>
                       </div>
-                      <p className="mt-3 font-semibold text-[#302720]">
-                        {player.display_name}
-                      </p>
-                      <p className="mt-1 text-sm text-[#6a5e54]">
-                        {player.aos_faction ?? "Faction non renseignée"}
-                      </p>
+
+                      <div className="flex flex-col gap-3 text-sm lg:items-end lg:text-right">
+                        <div>
+                          <p className="text-xl font-bold text-[#302720]">
+                            {player.glory}
+                          </p>
+                          <p className="text-[#6a5e54]">Gloire</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Badge variant={getOrderStatusVariant(displayedStatus)}>
+                            {getOrderStatusLabel(displayedStatus)}
+                          </Badge>
+                          <p className="text-[#6a5e54]">
+                            {getOrderVisibilitySummary(order)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right text-sm">
-                      <p className="text-xl font-bold text-[#302720]">
-                        {player.glory}
-                      </p>
-                      <p className="text-[#6a5e54]">Gloire</p>
-                      <p className="mt-2 text-[#6a5e54]">
-                        {controlledTerritories} territoire
-                        {controlledTerritories > 1 ? "s" : ""}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
               {pendingPlayers.length ? (
-                <p className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+                <p className="mt-3 rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
                   {pendingPlayers.length} demande
                   {pendingPlayers.length > 1 ? "s" : ""} encore en attente.
                 </p>
@@ -458,44 +484,6 @@ export default async function CampaignPage({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Statut des ordres</CardTitle>
-              <CardDescription>
-                Suivi du tour courant pour les joueurs actifs.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {activePlayers.map((player) => {
-                const order = orderVisibilityByPlayerId.get(player.id);
-                const displayedStatus = order?.can_view_details
-                  ? order.order_status
-                  : getPublicOrderStatus(order?.order_status);
-
-                return (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between gap-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
-                  >
-                    <div>
-                      <p className="font-semibold text-[#302720]">
-                        {player.display_name}
-                      </p>
-                      <p className="mt-1 text-sm text-[#6a5e54]">
-                        {getOrderVisibilitySummary(order)}
-                      </p>
-                    </div>
-                    <Badge variant={getOrderStatusVariant(displayedStatus)}>
-                      {getOrderStatusLabel(displayedStatus)}
-                    </Badge>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="mt-4">
           <CampaignLog logs={logs} />
         </section>
       </div>

@@ -10,8 +10,21 @@ function isRouteMatch(pathname: string, routes: string[]) {
   return routes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }
 
+function getLegacyCampaignRoute(pathname: string) {
+  const match = /^\/campaigns\/([^/]+)\/(?:map|orders)$/.exec(pathname);
+
+  return match ? `/campaigns/${match[1]}` : null;
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const legacyCampaignRoute = getLegacyCampaignRoute(request.nextUrl.pathname);
+
+  if (legacyCampaignRoute) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = legacyCampaignRoute;
+    return NextResponse.redirect(redirectUrl);
+  }
 
   const supabase = createServerClient<Database>(
     getSupabaseUrl(),
@@ -43,7 +56,11 @@ export async function updateSession(request: NextRequest) {
   if (!user && isRouteMatch(request.nextUrl.pathname, protectedRoutes)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+    redirectUrl.search = "";
+    redirectUrl.searchParams.set(
+      "next",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    );
     return NextResponse.redirect(redirectUrl);
   }
 

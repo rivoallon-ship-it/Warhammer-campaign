@@ -22,9 +22,11 @@ Utiliser `campaign.map_width` et `campaign.map_height`.
 
 ## 3. Page carte
 
-Route : `/campaigns/[campaignId]/map`.
+Route principale : `/campaigns/[campaignId]`.
 
-Desktop : header, carte à gauche, fiche territoire à droite, légende en bas.
+La route `/campaigns/[campaignId]/map` est conservée pour compatibilité mais redirige vers la page campagne.
+
+Desktop : header compact, carte à gauche, fiche territoire/actions à droite, légende compacte.
 
 Mobile : header, carte scrollable, fiche sélectionnée, légende.
 
@@ -107,17 +109,17 @@ Bonus : Territoire narratif Dragon
 
 Afficher icônes et badges : Capitale, Village, Ruines, Fort, Tour, Dragon, Géant, Sauvage, Fortifié. Sur mobile, légende repliable possible.
 
-## 12. Carte miniature
+## 12. Carte de campagne
 
-Dashboard campagne : version compacte avec code, couleur propriétaire, icône type éventuellement, fortification. Pas besoin de noms complets.
+La page campagne affiche la carte complète, pas une miniature. Chaque case affiche code, nom court, propriétaire et états utiles comme source, cible valide ou fortification.
 
-## 13. Carte dans l’écran d’ordres
+## 13. Ordres depuis la carte
 
-Les ordres peuvent être donnés via listes déroulantes. La carte sert d’aide visuelle : source sélectionnée, cibles valides en surbrillance.
+Les ordres se donnent directement depuis la carte : sélectionner un territoire contrôlé, choisir `Conquérir` ou `Fortifier`, puis cliquer une cible adjacente valide si nécessaire.
 
 ## 14. Comportement clic
 
-Sur page carte : sélectionner case, afficher fiche, surligner adjacents. Sur page ordres : MVP recommandé = listes déroulantes pour action principale, carte comme aide visuelle.
+Sur la page campagne : sélectionner une case affiche sa fiche, surligne ses adjacents et propose les actions possibles selon propriétaire, phase et joueur courant.
 
 ## 15. Adjacences visuelles
 

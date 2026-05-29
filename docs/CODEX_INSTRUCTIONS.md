@@ -179,8 +179,8 @@ Tables Supabase en `snake_case`, TypeScript en `camelCase`, composants React en 
 - `/campaigns/join`
 - `/campaigns/[campaignId]`
 - `/campaigns/[campaignId]/lobby`
-- `/campaigns/[campaignId]/map`
-- `/campaigns/[campaignId]/orders`
+- `/campaigns/[campaignId]/map` redirige vers `/campaigns/[campaignId]`
+- `/campaigns/[campaignId]/orders` redirige vers `/campaigns/[campaignId]`
 - `/campaigns/[campaignId]/reveal`
 - `/campaigns/[campaignId]/results`
 

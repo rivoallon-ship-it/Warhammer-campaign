@@ -16,7 +16,7 @@ function getReturnPath(campaignId: string, formData: FormData) {
     return `/campaigns/${campaignId}`;
   }
 
-  return `/campaigns/${campaignId}/orders`;
+  return `/campaigns/${campaignId}`;
 }
 
 function redirectAfterSubmit(

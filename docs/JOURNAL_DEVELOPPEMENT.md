@@ -162,9 +162,9 @@ Commits principaux :
 - `app/campaigns/new/page.tsx` : création de campagne.
 - `app/campaigns/join/page.tsx` : rejoindre une campagne.
 - `app/campaigns/[campaignId]/lobby/page.tsx` : lobby.
-- `app/campaigns/[campaignId]/page.tsx` : dashboard de campagne.
-- `app/campaigns/[campaignId]/map/page.tsx` : carte interactive.
-- `app/campaigns/[campaignId]/orders/page.tsx` : ordres secrets.
+- `app/campaigns/[campaignId]/page.tsx` : écran principal de campagne, carte interactive et ordres directs.
+- `app/campaigns/[campaignId]/map/page.tsx` : redirection vers l'écran principal.
+- `app/campaigns/[campaignId]/orders/page.tsx` : redirection vers l'écran principal.
 - `app/campaigns/[campaignId]/reveal/page.tsx` : révélation.
 - `app/campaigns/[campaignId]/results/page.tsx` : résultats et fin de tour.
 

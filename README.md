@@ -82,14 +82,13 @@ Ordre de priorité en cas de conflit :
       /join
       /[campaignId]
         /lobby
-        /map
-        /orders
+        /map        # redirige vers la page campagne
+        /orders     # redirige vers la page campagne
         /reveal
         /results
   /components
     /auth
     /campaign
-    /map
     /orders
     /ui
   /lib

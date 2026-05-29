@@ -423,12 +423,6 @@ export default async function ResultsPage({
             >
               Retour à la campagne
             </Link>
-            <Link
-              href={`/campaigns/${campaign.id}/map`}
-              className={buttonVariants({ variant: "outline", className: "w-full" })}
-            >
-              Voir la carte
-            </Link>
           </div>
         </section>
 

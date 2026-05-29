@@ -116,15 +116,15 @@ Au clic Lancer : vérifier lobby, appeler `generateMap`, créer tour 1, `army_ba
 
 ## Lot 11 — Dashboard de campagne
 
-Page `/campaigns/[campaignId]`. Afficher nom, Saison/Tour, phase, points d’armée, carte miniature, classement, statut ordres, actions selon rôle/phase, historique récent.
+Page `/campaigns/[campaignId]`. Écran principal de campagne : nom, Saison/Tour, phase, points d’armée, carte interactive, sélection de territoire, ordres directs depuis la carte, classement, statut ordres, actions selon rôle/phase, historique récent.
 
 ## Lot 12 — Carte interactive dynamique
 
-Page `/campaigns/[campaignId]/map`. Grille dynamique `map_width` x `map_height`, couleurs, neutres, types, noms/codes, fortifications, fiche au clic. Ne jamais supposer 4x4.
+La carte interactive est intégrée à `/campaigns/[campaignId]`. La route `/campaigns/[campaignId]/map` reste disponible mais redirige vers la page campagne. Grille dynamique `map_width` x `map_height`, couleurs, neutres, types, noms/codes, fortifications, fiche au clic. Ne jamais supposer 4x4.
 
 ## Lot 13 — Ordres secrets
 
-Page `/campaigns/[campaignId]/orders`. Actions affichées : `Conquérir`, `Fortifier`. Actions internes : `conquer`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification possible en phase orders.
+Les ordres se donnent depuis la carte de `/campaigns/[campaignId]`. La route `/campaigns/[campaignId]/orders` reste disponible mais redirige vers la page campagne. Actions affichées : `Conquérir`, `Fortifier`. Actions internes : `conquer`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification possible en phase orders.
 
 ## Lot 14 — Visibilité des ordres
 

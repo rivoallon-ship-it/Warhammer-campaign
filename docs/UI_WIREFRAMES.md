@@ -103,15 +103,17 @@ Actions maître : Lancer la campagne, avec messages si impossible : joueur manqu
 
 ## 11. Dashboard campagne `/campaigns/[campaignId]`
 
-Afficher : nom, Saison 1 — Tour X, phase, points d’armée, carte miniature, classement, statut des ordres, actions, historique récent.
+Afficher : nom, Saison 1 — Tour X, phase, points d’armée, carte interactive, panneau de territoire sélectionné, actions possibles, classement, statut des ordres, historique récent.
 
-Actions joueur : Donner mes ordres, Voir les batailles, Voir carte.
+Actions joueur : sélectionner un territoire contrôlé, conquérir une cible adjacente, fortifier, voir les batailles/résultats selon la phase.
 
 Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
 
 ## 12. Carte interactive `/campaigns/[campaignId]/map`
 
-Layout desktop : carte à gauche, fiche territoire à droite, légende en bas.
+Route conservée pour compatibilité, mais elle redirige vers `/campaigns/[campaignId]`.
+
+Layout desktop de la page campagne : carte à gauche, fiche territoire/actions à droite, légende compacte.
 
 Mobile : carte en haut, fiche en dessous, légende repliable possible.
 
@@ -123,7 +125,9 @@ Fiche : code, nom, type, propriétaire, statut, faction locale, adjacents, bonus
 
 ## 13. Donner mes ordres `/campaigns/[campaignId]/orders`
 
-Étapes : choisir action (`Conquérir`, `Fortifier`), choisir source, choisir cible, résumé, valider.
+Route conservée pour compatibilité, mais elle redirige vers `/campaigns/[campaignId]`.
+
+Étapes sur la page campagne : choisir un territoire contrôlé, cliquer `Conquérir` ou `Fortifier`, choisir une cible adjacente si nécessaire, valider.
 
 N’afficher que les sources contrôlées et cibles valides. Si ordre validé : montrer résumé + bouton Modifier mon ordre.
 

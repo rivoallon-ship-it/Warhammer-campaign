@@ -75,9 +75,7 @@ export async function resolveBattleAction(formData: FormData) {
     redirectToResults(campaignId, { error: error ?? "Résolution impossible." });
   }
 
-  redirectToResults(campaignId, {
-    battle: result.winner_role === "attacker" ? "attacker" : "defender",
-  });
+  redirectToResults(campaignId, { battle: "resolved" });
 }
 
 export async function finishTurnAction(formData: FormData) {

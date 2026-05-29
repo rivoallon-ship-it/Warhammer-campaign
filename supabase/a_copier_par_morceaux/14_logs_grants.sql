@@ -42,6 +42,7 @@ grant select, insert, update, delete on public.territory_adjacencies to authenti
 grant select, insert, update, delete on public.campaign_turns to authenticated;
 grant select, insert, update, delete on public.orders to authenticated;
 grant select, insert, update, delete on public.battles to authenticated;
+grant select, insert, update, delete on public.battle_participants to authenticated;
 grant select, insert, update, delete on public.explorations to authenticated;
 grant select, insert on public.campaign_logs to authenticated;
 

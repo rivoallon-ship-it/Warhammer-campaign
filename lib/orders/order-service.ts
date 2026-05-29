@@ -26,21 +26,22 @@ export type OrdersPageData = {
 };
 
 export const ORDER_ACTION_OPTIONS: { label: string; value: OrderAction }[] = [
-  { label: "Attaquer", value: "attack" },
-  { label: "Explorer", value: "explore" },
+  { label: "Conquérir", value: "conquer" },
   { label: "Fortifier", value: "fortify" },
 ];
 
 export function getOrderActionLabel(actionType: string) {
-  if (actionType === "attack") return "Attaquer";
-  if (actionType === "explore") return "Explorer";
+  if (actionType === "attack" || actionType === "explore" || actionType === "conquer") {
+    return "Conquérir";
+  }
+
   if (actionType === "fortify") return "Fortifier";
 
   return actionType;
 }
 
 function isOrderAction(value: string): value is OrderAction {
-  return value === "attack" || value === "explore" || value === "fortify";
+  return value === "conquer" || value === "fortify";
 }
 
 function getTerritoryById(territories: TerritoryRow[]) {
@@ -139,23 +140,13 @@ function validateSubmittedOrder(
     return { order: null, error: "La cible doit être adjacente à la source." };
   }
 
-  if (actionType === "attack") {
-    if (!targetTerritory.owner_campaign_player_id) {
-      return { order: null, error: "Une attaque doit cibler un territoire ennemi." };
-    }
-
-    if (targetTerritory.owner_campaign_player_id === currentPlayer.id) {
-      return { order: null, error: "Tu ne peux pas attaquer ton propre territoire." };
-    }
-  }
-
-  if (actionType === "explore" && targetTerritory.owner_campaign_player_id) {
-    return { order: null, error: "Une exploration doit cibler un territoire neutre." };
+  if (targetTerritory.owner_campaign_player_id === currentPlayer.id) {
+    return { order: null, error: "Tu contrôles déjà ce territoire." };
   }
 
   return {
     order: {
-      actionType,
+      actionType: targetTerritory.owner_campaign_player_id ? "attack" : "explore",
       sourceTerritoryId: sourceTerritory.id,
       targetTerritoryId: targetTerritory.id,
     },

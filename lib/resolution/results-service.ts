@@ -10,6 +10,8 @@ type CampaignPlayerRow = Database["public"]["Tables"]["campaign_players"]["Row"]
 type TerritoryRow = Database["public"]["Tables"]["territories"]["Row"];
 type ExplorationRow = Database["public"]["Tables"]["explorations"]["Row"];
 type BattleRow = Database["public"]["Tables"]["battles"]["Row"];
+type BattleParticipantRow =
+  Database["public"]["Tables"]["battle_participants"]["Row"];
 type ResolveExplorationRpcResult =
   Database["public"]["Functions"]["resolve_exploration_result"]["Returns"][number];
 type ResolveBattleRpcResult =
@@ -26,6 +28,11 @@ export type BattleResultItem = BattleRow & {
   attacker: CampaignPlayerRow | null;
   defender: CampaignPlayerRow | null;
   territory: TerritoryRow | null;
+  participants: BattleParticipantItem[];
+};
+
+export type BattleParticipantItem = BattleParticipantRow & {
+  player: CampaignPlayerRow | null;
 };
 
 export type ResultsPageData = CampaignDashboardData & {
@@ -131,21 +138,86 @@ export async function getResultsPageData(
     return { resultsData: null, error: "Impossible de charger les batailles." };
   }
 
+  const battleIds = (battles ?? []).map((battle) => battle.id);
+  const { data: battleParticipants, error: participantsError } = battleIds.length
+    ? await supabase
+        .from("battle_participants")
+        .select("*")
+        .eq("campaign_id", dashboard.campaign.id)
+        .in("battle_id", battleIds)
+        .order("advantage_rank", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true })
+    : { data: [], error: null };
+
+  if (participantsError) {
+    return {
+      resultsData: null,
+      error: "Impossible de charger les participants des batailles.",
+    };
+  }
+
   const playersById = getPlayerById(dashboard.activePlayers);
   const territoryById = new Map(
     dashboard.territories.map((territory) => [territory.id, territory]),
   );
+  const participantsByBattleId = new Map<string, BattleParticipantItem[]>();
+
+  for (const participant of battleParticipants ?? []) {
+    const item = {
+      ...participant,
+      player: playersById.get(participant.campaign_player_id) ?? null,
+    };
+    const existingItems = participantsByBattleId.get(participant.battle_id) ?? [];
+
+    existingItems.push(item);
+    participantsByBattleId.set(participant.battle_id, existingItems);
+  }
+
   const explorationItems = (explorations ?? []).map((exploration) => ({
     ...exploration,
     player: playersById.get(exploration.campaign_player_id) ?? null,
     territory: territoryById.get(exploration.territory_id) ?? null,
   }));
-  const battleItems = (battles ?? []).map((battle) => ({
-    ...battle,
-    attacker: playersById.get(battle.attacker_campaign_player_id) ?? null,
-    defender: playersById.get(battle.defender_campaign_player_id) ?? null,
-    territory: territoryById.get(battle.territory_id) ?? null,
-  }));
+  const battleItems = (battles ?? []).map((battle) => {
+    const participants = participantsByBattleId.get(battle.id);
+
+    return {
+      ...battle,
+      attacker: playersById.get(battle.attacker_campaign_player_id) ?? null,
+      defender: playersById.get(battle.defender_campaign_player_id) ?? null,
+      territory: territoryById.get(battle.territory_id) ?? null,
+      participants: participants?.length
+        ? participants
+        : [
+            {
+              id: `${battle.id}-attacker`,
+              battle_id: battle.id,
+              campaign_id: battle.campaign_id,
+              campaign_player_id: battle.attacker_campaign_player_id,
+              order_id: battle.order_id,
+              role: "attacker",
+              dice_result: null,
+              advantage_rank: null,
+              created_at: battle.created_at,
+              player:
+                playersById.get(battle.attacker_campaign_player_id) ?? null,
+            },
+            {
+              id: `${battle.id}-defender`,
+              battle_id: battle.id,
+              campaign_id: battle.campaign_id,
+              campaign_player_id: battle.defender_campaign_player_id,
+              order_id: null,
+              role: "defender",
+              dice_result: null,
+              advantage_rank: null,
+              created_at: battle.created_at,
+              player:
+                playersById.get(battle.defender_campaign_player_id) ?? null,
+            },
+          ],
+    };
+  });
 
   return {
     resultsData: {
@@ -275,8 +347,9 @@ export async function resolveBattle(
   }
 
   if (
-    winnerCampaignPlayerId !== battle.attacker_campaign_player_id &&
-    winnerCampaignPlayerId !== battle.defender_campaign_player_id
+    !battle.participants.some(
+      (participant) => participant.campaign_player_id === winnerCampaignPlayerId,
+    )
   ) {
     return { result: null, error: "Le vainqueur doit participer à cette bataille." };
   }

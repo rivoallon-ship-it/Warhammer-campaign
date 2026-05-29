@@ -342,6 +342,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      battle_participants: {
+        Row: {
+          id: string;
+          battle_id: string;
+          campaign_id: string;
+          campaign_player_id: string;
+          order_id: string | null;
+          role: string;
+          dice_result: number | null;
+          advantage_rank: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          battle_id: string;
+          campaign_id: string;
+          campaign_player_id: string;
+          order_id?: string | null;
+          role?: string;
+          dice_result?: number | null;
+          advantage_rank?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          battle_id?: string;
+          campaign_id?: string;
+          campaign_player_id?: string;
+          order_id?: string | null;
+          role?: string;
+          dice_result?: number | null;
+          advantage_rank?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       explorations: {
         Row: {
           id: string;

@@ -36,7 +36,13 @@ type OrderFormProps = {
 };
 
 function isOrderAction(value?: string | null): value is OrderAction {
-  return value === "attack" || value === "explore" || value === "fortify";
+  return value === "conquer" || value === "fortify";
+}
+
+function toFormAction(value?: string | null): OrderAction {
+  if (value === "fortify") return "fortify";
+
+  return "conquer";
 }
 
 function getTerritoryTypeLabel(type: string) {
@@ -71,6 +77,16 @@ function getOrderStatusVariant(status: string) {
   return "neutral" as const;
 }
 
+function getStoredOrderActionLabel(actionType: string) {
+  if (actionType === "attack" || actionType === "explore" || actionType === "conquer") {
+    return "Conquérir";
+  }
+
+  if (actionType === "fortify") return "Fortifier";
+
+  return actionType;
+}
+
 function getTerritoryLabel(
   territory: TerritoryOption,
   currentPlayerId: string,
@@ -95,7 +111,7 @@ function getOrderSummary(
 ) {
   const actionLabel =
     actionOptions.find((option) => option.value === existingOrder.actionType)?.label ??
-    existingOrder.actionType;
+    getStoredOrderActionLabel(existingOrder.actionType);
   const source = territories.find(
     (territory) => territory.id === existingOrder.sourceTerritoryId,
   );
@@ -121,7 +137,9 @@ export function OrderForm({
   existingOrder,
 }: OrderFormProps) {
   const [actionType, setActionType] = useState<OrderAction>(
-    isOrderAction(existingOrder?.actionType) ? existingOrder.actionType : "attack",
+    isOrderAction(existingOrder?.actionType)
+      ? existingOrder.actionType
+      : toFormAction(existingOrder?.actionType),
   );
   const [sourceTerritoryId, setSourceTerritoryId] = useState(
     existingOrder?.sourceTerritoryId ?? "",
@@ -180,14 +198,7 @@ export function OrderForm({
     return territories.filter((territory) => {
       if (!adjacentCodes.has(territory.code)) return false;
 
-      if (actionType === "attack") {
-        return (
-          territory.ownerCampaignPlayerId !== null &&
-          territory.ownerCampaignPlayerId !== currentPlayerId
-        );
-      }
-
-      return territory.ownerCampaignPlayerId === null;
+      return territory.ownerCampaignPlayerId !== currentPlayerId;
     });
   }, [
     actionType,
@@ -217,11 +228,9 @@ export function OrderForm({
     Boolean(selectedTargetTerritoryId) &&
     (actionType === "fortify" || Boolean(selectedSourceTerritoryId));
   const actionHint =
-    actionType === "attack"
-      ? "Une attaque cible un territoire ennemi adjacent."
-      : actionType === "explore"
-        ? "Une exploration cible un territoire neutre adjacent."
-        : "La fortification se place sur un territoire que vous contrôlez.";
+    actionType === "conquer"
+      ? "Conquérir cible un territoire adjacent neutre ou ennemi. L'app décidera automatiquement s'il faut une exploration ou une bataille."
+      : "La fortification se place sur un territoire que vous contrôlez.";
 
   return (
     <form action={submitOrderAction} className="space-y-5">

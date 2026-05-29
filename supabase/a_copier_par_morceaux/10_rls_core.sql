@@ -6,6 +6,7 @@ alter table public.territory_adjacencies enable row level security;
 alter table public.campaign_turns enable row level security;
 alter table public.orders enable row level security;
 alter table public.battles enable row level security;
+alter table public.battle_participants enable row level security;
 alter table public.explorations enable row level security;
 alter table public.campaign_logs enable row level security;
 
@@ -56,4 +57,3 @@ create policy "Owners delete campaigns"
 on public.campaigns for delete
 to authenticated
 using (owner_user_id = auth.uid());
-

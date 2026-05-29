@@ -62,8 +62,7 @@ function getOrderStatusVariant(status?: string) {
 }
 
 function getOrderActionLabel(actionType?: string | null) {
-  if (actionType === "attack") return "Attaquer";
-  if (actionType === "explore") return "Explorer";
+  if (actionType === "attack" || actionType === "explore") return "Conquérir";
   if (actionType === "fortify") return "Fortifier";
 
   return actionType ?? "Ordre";
@@ -109,9 +108,9 @@ function getFeedbackMessage(query?: Awaited<RevealPageProps["searchParams"]>) {
       variant: "success" as const,
       text: `Ordres révélés : ${query.battles ?? "0"} bataille(s), ${
         query.explorations ?? "0"
-      } exploration(s), ${query.fortifications ?? "0"} fortification(s).${
+      } conquête(s) automatique(s), ${query.fortifications ?? "0"} fortification(s).${
         Number(query.multi ?? 0) > 0
-          ? ` ${query.multi} territoire(s) subissent plusieurs attaques.`
+          ? ` ${query.multi} territoire(s) déclenchent un conflit multiple.`
           : ""
       }`,
     };
@@ -262,7 +261,8 @@ export default async function RevealPage({
                   <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
                     <dt className="font-semibold text-[#302720]">Après révélation</dt>
                     <dd className="mt-1 text-[#5d5148]">
-                      Batailles, explorations et fortifications sont générées.
+                      Batailles, conquêtes automatiques et fortifications sont
+                      générées.
                     </dd>
                   </div>
                 </dl>

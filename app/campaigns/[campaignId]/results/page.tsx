@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
 import { ResolveBattleForm } from "@/components/results/resolve-battle-form";
-import { ResolveExplorationForm } from "@/components/results/resolve-exploration-form";
 import {
   Badge,
   Card,
@@ -60,22 +59,58 @@ function getExplorationResultLabel(
   diceResult: number | null,
   success: boolean | null,
 ) {
-  if (!diceResult || success === null) return "D6 à saisir";
+  if (!diceResult || success === null) return "D6 automatique";
 
   return success ? `Réussite sur ${diceResult}` : `Échec sur ${diceResult}`;
 }
 
+type BattleParticipantSummary = {
+  campaign_player_id: string;
+  role: string;
+  dice_result: number | null;
+  advantage_rank: number | null;
+  player: {
+    display_name: string;
+  } | null;
+};
+
+function getParticipantName(participant: BattleParticipantSummary) {
+  return participant.player?.display_name ?? "Participant inconnu";
+}
+
+function getParticipantRoleLabel(role: string) {
+  if (role === "attacker") return "Attaquant";
+  if (role === "defender") return "Défenseur";
+  if (role === "contender") return "Prétendant";
+
+  return role;
+}
+
 function getBattleResultLabel(
   winnerCampaignPlayerId: string | null,
-  attackerCampaignPlayerId: string,
-  attackerName: string,
-  defenderName: string,
+  participants: BattleParticipantSummary[],
 ) {
   if (!winnerCampaignPlayerId) return "Vainqueur à saisir";
 
-  return winnerCampaignPlayerId === attackerCampaignPlayerId
-    ? `${attackerName} conquiert`
-    : `${defenderName} défend`;
+  const winner = participants.find(
+    (participant) => participant.campaign_player_id === winnerCampaignPlayerId,
+  );
+
+  return `${winner ? getParticipantName(winner) : "Vainqueur"} l'emporte`;
+}
+
+function getBattleParticipantsLabel(participants: BattleParticipantSummary[]) {
+  return participants.map(getParticipantName).join(" contre ");
+}
+
+function getBestDiceLabel(participants: BattleParticipantSummary[]) {
+  const bestParticipant = participants.find(
+    (participant) => participant.advantage_rank === 1 && participant.dice_result,
+  );
+
+  if (!bestParticipant?.dice_result) return null;
+
+  return `${getParticipantName(bestParticipant)} a l'avantage sur D6 ${bestParticipant.dice_result}.`;
 }
 
 function getFeedbackMessage(query?: Awaited<ResultsPageProps["searchParams"]>) {
@@ -97,17 +132,10 @@ function getFeedbackMessage(query?: Awaited<ResultsPageProps["searchParams"]>) {
     };
   }
 
-  if (query.battle === "attacker") {
+  if (query.battle === "resolved") {
     return {
       variant: "success" as const,
-      text: "Bataille résolue. Le territoire passe à l'attaquant et la Gloire a été mise à jour.",
-    };
-  }
-
-  if (query.battle === "defender") {
-    return {
-      variant: "success" as const,
-      text: "Bataille résolue. Le défenseur conserve le territoire et la Gloire a été mise à jour.",
+      text: "Bataille résolue. Le territoire et la Gloire ont été mis à jour.",
     };
   }
 
@@ -170,16 +198,16 @@ export default async function ResultsPage({
                   {getPhaseLabel(campaign.current_phase)}
                 </Badge>
                 <Badge variant="neutral">
-                  {readiness.resolvedExplorationCount} / {explorations.length} explorations
+                  {readiness.resolvedExplorationCount} / {explorations.length} conquêtes
                 </Badge>
                 <Badge variant="neutral">
                   {readiness.pendingBattleCount} bataille(s) en attente
                 </Badge>
               </div>
-              <CardTitle>Explorations</CardTitle>
+              <CardTitle>Conquêtes automatiques</CardTitle>
               <CardDescription>
-                Un résultat de 1-2 échoue, 3-6 réussit. Le joueur gagne toujours
-                1 Gloire.
+                Les D6 sont lancés automatiquement à la révélation. Un résultat
+                de 1-2 échoue, 3-6 réussit. Le joueur gagne toujours 1 Gloire.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -187,7 +215,7 @@ export default async function ResultsPage({
                 explorations.map((exploration) => (
                   <div
                     key={exploration.id}
-                    className="grid gap-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 lg:grid-cols-[1fr_220px]"
+                    className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -205,7 +233,7 @@ export default async function ResultsPage({
                         {exploration.player?.display_name ?? "Joueur inconnu"}
                       </p>
                       <p className="mt-1 text-sm text-[#6a5e54]">
-                        Explore{" "}
+                        Tente de conquérir{" "}
                         {exploration.territory
                           ? `${exploration.territory.code} - ${exploration.territory.name}`
                           : "un territoire inconnu"}
@@ -222,18 +250,18 @@ export default async function ResultsPage({
                       ) : null}
                     </div>
 
-                    {readiness.canResolveExplorations &&
-                    exploration.status === "pending" ? (
-                      <ResolveExplorationForm
-                        campaignId={campaign.id}
-                        explorationId={exploration.id}
-                      />
+                    {exploration.status === "pending" ? (
+                      <p className="mt-2 text-sm text-[#7b2922]">
+                        Cette ancienne exploration est encore en attente. Révèle à
+                        nouveau les ordres sur une campagne mise à jour pour
+                        utiliser les D6 automatiques.
+                      </p>
                     ) : null}
                   </div>
                 ))
               ) : (
                 <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
-                  Aucune exploration à résoudre pour ce tour.
+                  Aucune conquête automatique pour ce tour.
                 </p>
               )}
             </CardContent>
@@ -251,7 +279,7 @@ export default async function ResultsPage({
               <CardContent>
                 {readiness.canResolveResults ? (
                   <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
-                    Tu peux résoudre les explorations et batailles en attente.
+                    Tu peux résoudre les batailles en attente.
                   </p>
                 ) : (
                   <ul className="space-y-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
@@ -284,13 +312,11 @@ export default async function ResultsPage({
                         <Badge variant="neutral">
                           {getBattleResultLabel(
                             battle.winner_campaign_player_id,
-                            battle.attacker_campaign_player_id,
-                            battle.attacker?.display_name ?? "Attaquant",
-                            battle.defender?.display_name ?? "Défenseur",
+                            battle.participants,
                           )}
                         </Badge>
                         {battle.defender_bonus ? (
-                          <Badge variant="warning">Fortifié</Badge>
+                          <Badge variant="warning">Bonus</Badge>
                         ) : null}
                       </div>
                       <p className="mt-3 font-semibold text-[#302720]">
@@ -299,9 +325,29 @@ export default async function ResultsPage({
                           : "Territoire inconnu"}
                       </p>
                       <p className="mt-1 text-sm text-[#6a5e54]">
-                        {battle.attacker?.display_name ?? "Attaquant"} contre{" "}
-                        {battle.defender?.display_name ?? "Défenseur"}
+                        {getBattleParticipantsLabel(battle.participants)}
                       </p>
+                      {getBestDiceLabel(battle.participants) ? (
+                        <p className="mt-2 text-sm text-[#284d77]">
+                          {getBestDiceLabel(battle.participants)}
+                        </p>
+                      ) : null}
+                      <ul className="mt-3 space-y-2 text-sm text-[#6a5e54]">
+                        {battle.participants.map((participant) => (
+                          <li
+                            key={participant.id}
+                            className="flex flex-wrap items-center gap-2"
+                          >
+                            <Badge variant="neutral">
+                              {getParticipantRoleLabel(participant.role)}
+                            </Badge>
+                            <span>{getParticipantName(participant)}</span>
+                            {participant.dice_result ? (
+                              <Badge variant="info">D6 {participant.dice_result}</Badge>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
                       {battle.defender_bonus ? (
                         <p className="mt-2 text-sm text-[#644512]">
                           {battle.defender_bonus}
@@ -317,18 +363,10 @@ export default async function ResultsPage({
                           <ResolveBattleForm
                             campaignId={campaign.id}
                             battleId={battle.id}
-                            attackerCampaignPlayerId={
-                              battle.attacker_campaign_player_id
-                            }
-                            attackerName={
-                              battle.attacker?.display_name ?? "Attaquant"
-                            }
-                            defenderCampaignPlayerId={
-                              battle.defender_campaign_player_id
-                            }
-                            defenderName={
-                              battle.defender?.display_name ?? "Défenseur"
-                            }
+                            participants={battle.participants.map((participant) => ({
+                              campaignPlayerId: participant.campaign_player_id,
+                              name: getParticipantName(participant),
+                            }))}
                           />
                         </div>
                       ) : null}

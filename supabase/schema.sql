@@ -145,12 +145,39 @@ create table if not exists public.battles (
   result_notes text,
   created_at timestamptz not null default now(),
   resolved_at timestamptz,
-  check (status in ('pending', 'played', 'cancelled')),
-  check (
-    winner_campaign_player_id is null
-    or winner_campaign_player_id = attacker_campaign_player_id
-    or winner_campaign_player_id = defender_campaign_player_id
-  )
+  check (status in ('pending', 'played', 'cancelled'))
+);
+
+do $$
+declare
+  v_constraint_name text;
+begin
+  select conname
+  into v_constraint_name
+  from pg_constraint
+  where conrelid = 'public.battles'::regclass
+    and contype = 'c'
+    and pg_get_constraintdef(oid) like '%winner_campaign_player_id%'
+  limit 1;
+
+  if v_constraint_name is not null then
+    execute format('alter table public.battles drop constraint %I', v_constraint_name);
+  end if;
+end;
+$$;
+
+create table if not exists public.battle_participants (
+  id uuid primary key default gen_random_uuid(),
+  battle_id uuid not null references public.battles(id) on delete cascade,
+  campaign_id uuid not null references public.campaigns(id) on delete cascade,
+  campaign_player_id uuid not null references public.campaign_players(id) on delete cascade,
+  order_id uuid references public.orders(id) on delete set null,
+  role text not null default 'contender',
+  dice_result int check (dice_result between 1 and 6),
+  advantage_rank int check (advantage_rank is null or advantage_rank > 0),
+  created_at timestamptz not null default now(),
+  unique (battle_id, campaign_player_id),
+  check (role in ('attacker', 'defender', 'contender'))
 );
 
 create table if not exists public.explorations (
@@ -206,6 +233,8 @@ create index if not exists orders_campaign_id_idx on public.orders(campaign_id);
 create index if not exists orders_turn_id_idx on public.orders(turn_id);
 create index if not exists battles_campaign_id_idx on public.battles(campaign_id);
 create index if not exists battles_turn_id_idx on public.battles(turn_id);
+create index if not exists battle_participants_battle_id_idx on public.battle_participants(battle_id);
+create index if not exists battle_participants_campaign_id_idx on public.battle_participants(campaign_id);
 create index if not exists explorations_campaign_id_idx on public.explorations(campaign_id);
 create index if not exists explorations_turn_id_idx on public.explorations(turn_id);
 create index if not exists campaign_logs_campaign_id_created_at_idx on public.campaign_logs(campaign_id, created_at desc);
@@ -491,6 +520,8 @@ declare
   v_active_count int := 0;
   v_submitted_count int := 0;
   v_battle_count int := 0;
+  v_attack_battle_count int := 0;
+  v_contested_battle_count int := 0;
   v_exploration_count int := 0;
   v_fortification_count int := 0;
   v_multiple_attack_count int := 0;
@@ -599,66 +630,296 @@ begin
   from (
     select o.target_territory_id
     from public.orders o
+    join public.territories target on target.id = o.target_territory_id
     where o.campaign_id = v_campaign.id
       and o.turn_id = v_turn.id
       and o.status = 'submitted'
-      and o.action_type = 'attack'
+      and (
+        o.action_type = 'attack'
+        or (o.action_type = 'explore' and target.owner_campaign_player_id is null)
+      )
     group by o.target_territory_id
     having count(*) > 1
   ) contested_targets;
 
-  insert into public.battles (
-    campaign_id,
-    turn_id,
-    order_id,
-    territory_id,
-    attacker_campaign_player_id,
-    defender_campaign_player_id,
-    army_base_points,
-    defender_bonus
-  )
-  select
-    o.campaign_id,
-    o.turn_id,
-    o.id,
-    target.id,
-    o.campaign_player_id,
-    target.owner_campaign_player_id,
-    v_turn.army_base_points,
-    case
-      when target.is_fortified then 'Fortification : défenseur +1 point de commandement au round 1.'
-      else null
-    end
+  select count(*)
+  into v_attack_battle_count
   from public.orders o
-  join public.territories target on target.id = o.target_territory_id
   where o.campaign_id = v_campaign.id
     and o.turn_id = v_turn.id
     and o.status = 'submitted'
     and o.action_type = 'attack';
 
-  get diagnostics v_battle_count = row_count;
-
-  insert into public.explorations (
+  with inserted_battles as (
+    insert into public.battles (
+      campaign_id,
+      turn_id,
+      order_id,
+      territory_id,
+      attacker_campaign_player_id,
+      defender_campaign_player_id,
+      army_base_points,
+      defender_bonus
+    )
+    select
+      o.campaign_id,
+      o.turn_id,
+      o.id,
+      target.id,
+      o.campaign_player_id,
+      target.owner_campaign_player_id,
+      v_turn.army_base_points,
+      case
+        when target.is_fortified then 'Fortification : défenseur +1 point de commandement au round 1.'
+        else null
+      end
+    from public.orders o
+    join public.territories target on target.id = o.target_territory_id
+    where o.campaign_id = v_campaign.id
+      and o.turn_id = v_turn.id
+      and o.status = 'submitted'
+      and o.action_type = 'attack'
+    returning id, campaign_id, order_id, attacker_campaign_player_id, defender_campaign_player_id
+  )
+  insert into public.battle_participants (
+    battle_id,
     campaign_id,
-    turn_id,
-    order_id,
     campaign_player_id,
-    territory_id
+    order_id,
+    role
+  )
+  select id, campaign_id, attacker_campaign_player_id, order_id, 'attacker'
+  from inserted_battles
+  union all
+  select id, campaign_id, defender_campaign_player_id, null, 'defender'
+  from inserted_battles;
+
+  select count(*)
+  into v_contested_battle_count
+  from (
+    select o.target_territory_id
+    from public.orders o
+    join public.territories target on target.id = o.target_territory_id
+    where o.campaign_id = v_campaign.id
+      and o.turn_id = v_turn.id
+      and o.status = 'submitted'
+      and o.action_type = 'explore'
+      and target.owner_campaign_player_id is null
+    group by o.target_territory_id
+    having count(*) > 1
+  ) contested_neutral_targets;
+
+  with neutral_order_counts as (
+    select o.target_territory_id, count(*) as order_count
+    from public.orders o
+    join public.territories target on target.id = o.target_territory_id
+    where o.campaign_id = v_campaign.id
+      and o.turn_id = v_turn.id
+      and o.status = 'submitted'
+      and o.action_type = 'explore'
+      and target.owner_campaign_player_id is null
+    group by o.target_territory_id
+  ),
+  contested_orders as (
+    select
+      o.id as order_id,
+      o.campaign_id,
+      o.turn_id,
+      o.campaign_player_id,
+      o.target_territory_id as territory_id,
+      o.submitted_at,
+      roll.dice_result
+    from public.orders o
+    join neutral_order_counts noc on noc.target_territory_id = o.target_territory_id
+    cross join lateral (
+      select (floor(random() * 6)::int + 1) as dice_result
+      where o.id is not null
+    ) roll
+    where o.campaign_id = v_campaign.id
+      and o.turn_id = v_turn.id
+      and o.status = 'submitted'
+      and o.action_type = 'explore'
+      and noc.order_count > 1
+  ),
+  ranked_contenders as (
+    select
+      *,
+      row_number() over (
+        partition by territory_id
+        order by dice_result desc, submitted_at asc nulls last, order_id asc
+      ) as advantage_rank
+    from contested_orders
+  ),
+  battle_seed as (
+    select
+      campaign_id,
+      turn_id,
+      territory_id,
+      (array_agg(order_id order by advantage_rank))[1] as order_id,
+      (array_agg(campaign_player_id order by advantage_rank))[1] as first_player_id,
+      (array_agg(campaign_player_id order by advantage_rank))[2] as second_player_id
+    from ranked_contenders
+    group by campaign_id, turn_id, territory_id
+  ),
+  inserted_battles as (
+    insert into public.battles (
+      campaign_id,
+      turn_id,
+      order_id,
+      territory_id,
+      attacker_campaign_player_id,
+      defender_campaign_player_id,
+      army_base_points
+    )
+    select
+      campaign_id,
+      turn_id,
+      order_id,
+      territory_id,
+      first_player_id,
+      second_player_id,
+      v_turn.army_base_points
+    from battle_seed
+    returning id, campaign_id, territory_id
+  )
+  insert into public.battle_participants (
+    battle_id,
+    campaign_id,
+    campaign_player_id,
+    order_id,
+    role,
+    dice_result,
+    advantage_rank
   )
   select
-    o.campaign_id,
-    o.turn_id,
-    o.id,
-    o.campaign_player_id,
-    target.id
+    inserted_battles.id,
+    ranked_contenders.campaign_id,
+    ranked_contenders.campaign_player_id,
+    ranked_contenders.order_id,
+    'contender',
+    ranked_contenders.dice_result,
+    ranked_contenders.advantage_rank
+  from ranked_contenders
+  join inserted_battles on inserted_battles.territory_id = ranked_contenders.territory_id;
+
+  select count(*)
+  into v_exploration_count
   from public.orders o
   join public.territories target on target.id = o.target_territory_id
   where o.campaign_id = v_campaign.id
     and o.turn_id = v_turn.id
     and o.status = 'submitted'
-    and o.action_type = 'explore';
+    and o.action_type = 'explore'
+    and target.owner_campaign_player_id is null
+    and not exists (
+      select 1
+      from public.orders rival
+      where rival.campaign_id = o.campaign_id
+        and rival.turn_id = o.turn_id
+        and rival.status = 'submitted'
+        and rival.action_type = 'explore'
+        and rival.target_territory_id = o.target_territory_id
+        and rival.id <> o.id
+    );
 
-  get diagnostics v_exploration_count = row_count;
+  with single_orders as (
+    select
+      o.id as order_id,
+      o.campaign_id,
+      o.turn_id,
+      o.campaign_player_id,
+      target.id as territory_id,
+      target.code as territory_code,
+      target.name as territory_name,
+      roll.dice_result,
+      roll.dice_result >= 3 as success
+    from public.orders o
+    join public.territories target on target.id = o.target_territory_id
+    cross join lateral (
+      select (floor(random() * 6)::int + 1) as dice_result
+      where o.id is not null
+    ) roll
+    where o.campaign_id = v_campaign.id
+      and o.turn_id = v_turn.id
+      and o.status = 'submitted'
+      and o.action_type = 'explore'
+      and target.owner_campaign_player_id is null
+      and not exists (
+        select 1
+        from public.orders rival
+        where rival.campaign_id = o.campaign_id
+          and rival.turn_id = o.turn_id
+          and rival.status = 'submitted'
+          and rival.action_type = 'explore'
+          and rival.target_territory_id = o.target_territory_id
+          and rival.id <> o.id
+      )
+  ),
+  inserted_explorations as (
+    insert into public.explorations (
+      campaign_id,
+      turn_id,
+      order_id,
+      campaign_player_id,
+      territory_id,
+      status,
+      dice_result,
+      success,
+      resolved_at
+    )
+    select
+      campaign_id,
+      turn_id,
+      order_id,
+      campaign_player_id,
+      territory_id,
+      'resolved',
+      dice_result,
+      success,
+      now()
+    from single_orders
+    returning campaign_id, turn_id, campaign_player_id, territory_id, dice_result, success
+  ),
+  glory_updates as (
+    update public.campaign_players cp
+    set glory = glory + 1,
+        updated_at = now()
+    from inserted_explorations ie
+    where cp.id = ie.campaign_player_id
+    returning cp.id
+  ),
+  territory_updates as (
+    update public.territories target
+    set owner_campaign_player_id = ie.campaign_player_id,
+        updated_at = now()
+    from inserted_explorations ie
+    where target.id = ie.territory_id
+      and ie.success
+    returning target.id
+  )
+  insert into public.campaign_logs (
+    campaign_id,
+    turn_id,
+    type,
+    title,
+    description,
+    created_by_user_id
+  )
+  select
+    ie.campaign_id,
+    ie.turn_id,
+    'exploration_result',
+    case when ie.success then 'Conquête réussie' else 'Conquête échouée' end,
+    cp.display_name || ' tente de conquérir ' || target.code || ' - '
+      || target.name || ' : '
+      || case when ie.success then 'réussite' else 'échec' end
+      || ' sur un D6 automatique de ' || ie.dice_result || '. +1 Gloire.',
+    auth.uid()
+  from inserted_explorations ie
+  join public.campaign_players cp on cp.id = ie.campaign_player_id
+  join public.territories target on target.id = ie.territory_id;
+
+  v_battle_count := v_attack_battle_count + v_contested_battle_count;
 
   update public.territories target
   set is_fortified = true,
@@ -725,11 +986,11 @@ begin
     'orders_revealed',
     'Ordres révélés',
     'Révélation : ' || v_battle_count || ' bataille(s), '
-      || v_exploration_count || ' exploration(s), '
+      || v_exploration_count || ' conquête(s) automatique(s), '
       || v_fortification_count || ' fortification(s).'
       || case
         when v_multiple_attack_count > 0
-          then ' Attention : ' || v_multiple_attack_count || ' territoire(s) subissent plusieurs attaques.'
+          then ' Attention : ' || v_multiple_attack_count || ' territoire(s) déclenchent un conflit multiple.'
         else ''
       end,
     auth.uid()
@@ -898,12 +1159,12 @@ declare
   v_battle public.battles%rowtype;
   v_campaign public.campaigns%rowtype;
   v_turn public.campaign_turns%rowtype;
-  v_attacker public.campaign_players%rowtype;
-  v_defender public.campaign_players%rowtype;
   v_territory public.territories%rowtype;
-  v_attacker_wins boolean;
+  v_winner public.campaign_players%rowtype;
   v_winner_role text;
   v_notes text;
+  v_participant_count int := 0;
+  v_loser_count int := 0;
 begin
   select *
   into v_battle
@@ -950,34 +1211,53 @@ begin
     return;
   end if;
 
-  if submitted_winner_campaign_player_id is distinct from v_battle.attacker_campaign_player_id
-    and submitted_winner_campaign_player_id is distinct from v_battle.defender_campaign_player_id then
-    return query select false, 'Le vainqueur doit être l''attaquant ou le défenseur.', null::text;
-    return;
-  end if;
-
-  select *
-  into v_attacker
-  from public.campaign_players
-  where id = v_battle.attacker_campaign_player_id;
-
-  select *
-  into v_defender
-  from public.campaign_players
-  where id = v_battle.defender_campaign_player_id;
-
   select *
   into v_territory
   from public.territories
   where id = v_battle.territory_id;
 
-  if v_attacker.id is null or v_defender.id is null or v_territory.id is null then
+  select *
+  into v_winner
+  from public.campaign_players
+  where id = submitted_winner_campaign_player_id;
+
+  if v_winner.id is null or v_territory.id is null then
     return query select false, 'Données de bataille incomplètes.', null::text;
     return;
   end if;
 
-  v_attacker_wins := submitted_winner_campaign_player_id = v_battle.attacker_campaign_player_id;
-  v_winner_role := case when v_attacker_wins then 'attacker' else 'defender' end;
+  select count(*)
+  into v_participant_count
+  from public.battle_participants
+  where battle_id = v_battle.id;
+
+  if v_participant_count > 0 then
+    select role
+    into v_winner_role
+    from public.battle_participants
+    where battle_id = v_battle.id
+      and campaign_player_id = submitted_winner_campaign_player_id
+    limit 1;
+
+    if not found then
+      return query select false, 'Le vainqueur doit participer à cette bataille.', null::text;
+      return;
+    end if;
+  else
+    if submitted_winner_campaign_player_id is distinct from v_battle.attacker_campaign_player_id
+      and submitted_winner_campaign_player_id is distinct from v_battle.defender_campaign_player_id then
+      return query select false, 'Le vainqueur doit participer à cette bataille.', null::text;
+      return;
+    end if;
+
+    v_winner_role := case
+      when submitted_winner_campaign_player_id = v_battle.attacker_campaign_player_id then 'attacker'
+      else 'defender'
+    end;
+    v_participant_count := 2;
+  end if;
+
+  v_loser_count := greatest(v_participant_count - 1, 0);
   v_notes := nullif(trim(coalesce(submitted_result_notes, '')), '');
 
   update public.battles
@@ -987,25 +1267,36 @@ begin
       resolved_at = now()
   where id = v_battle.id;
 
-  update public.campaign_players
-  set glory = glory + case
-        when v_attacker_wins and id = v_battle.attacker_campaign_player_id then 3
-        when v_attacker_wins and id = v_battle.defender_campaign_player_id then 1
-        when not v_attacker_wins and id = v_battle.defender_campaign_player_id then 2
-        when not v_attacker_wins and id = v_battle.attacker_campaign_player_id then 1
-        else 0
-      end,
-      updated_at = now()
-  where id in (
-    v_battle.attacker_campaign_player_id,
-    v_battle.defender_campaign_player_id
-  );
+  if exists (select 1 from public.battle_participants where battle_id = v_battle.id) then
+    update public.campaign_players cp
+    set glory = glory + case
+          when cp.id = submitted_winner_campaign_player_id and v_winner_role = 'defender' then 2
+          when cp.id = submitted_winner_campaign_player_id then 3
+          else 1
+        end,
+        updated_at = now()
+    where exists (
+      select 1
+      from public.battle_participants bp
+      where bp.battle_id = v_battle.id
+        and bp.campaign_player_id = cp.id
+    );
+  else
+    update public.campaign_players
+    set glory = glory + case
+          when id = submitted_winner_campaign_player_id and v_winner_role = 'defender' then 2
+          when id = submitted_winner_campaign_player_id then 3
+          else 1
+        end,
+        updated_at = now()
+    where id in (
+      v_battle.attacker_campaign_player_id,
+      v_battle.defender_campaign_player_id
+    );
+  end if;
 
   update public.territories
-  set owner_campaign_player_id = case
-        when v_attacker_wins then v_battle.attacker_campaign_player_id
-        else owner_campaign_player_id
-      end,
+  set owner_campaign_player_id = submitted_winner_campaign_player_id,
       is_fortified = case
         when v_battle.defender_bonus is not null then false
         else is_fortified
@@ -1026,16 +1317,14 @@ begin
     v_battle.turn_id,
     'battle_result',
     'Bataille résolue',
-    case
-      when v_attacker_wins then
-        v_attacker.display_name || ' conquiert ' || v_territory.code || ' - '
-        || v_territory.name || ' contre ' || v_defender.display_name
-        || '. +' || 3 || ' Gloire attaquant, +1 Gloire défenseur.'
-      else
-        v_defender.display_name || ' défend ' || v_territory.code || ' - '
-        || v_territory.name || ' contre ' || v_attacker.display_name
-        || '. +2 Gloire défenseur, +1 Gloire attaquant.'
-    end
+    v_winner.display_name || ' remporte la bataille pour '
+      || v_territory.code || ' - ' || v_territory.name || '. +'
+      || case when v_winner_role = 'defender' then 2 else 3 end
+      || ' Gloire vainqueur'
+      || case
+        when v_loser_count > 0 then ', +1 Gloire pour chaque autre participant.'
+        else '.'
+      end
     || case
       when v_battle.defender_bonus is not null then ' La fortification est retirée.'
       else ''
@@ -1200,6 +1489,7 @@ alter table public.territory_adjacencies enable row level security;
 alter table public.campaign_turns enable row level security;
 alter table public.orders enable row level security;
 alter table public.battles enable row level security;
+alter table public.battle_participants enable row level security;
 alter table public.explorations enable row level security;
 alter table public.campaign_logs enable row level security;
 
@@ -1443,6 +1733,25 @@ to authenticated
 using (public.is_campaign_master(campaign_id))
 with check (public.is_campaign_master(campaign_id));
 
+drop policy if exists "Battle participants readable by active members" on public.battle_participants;
+create policy "Battle participants readable by active members"
+on public.battle_participants for select
+to authenticated
+using (public.is_active_campaign_member(campaign_id));
+
+drop policy if exists "Game masters insert battle participants" on public.battle_participants;
+create policy "Game masters insert battle participants"
+on public.battle_participants for insert
+to authenticated
+with check (public.is_campaign_master(campaign_id));
+
+drop policy if exists "Game masters update battle participants" on public.battle_participants;
+create policy "Game masters update battle participants"
+on public.battle_participants for update
+to authenticated
+using (public.is_campaign_master(campaign_id))
+with check (public.is_campaign_master(campaign_id));
+
 drop policy if exists "Explorations readable by active members" on public.explorations;
 create policy "Explorations readable by active members"
 on public.explorations for select
@@ -1499,6 +1808,7 @@ grant select, insert, update, delete on public.territory_adjacencies to authenti
 grant select, insert, update, delete on public.campaign_turns to authenticated;
 grant select, insert, update, delete on public.orders to authenticated;
 grant select, insert, update, delete on public.battles to authenticated;
+grant select, insert, update, delete on public.battle_participants to authenticated;
 grant select, insert, update, delete on public.explorations to authenticated;
 grant select, insert on public.campaign_logs to authenticated;
 

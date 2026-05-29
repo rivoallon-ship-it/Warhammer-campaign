@@ -18,7 +18,7 @@ export type CampaignPlayerRole = "player" | "game_master";
 
 export type CampaignPlayerStatus = "pending" | "active" | "rejected" | "left";
 
-export type OrderAction = "attack" | "explore" | "fortify";
+export type OrderAction = "conquer" | "fortify";
 
 export type TerritoryType =
   | "capital"

@@ -64,6 +64,25 @@ to authenticated
 using (public.is_campaign_master(campaign_id))
 with check (public.is_campaign_master(campaign_id));
 
+drop policy if exists "Battle participants readable by active members" on public.battle_participants;
+create policy "Battle participants readable by active members"
+on public.battle_participants for select
+to authenticated
+using (public.is_active_campaign_member(campaign_id));
+
+drop policy if exists "Game masters insert battle participants" on public.battle_participants;
+create policy "Game masters insert battle participants"
+on public.battle_participants for insert
+to authenticated
+with check (public.is_campaign_master(campaign_id));
+
+drop policy if exists "Game masters update battle participants" on public.battle_participants;
+create policy "Game masters update battle participants"
+on public.battle_participants for update
+to authenticated
+using (public.is_campaign_master(campaign_id))
+with check (public.is_campaign_master(campaign_id));
+
 drop policy if exists "Explorations readable by active members" on public.explorations;
 create policy "Explorations readable by active members"
 on public.explorations for select
@@ -75,4 +94,3 @@ create policy "Game masters insert explorations"
 on public.explorations for insert
 to authenticated
 with check (public.is_campaign_master(campaign_id));
-

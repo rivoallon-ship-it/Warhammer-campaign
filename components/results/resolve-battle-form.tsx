@@ -7,19 +7,16 @@ import { Button, Select, Textarea } from "@/components/ui";
 type ResolveBattleFormProps = {
   campaignId: string;
   battleId: string;
-  attackerCampaignPlayerId: string;
-  attackerName: string;
-  defenderCampaignPlayerId: string;
-  defenderName: string;
+  participants: {
+    campaignPlayerId: string;
+    name: string;
+  }[];
 };
 
 export function ResolveBattleForm({
   campaignId,
   battleId,
-  attackerCampaignPlayerId,
-  attackerName,
-  defenderCampaignPlayerId,
-  defenderName,
+  participants,
 }: ResolveBattleFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     if (
@@ -38,10 +35,10 @@ export function ResolveBattleForm({
       <Select
         name="winnerCampaignPlayerId"
         label="Vainqueur"
-        options={[
-          { label: attackerName, value: attackerCampaignPlayerId },
-          { label: defenderName, value: defenderCampaignPlayerId },
-        ]}
+        options={participants.map((participant) => ({
+          label: participant.name,
+          value: participant.campaignPlayerId,
+        }))}
       />
       <Textarea
         name="resultNotes"

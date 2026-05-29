@@ -9,9 +9,23 @@ function getFormValue(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function redirectToOrders(campaignId: string, params: Record<string, string>) {
+function getReturnPath(campaignId: string, formData: FormData) {
+  const returnTo = getFormValue(formData, "returnTo");
+
+  if (returnTo === "campaign") {
+    return `/campaigns/${campaignId}`;
+  }
+
+  return `/campaigns/${campaignId}/orders`;
+}
+
+function redirectAfterSubmit(
+  campaignId: string,
+  formData: FormData,
+  params: Record<string, string>,
+) {
   const searchParams = new URLSearchParams(params);
-  redirect(`/campaigns/${campaignId}/orders?${searchParams.toString()}`);
+  redirect(`${getReturnPath(campaignId, formData)}?${searchParams.toString()}`);
 }
 
 export async function submitOrderAction(formData: FormData) {
@@ -25,7 +39,7 @@ export async function submitOrderAction(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?next=/campaigns/${campaignId}/orders`);
+    redirect(`/login?next=${getReturnPath(campaignId, formData)}`);
   }
 
   const { error } = await submitOrder(supabase, user, campaignId, {
@@ -35,8 +49,8 @@ export async function submitOrderAction(formData: FormData) {
   });
 
   if (error) {
-    redirectToOrders(campaignId, { error });
+    redirectAfterSubmit(campaignId, formData, { error });
   }
 
-  redirectToOrders(campaignId, { submitted: "1" });
+  redirectAfterSubmit(campaignId, formData, { submitted: "1" });
 }

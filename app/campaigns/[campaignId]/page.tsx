@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -16,7 +16,6 @@ import {
   type CampaignOrderVisibilityRow,
   getCampaignDashboard,
   getOrderVisibilityByPlayerId,
-  getPlayerById,
   getRankedPlayers,
   getTerritoryStats,
 } from "@/lib/campaigns/campaign-dashboard-service";
@@ -31,6 +30,8 @@ type CampaignPageProps = {
     launched?: string;
     turnFinished?: string;
     turn?: string;
+    submitted?: string;
+    error?: string;
   }>;
 };
 
@@ -53,19 +54,6 @@ function getPhaseLabel(phase: string) {
   if (phase === "season_summary") return "Bilan";
 
   return phase;
-}
-
-function getTerritoryTypeLabel(type: string) {
-  if (type === "capital") return "Capitale";
-  if (type === "village") return "Village";
-  if (type === "ruins") return "Ruines";
-  if (type === "fort") return "Fort";
-  if (type === "magic_tower") return "Tour";
-  if (type === "dragon") return "Dragon";
-  if (type === "giant") return "Géant";
-  if (type === "wild") return "Sauvage";
-
-  return type;
 }
 
 function getOrderStatusLabel(status?: string) {
@@ -165,10 +153,11 @@ export default async function CampaignPage({
     pendingPlayers,
     currentTurn,
     territories,
+    adjacencies,
+    orders,
     orderVisibility,
     logs,
   } = dashboard;
-  const playersById = getPlayerById(activePlayers);
   const rankedPlayers = getRankedPlayers(activePlayers);
   const territoryStats = getTerritoryStats(territories);
   const orderVisibilityByPlayerId =
@@ -179,10 +168,28 @@ export default async function CampaignPage({
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
   const canUseCampaignActions = campaign.status === "active" && currentPlayer;
+  const existingPlayerOrder =
+    currentPlayer && currentTurn
+      ? (orders.find((order) => order.campaign_player_id === currentPlayer.id) ?? null)
+      : null;
+  const orderUnavailableMessage = !currentPlayer
+    ? "Tu dois rejoindre cette campagne avant de donner un ordre."
+    : currentPlayer.status !== "active"
+      ? "Ton joueur n'est pas encore actif dans cette campagne."
+      : campaign.status !== "active"
+        ? "La campagne n'est pas encore active."
+        : campaign.current_phase !== "orders"
+          ? "La phase actuelle ne permet pas de modifier les ordres."
+          : !currentTurn || currentTurn.phase !== "orders"
+            ? "Le tour courant n'accepte pas d'ordres."
+            : !territories.length
+              ? "La carte n'est pas encore générée."
+              : null;
+  const canSubmitOrders = !orderUnavailableMessage;
 
   return (
     <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <PageHeader
           eyebrow="Campagne"
           title={campaign.name}
@@ -198,6 +205,16 @@ export default async function CampaignPage({
           <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
             Tour terminé. Le tour {query.turn || campaign.current_turn_number} est
             ouvert.
+          </p>
+        ) : null}
+        {query?.submitted ? (
+          <p className="mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+            Ordre enregistré pour ce tour.
+          </p>
+        ) : null}
+        {query?.error ? (
+          <p className="mt-6 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+            {query.error}
           </p>
         ) : null}
 
@@ -267,29 +284,11 @@ export default async function CampaignPage({
                 </Link>
               ) : null}
               {canUseCampaignActions ? (
-                <>
-                  {campaign.current_phase === "orders" ? (
-                    <Link
-                      href={`/campaigns/${campaign.id}/orders`}
-                      className={buttonVariants({ className: "w-full" })}
-                    >
-                      Donner mes ordres
-                    </Link>
-                  ) : (
-                    <Button type="button" className="w-full" disabled>
-                      Donner mes ordres
-                    </Button>
-                  )}
-                  <Link
-                    href={`/campaigns/${campaign.id}/map`}
-                    className={buttonVariants({
-                      variant: "outline",
-                      className: "w-full",
-                    })}
-                  >
-                    Voir la carte
-                  </Link>
-                </>
+                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+                  {campaign.current_phase === "orders"
+                    ? "Les ordres se donnent maintenant directement sur la carte."
+                    : "La carte reste consultable, mais les ordres ne sont pas ouverts dans cette phase."}
+                </p>
               ) : null}
               {isGameMaster && campaign.current_phase === "orders" ? (
                 <Link
@@ -342,65 +341,66 @@ export default async function CampaignPage({
           </Card>
         </section>
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Carte miniature</CardTitle>
-              <CardDescription>
-                Aperçu compact des propriétaires, types et fortifications.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {territories.length ? (
-                <div className="overflow-x-auto pb-1">
-                  <div
-                    className="grid min-w-[360px] gap-2"
-                    style={{
-                      gridTemplateColumns: `repeat(${campaign.map_width}, minmax(54px, 1fr))`,
-                    }}
-                  >
-                    {territories.map((territory) => {
-                      const owner = territory.owner_campaign_player_id
-                        ? playersById.get(territory.owner_campaign_player_id)
-                        : null;
-                      const borderColor = owner?.color ?? "#d8cbb7";
-                      const backgroundColor = owner?.color
-                        ? `${owner.color}22`
-                        : "#f2eee5";
-
-                      return (
-                        <div
-                          key={territory.id}
-                          className="min-h-20 rounded-md border bg-[#fffdf8] p-2 text-xs"
-                          style={{ borderColor, backgroundColor }}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-bold text-[#302720]">
-                              {territory.code}
-                            </span>
-                            {territory.is_fortified ? (
-                              <span className="font-semibold text-[#5b3c0a]">F</span>
-                            ) : null}
-                          </div>
-                          <p className="mt-2 truncate font-semibold text-[#302720]">
-                            {getTerritoryTypeLabel(territory.type)}
-                          </p>
-                          <p className="mt-1 truncate text-[#5d5148]">
-                            {owner?.display_name ?? "Neutre"}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+        <section className="mt-4">
+          {territories.length ? (
+            <CampaignCommandCenter
+              campaignId={campaign.id}
+              mapWidth={campaign.map_width}
+              mapHeight={campaign.map_height}
+              players={activePlayers.map((player) => ({
+                id: player.id,
+                displayName: player.display_name,
+                faction: player.aos_faction,
+                color: player.color,
+              }))}
+              territories={territories.map((territory) => ({
+                id: territory.id,
+                code: territory.code,
+                name: territory.name,
+                type: territory.type,
+                positionX: territory.position_x,
+                positionY: territory.position_y,
+                ownerCampaignPlayerId: territory.owner_campaign_player_id,
+                isFortified: territory.is_fortified,
+                localFaction: territory.local_faction,
+              }))}
+              adjacencies={adjacencies.map((adjacency) => ({
+                territoryCode: adjacency.territory_code,
+                adjacentTerritoryCode: adjacency.adjacent_territory_code,
+              }))}
+              currentPlayerId={currentPlayer?.id ?? null}
+              canSubmitOrders={canSubmitOrders}
+              unavailableMessage={orderUnavailableMessage}
+              existingOrder={
+                existingPlayerOrder
+                  ? {
+                      actionType: existingPlayerOrder.action_type,
+                      sourceTerritoryId: existingPlayerOrder.source_territory_id,
+                      targetTerritoryId: existingPlayerOrder.target_territory_id,
+                      status: existingPlayerOrder.status,
+                    }
+                  : null
+              }
+            />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Carte de campagne</CardTitle>
+                <CardDescription>
                   La carte sera générée au lancement de la campagne.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                  Ouvre le lobby pour lancer la campagne quand tous les joueurs sont
+                  prêts.
                 </p>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
+        </section>
 
+        <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
           <Card>
             <CardHeader>
               <CardTitle>Classement</CardTitle>
@@ -457,9 +457,7 @@ export default async function CampaignPage({
               ) : null}
             </CardContent>
           </Card>
-        </section>
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
           <Card>
             <CardHeader>
               <CardTitle>Statut des ordres</CardTitle>
@@ -495,7 +493,9 @@ export default async function CampaignPage({
               })}
             </CardContent>
           </Card>
+        </section>
 
+        <section className="mt-4">
           <CampaignLog logs={logs} />
         </section>
       </div>

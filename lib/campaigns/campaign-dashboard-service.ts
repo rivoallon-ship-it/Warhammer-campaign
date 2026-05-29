@@ -5,6 +5,8 @@ type CampaignRow = Database["public"]["Tables"]["campaigns"]["Row"];
 type CampaignPlayerRow = Database["public"]["Tables"]["campaign_players"]["Row"];
 type CampaignTurnRow = Database["public"]["Tables"]["campaign_turns"]["Row"];
 type TerritoryRow = Database["public"]["Tables"]["territories"]["Row"];
+type AdjacencyRow =
+  Database["public"]["Tables"]["territory_adjacencies"]["Row"];
 type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type CampaignLogRow = Database["public"]["Tables"]["campaign_logs"]["Row"];
 export type CampaignOrderVisibilityRow =
@@ -20,6 +22,7 @@ export type CampaignDashboardData = {
   pendingPlayers: CampaignPlayerRow[];
   currentTurn: CampaignTurnRow | null;
   territories: TerritoryRow[];
+  adjacencies: AdjacencyRow[];
   orders: OrderRow[];
   orderVisibility: CampaignOrderVisibilityRow[];
   logs: CampaignLogItem[];
@@ -152,6 +155,10 @@ export async function getCampaignDashboard(
     .eq("campaign_id", campaign.id)
     .order("position_y", { ascending: true })
     .order("position_x", { ascending: true });
+  const { data: adjacencies } = await supabase
+    .from("territory_adjacencies")
+    .select("*")
+    .eq("campaign_id", campaign.id);
 
   const { data: orders } = currentTurn
     ? await supabase
@@ -216,6 +223,7 @@ export async function getCampaignDashboard(
       pendingPlayers,
       currentTurn: currentTurn ?? null,
       territories: territories ?? [],
+      adjacencies: adjacencies ?? [],
       orders: orders ?? [],
       orderVisibility,
       logs: logsWithTurns,

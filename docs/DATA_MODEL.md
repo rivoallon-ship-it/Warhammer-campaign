@@ -4,7 +4,7 @@
 
 ## 1. Objectif du modèle
 
-Le modèle doit gérer : comptes utilisateurs, profils joueurs, campagnes 2 à 6 joueurs, cartes générées automatiquement, lobby, capitales, ordres secrets, révélation, batailles, explorations, fortifications, Gloire, historique et tours sans limite.
+Le modèle doit gérer : comptes utilisateurs, profils joueurs, campagnes 2 à 6 joueurs, cartes générées automatiquement, lobby, capitales, ordres secrets, révélation, conquêtes, batailles, fortifications, Gloire, historique et tours sans limite.
 
 L’authentification est gérée par Supabase Auth. Les données applicatives sont stockées dans PostgreSQL.
 
@@ -20,7 +20,8 @@ L’authentification est gérée par Supabase Auth. Les données applicatives so
 | `campaign_turns` | Tours de campagne |
 | `orders` | Ordres secrets |
 | `battles` | Batailles générées |
-| `explorations` | Explorations générées |
+| `battle_participants` | Participants des batailles, y compris batailles multi-joueurs |
+| `explorations` | Résultats des conquêtes neutres automatiques |
 | `campaign_logs` | Historique simple |
 
 ## 3. `profiles`
@@ -174,7 +175,16 @@ export function getArmyBasePoints(turnNumber: number): number {
 
 Champs : `id`, `campaign_id`, `turn_id`, `campaign_player_id`, `action_type`, `source_territory_id`, `target_territory_id`, `status`, `submitted_at`, `revealed_at`, `created_at`, `updated_at`.
 
-`action_type` : `attack`, `explore`, `fortify`.
+`action_type` : `conquer`, `fortify`.
+
+`conquer` remplace les anciens cas séparés `attack` et `explore`.
+
+Règles :
+
+- cible ennemie : création d'une bataille ;
+- cible neutre non contestée : D6 automatique et ligne `explorations` déjà résolue ;
+- cible neutre contestée par plusieurs joueurs : bataille multi-joueurs ;
+- cible contrôlée par le joueur : interdite.
 
 `status` : `draft`, `submitted`, `revealed`, `resolved`.
 
@@ -188,21 +198,35 @@ Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `territory_id`, `attacker_c
 
 `status` : `pending`, `played`, `cancelled`.
 
-Si attaquant gagne : territoire attaquant, attaquant +3, défenseur +1. Si défenseur gagne : territoire inchangé, défenseur +2, attaquant +1. Retirer fortification après bataille.
+Pour une bataille classique contre un territoire ennemi : si attaquant gagne, territoire attaquant, attaquant +3, défenseur +1. Si défenseur gagne, territoire inchangé, défenseur +2, attaquant +1. Retirer fortification après bataille si elle a fourni un bonus.
 
-## 14. `explorations`
+Pour une bataille multi-joueurs sur territoire neutre : le vainqueur gagne le territoire et +3 Gloire, chaque autre participant gagne +1 Gloire.
+
+## 14. `battle_participants`
+
+Champs : `id`, `battle_id`, `campaign_id`, `campaign_player_id`, `order_id`, `role`, `dice_result`, `advantage_rank`, `created_at`.
+
+`role` : `attacker`, `defender`, `contender`.
+
+Cette table permet d'avoir plus de deux participants dans une bataille. Pour les batailles classiques, elle contient l'attaquant et le défenseur. Pour les batailles multi-joueurs sur territoire neutre, elle contient tous les prétendants avec leur D6 d'avantage.
+
+## 15. `explorations`
 
 Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `campaign_player_id`, `territory_id`, `status`, `dice_result`, `success`, `created_at`, `resolved_at`.
 
-`status` : `pending`, `resolved`. D6 1-2 échec, 3-6 succès. Joueur +1 Gloire dans tous les cas. Succès = territoire au joueur.
+`status` : `pending`, `resolved`. Dans le fonctionnement actuel, les conquêtes neutres non contestées sont créées directement en `resolved` à la révélation. D6 automatique : 1-2 échec, 3-6 succès. Joueur +1 Gloire dans tous les cas. Succès = territoire au joueur.
 
-## 15. `campaign_logs`
+Le nom `explorations` reste en base pour compatibilité historique, mais l'interface parle de conquêtes automatiques.
+
+## 16. `campaign_logs`
 
 Champs : `id`, `campaign_id`, `turn_id`, `type`, `title`, `description`, `created_by_user_id`, `created_at`.
 
 Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launched`, `orders_revealed`, `battle_created`, `battle_result`, `exploration_result`, `territory_fortified`, `turn_finished`, `season_finished`, `campaign_archived`.
 
-## 16. Fonctions métier attendues
+`exploration_result` est conservé comme type technique pour les conquêtes neutres automatiques.
+
+## 17. Fonctions métier attendues
 
 - `createCampaign` : créer campagne, code, config carte, créateur game_master actif, log.
 - `joinCampaign` : vérifier code/lobby/place/couleur/capitale puis créer joueur pending, log.
@@ -210,12 +234,12 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 - `launchCampaign` : vérifier conditions, générer carte, créer tour 1, status active, phase orders, log.
 - `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
 - `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale.
-- `revealOrders` : maître, tous submitted, ordres revealed, batailles/explorations/fortifications, phase resolving, log.
-- `resolveExploration` : maître, D6, Gloire, territoire si succès, status resolved, log.
-- `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, status played, log.
+- `revealOrders` : maître, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, phase resolving, log.
+- `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
+- `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.
 - `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.
 
-## 17. SQL conceptuel
+## 18. SQL conceptuel
 
 Le fichier final sera `/supabase/schema.sql`.
 
@@ -251,18 +275,18 @@ create table campaigns (
 );
 ```
 
-## 18. RLS — règles fonctionnelles
+## 19. RLS — règles fonctionnelles
 
 Activer RLS sur toutes les tables applicatives.
 
 Règle générale : un utilisateur lit les données d’une campagne uniquement s’il est membre (`campaign_players.user_id = auth.uid()` et status `pending` ou `active`).
 
-Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, explorations, territoires : lecture par membres, modification par maître ou fonctions métier.
+Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier.
 
-## 19. Données dérivées
+## 20. Données dérivées
 
 Statut d’ordre, classement et joueur le plus faible peuvent être calculés depuis les tables plutôt que stockés.
 
-## 20. Points d’attention Codex
+## 21. Points d’attention Codex
 
 Ne pas supposer 4 joueurs, ne pas coder une carte 4x4 fixe, ne pas bloquer au tour 6, ne pas révéler les ordres avant l’action du maître, ne pas coder héros/mercenaires/détachements dans le MVP.

@@ -4,7 +4,7 @@
 
 ## 1. Objectif
 
-Construire une application web en ligne permettant de gérer une campagne narrative Warhammer Age of Sigmar : comptes, campagnes 2 à 6 joueurs, cartes dynamiques, lobby, ordres secrets, révélation, batailles, explorations, résultats, Gloire et tours ouverts.
+Construire une application web en ligne permettant de gérer une campagne narrative Warhammer Age of Sigmar : comptes, campagnes 2 à 6 joueurs, cartes dynamiques, lobby, ordres secrets, révélation, conquêtes, batailles, résultats, Gloire et tours ouverts.
 
 ## 2. Stack technique
 
@@ -20,6 +20,7 @@ Hébergement : Vercel + Supabase Cloud.
 - `docs/DATA_MODEL.md`
 - `docs/IMPLEMENTATION_PLAN.md`
 - `docs/CODEX_INSTRUCTIONS.md`
+- `docs/JOURNAL_DEVELOPPEMENT.md`
 - `docs/UI_WIREFRAMES.md`
 - `docs/MAP_DESIGN.md`
 
@@ -28,6 +29,8 @@ Priorité : CODEX_INSTRUCTIONS, IMPLEMENTATION_PLAN, DATA_MODEL, PRODUCT_SPEC, U
 ## 4. Principes
 
 Avancer par lots. Chaque lot doit être limité, testable et compilable. Garder le MVP strict. Séparer logique métier et interface dans `/lib`.
+
+État au 2026-05-29 : les lots 1 à 20 sont implémentés. Le Lot 21 reste le prochain lot principal. Voir `docs/JOURNAL_DEVELOPPEMENT.md` pour le suivi réel des livraisons.
 
 ## 5. Structure cible
 
@@ -81,7 +84,7 @@ Créer `/lib/supabase/client.ts`, `/lib/supabase/server.ts`, `.env.example`, doc
 
 ## Lot 3 — Schéma SQL Supabase
 
-Créer `/supabase/schema.sql` avec tables : `profiles`, `campaigns`, `campaign_players`, `territories`, `territory_adjacencies`, `campaign_turns`, `orders`, `battles`, `explorations`, `campaign_logs`. Ajouter contraintes, clés étrangères, checks, RLS et policies simples.
+Créer `/supabase/schema.sql` avec tables : `profiles`, `campaigns`, `campaign_players`, `territories`, `territory_adjacencies`, `campaign_turns`, `orders`, `battles`, `battle_participants`, `explorations`, `campaign_logs`. Ajouter contraintes, clés étrangères, checks, RLS et policies simples.
 
 ## Lot 4 — Authentification
 
@@ -121,7 +124,7 @@ Page `/campaigns/[campaignId]/map`. Grille dynamique `map_width` x `map_height`,
 
 ## Lot 13 — Ordres secrets
 
-Page `/campaigns/[campaignId]/orders`. Actions `attack`, `explore`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification possible en phase orders.
+Page `/campaigns/[campaignId]/orders`. Actions affichées : `Conquérir`, `Fortifier`. Actions internes : `conquer`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification possible en phase orders.
 
 ## Lot 14 — Visibilité des ordres
 
@@ -129,15 +132,15 @@ Avant révélation : propriétaire seulement pour les détails, autres = statut.
 
 ## Lot 15 — Révélation
 
-Page `/campaigns/[campaignId]/reveal`. Maître, phase orders, tous submitted. Effets : ordres revealed, batailles, explorations, fortifications, phase resolving, log.
+Page `/campaigns/[campaignId]/reveal`. Maître, phase orders, tous submitted. Effets : ordres revealed, batailles, conquêtes automatiques, fortifications, phase resolving, log.
 
-## Lot 16 — Génération batailles/explorations
+## Lot 16 — Génération batailles/conquêtes
 
-`attack` -> `battles`; `explore` -> `explorations`; `fortify` -> `territories.is_fortified=true` + log. Attaques multiples : créer toutes les batailles et alerte.
+`conquer` vers territoire ennemi -> `battles`. `conquer` vers territoire neutre seul -> D6 automatique et ligne `explorations` résolue. `conquer` vers territoire neutre ciblé par plusieurs joueurs -> bataille multi-joueurs avec participants et D6 d'avantage. `fortify` -> `territories.is_fortified=true` + log.
 
-## Lot 17 — Résolution des explorations
+## Lot 17 — Résolution des conquêtes automatiques
 
-Page `/campaigns/[campaignId]/results`. Maître saisit D6. 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur. Status resolved, log.
+Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées sont déjà résolues automatiquement à la révélation. D6 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur. Status resolved, log.
 
 ## Lot 18 — Résolution des batailles
 
@@ -145,11 +148,11 @@ Maître saisit vainqueur + notes. Attaquant gagne : territoire à attaquant, +3/
 
 ## Lot 19 — Fin de tour
 
-Maître finit si toutes explorations resolved et batailles played/cancelled. Clôturer tour, créer suivant, incrémenter, recalculer points, phase orders, log. Ne jamais bloquer au tour 6.
+Maître finit si toutes conquêtes automatiques sont resolved et batailles played/cancelled. Clôturer tour, créer suivant, incrémenter, recalculer points, phase orders, log. Ne jamais bloquer au tour 6.
 
 ## Lot 20 — Historique simple
 
-Composant `CampaignLog`. Afficher campagne créée, joueur rejoint/accepté, lancement, ordres révélés, explorations, batailles, fortifications, tours terminés.
+Composant `CampaignLog`. Afficher campagne créée, joueur rejoint/accepté, lancement, ordres révélés, conquêtes, batailles, fortifications, tours terminés.
 
 ## Lot 21 — Qualité UX et responsive
 
@@ -243,13 +246,13 @@ Implémente les Lots 13 et 14. Ordres secrets, validation, visibilité avant/apr
 ### Prompt 12
 
 ```text
-Implémente les Lots 15 et 16. Révélation par maître, génération batailles/explorations/fortifications, phase resolving.
+Implémente les Lots 15 et 16. Révélation par maître, génération batailles/conquêtes automatiques/fortifications, phase resolving.
 ```
 
 ### Prompt 13
 
 ```text
-Implémente les Lots 17 et 18. Résolution explorations et batailles, Gloire, territoires, logs.
+Implémente les Lots 17 et 18. Résolution conquêtes automatiques et batailles, Gloire, territoires, logs.
 ```
 
 ### Prompt 14
@@ -266,7 +269,7 @@ Implémente le Lot 21. Polish UX responsive, états, confirmations, badges, icô
 
 ## Définition du MVP terminé
 
-Le scénario de bout en bout doit fonctionner : compte, campagne 2-6, invitation, lobby, lancement, carte, ordres secrets, révélation, batailles/explorations, résultats, Gloire, tour suivant, campagne continue.
+Le scénario de bout en bout doit fonctionner : compte, campagne 2-6, invitation, lobby, lancement, carte, ordres secrets, révélation, conquêtes/batailles, résultats, Gloire, tour suivant, campagne continue.
 
 ## Qualité
 

@@ -6,7 +6,7 @@
 
 Développer une application web appelée **Les Couronnes Brisées**, gestionnaire en ligne de campagne pour Warhammer Age of Sigmar.
 
-L’application doit permettre : comptes, profils, campagnes 2 à 6 joueurs, cartes dynamiques, lobby, ordres secrets, révélation, batailles, explorations, résultats, Gloire et tours ouverts.
+L’application doit permettre : comptes, profils, campagnes 2 à 6 joueurs, cartes dynamiques, lobby, ordres secrets, révélation, conquêtes, batailles, résultats, Gloire et tours ouverts.
 
 ## 2. Documents de référence
 
@@ -16,6 +16,7 @@ Lire et respecter :
 - `docs/DATA_MODEL.md`
 - `docs/IMPLEMENTATION_PLAN.md`
 - `docs/CODEX_INSTRUCTIONS.md`
+- `docs/JOURNAL_DEVELOPPEMENT.md`
 - `docs/UI_WIREFRAMES.md`
 - `docs/MAP_DESIGN.md`
 
@@ -98,21 +99,32 @@ Avant révélation : propriétaire voit son ordre, autres voient seulement statu
 
 ### Actions MVP
 
-Uniquement `attack`, `explore`, `fortify`.
+Actions affichées : `Conquérir`, `Fortifier`.
+
+Actions internes stockées dans `orders.action_type` : `conquer`, `fortify`.
+
+`conquer` remplace les anciens ordres séparés `attack` et `explore`.
 
 ### Validation
 
-- `attack` : source contrôlée par joueur, cible adjacente ennemie.
-- `explore` : source contrôlée par joueur, cible adjacente neutre.
+- `conquer` : source contrôlée par joueur, cible adjacente, cible neutre ou ennemie, jamais un territoire déjà contrôlé par le joueur.
 - `fortify` : cible contrôlée par joueur.
 
-### Exploration
+### Conquête neutre non contestée
 
-D6 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur.
+D6 automatique à la révélation. 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur.
+
+### Conquête neutre contestée
+
+Si deux joueurs ou plus visent le même territoire neutre, créer une bataille multi-joueurs. Un D6 automatique classe les participants pour l'avantage, mais le territoire revient seulement au vainqueur saisi après la bataille.
 
 ### Bataille
 
-Attaquant gagne : territoire à attaquant, attaquant +3, défenseur +1. Défenseur gagne : territoire inchangé, défenseur +2, attaquant +1. Retirer fortification après bataille.
+Conquête d'un territoire ennemi : bataille entre attaquant et défenseur. Attaquant gagne : territoire à attaquant, attaquant +3, défenseur +1. Défenseur gagne : territoire inchangé, défenseur +2, attaquant +1.
+
+Bataille multi-joueurs : le vainqueur gagne le territoire et +3 Gloire, chaque autre participant gagne +1 Gloire.
+
+Retirer la fortification après bataille si elle a fourni le bonus défensif.
 
 ### Points d’armée
 
@@ -127,7 +139,7 @@ export function getArmyBasePoints(turnNumber: number): number {
 
 ## 7. Supabase
 
-Tables attendues : `profiles`, `campaigns`, `campaign_players`, `territories`, `territory_adjacencies`, `campaign_turns`, `orders`, `battles`, `explorations`, `campaign_logs`.
+Tables attendues : `profiles`, `campaigns`, `campaign_players`, `territories`, `territory_adjacencies`, `campaign_turns`, `orders`, `battles`, `battle_participants`, `explorations`, `campaign_logs`.
 
 Activer RLS sur toutes les tables applicatives. Ne pas exposer de service role key. Côté client, utiliser seulement `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
@@ -174,7 +186,7 @@ Tables Supabase en `snake_case`, TypeScript en `camelCase`, composants React en 
 
 ## 12. Tests manuels clés
 
-Création compte, campagne 2 joueurs, code invitation, second joueur rejoint, maître accepte, joueurs prêts, lancement, carte 3x3, ordres secrets, révélation, exploration/bataille, Gloire, fin de tour.
+Création compte, campagne 2 joueurs, code invitation, second joueur rejoint, maître accepte, joueurs prêts, lancement, carte 3x3, ordres secrets, révélation, conquête neutre automatique, bataille, Gloire, fin de tour.
 
 ## 13. Ce qu’il ne faut pas faire
 

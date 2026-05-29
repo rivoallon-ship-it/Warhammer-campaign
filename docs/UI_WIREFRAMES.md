@@ -123,7 +123,7 @@ Fiche : code, nom, type, propriétaire, statut, faction locale, adjacents, bonus
 
 ## 13. Donner mes ordres `/campaigns/[campaignId]/orders`
 
-Étapes : choisir action (`Attaquer`, `Explorer`, `Fortifier`), choisir source, choisir cible, résumé, valider.
+Étapes : choisir action (`Conquérir`, `Fortifier`), choisir source, choisir cible, résumé, valider.
 
 N’afficher que les sources contrôlées et cibles valides. Si ordre validé : montrer résumé + bouton Modifier mon ordre.
 
@@ -139,9 +139,9 @@ Après révélation : tableau joueur/action/source/cible + bouton voir résultat
 
 ## 15. Résultats `/campaigns/[campaignId]/results`
 
-Section Explorations : carte exploration, D6, bouton Résoudre.
+Section Conquêtes automatiques : territoire, joueur, D6 automatique, réussite/échec.
 
-Section Batailles : attaquant, défenseur, territoire, points, bonus, vainqueur, notes, bouton Valider résultat.
+Section Batailles : participants, territoire, points, bonus éventuel, vainqueur, notes, bouton Valider résultat.
 
 Section Fin de tour : bouton Finir le tour, message si impossible.
 

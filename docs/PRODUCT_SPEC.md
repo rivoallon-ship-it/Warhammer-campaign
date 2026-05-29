@@ -6,13 +6,13 @@
 
 **Les Couronnes Brisées** est une application web permettant de gérer une campagne narrative de conquête pour **Warhammer Age of Sigmar**.
 
-L’application aide les joueurs à créer une campagne en ligne, inviter d’autres joueurs, rejoindre une partie avec un code, visualiser une carte de territoires, donner des ordres secrets, révéler les ordres en même temps, générer les batailles à jouer, résoudre les explorations, saisir les résultats, mettre à jour automatiquement les territoires, la Gloire et le tour de campagne.
+L’application aide les joueurs à créer une campagne en ligne, inviter d’autres joueurs, rejoindre une partie avec un code, visualiser une carte de territoires, donner des ordres secrets, révéler les ordres en même temps, générer les batailles à jouer, résoudre automatiquement les conquêtes neutres non contestées, saisir les résultats, mettre à jour automatiquement les territoires, la Gloire et le tour de campagne.
 
 Le site ne remplace pas les règles Age of Sigmar. Il gère uniquement la couche de campagne.
 
 ## 2. Objectifs du MVP
 
-Le MVP doit permettre de jouer une campagne complète en ligne avec un nombre de joueurs modulable : création de compte, connexion, profil joueur, création de campagne, choix du nombre de joueurs de 2 à 6, génération automatique d’une carte adaptée, invitation par code, lobby, validation des joueurs par le maître, choix de faction/couleur/capitale, lancement, carte interactive, ordres secrets, révélation simultanée, batailles, explorations, résultats, Gloire, passage au tour suivant et campagne ouverte.
+Le MVP doit permettre de jouer une campagne complète en ligne avec un nombre de joueurs modulable : création de compte, connexion, profil joueur, création de campagne, choix du nombre de joueurs de 2 à 6, génération automatique d’une carte adaptée, invitation par code, lobby, validation des joueurs par le maître, choix de faction/couleur/capitale, lancement, carte interactive, ordres secrets, révélation simultanée, conquêtes, batailles, résultats, Gloire, passage au tour suivant et campagne ouverte.
 
 ## 3. Hors périmètre du MVP
 
@@ -27,7 +27,7 @@ L’application est pensée pour des groupes de joueurs Age of Sigmar, des famil
 - Simplicité : afficher uniquement les options pertinentes.
 - Secret : les ordres sont secrets jusqu’à la révélation.
 - Lisibilité : toujours indiquer ce que le joueur possède, ce qu’il peut faire, et ce qu’il doit jouer.
-- Automatisation : génération carte, adjacence, validation ordres, révélation, batailles, explorations, Gloire et tours.
+- Automatisation : génération carte, adjacence, validation ordres, révélation, conquêtes neutres non contestées, batailles, Gloire et tours.
 
 ## 6. Rôles utilisateurs
 
@@ -41,7 +41,7 @@ Peut voir la campagne, la carte, ses ordres, les ordres révélés, les bataille
 
 ### Maître de campagne
 
-Peut accepter/refuser des joueurs, lancer la campagne, révéler les ordres, résoudre les explorations, saisir les résultats de bataille, terminer le tour et corriger certains éléments. Dans le MVP, il ne voit pas les détails des ordres secrets avant révélation.
+Peut accepter/refuser des joueurs, lancer la campagne, révéler les ordres, consulter les conquêtes automatiques, saisir les résultats de bataille, terminer le tour et corriger certains éléments. Dans le MVP, il ne voit pas les détails des ordres secrets avant révélation.
 
 ## 7. Campagnes ouvertes
 
@@ -102,37 +102,54 @@ Le maître peut lancer si : joueurs actifs = joueurs prévus, tous prêts, facti
 
 1. Ordres secrets.
 2. Révélation.
-3. Génération des batailles et explorations.
-4. Résolution des explorations.
+3. Génération des batailles et conquêtes automatiques.
+4. Consultation des conquêtes automatiques.
 5. Saisie des résultats de bataille.
 6. Fin de tour.
 7. Passage au tour suivant.
 
 ## 14. Ordres disponibles
 
-Chaque joueur actif peut soumettre **un ordre par tour** : `attack`, `explore`, `fortify`.
+Chaque joueur actif peut soumettre **un ordre par tour**.
+
+Actions affichées :
+
+- `Conquérir`
+- `Fortifier`
+
+Actions internes :
+
+- `conquer`
+- `fortify`
+
+`conquer` couvre les anciens cas `attack` et `explore`.
 
 ## 15. Validation des ordres
 
-- `attack` : source au joueur, cible adjacente, cible ennemie.
-- `explore` : source au joueur, cible adjacente, cible neutre.
+- `conquer` : source au joueur, cible adjacente, cible neutre ou ennemie, cible non contrôlée par le joueur.
 - `fortify` : cible contrôlée par le joueur.
 
 ## 16. Révélation des ordres
 
-Quand tous les joueurs actifs ont soumis leurs ordres, le maître peut révéler. Après révélation, tous les ordres deviennent visibles, les batailles/explorations sont générées, les fortifications appliquées, et la campagne passe en résolution.
+Quand tous les joueurs actifs ont soumis leurs ordres, le maître peut révéler. Après révélation, tous les ordres deviennent visibles, les batailles/conquêtes automatiques sont générées, les fortifications appliquées, et la campagne passe en résolution.
 
 ## 17. Batailles
 
-Si l’attaquant gagne : territoire à l’attaquant, attaquant +3 Gloire, défenseur +1 Gloire.
+Une bataille est créée quand un joueur conquiert un territoire ennemi ou quand plusieurs joueurs visent le même territoire neutre.
+
+Si l’attaquant gagne contre un défenseur : territoire à l’attaquant, attaquant +3 Gloire, défenseur +1 Gloire.
 
 Si le défenseur gagne : territoire inchangé, défenseur +2 Gloire, attaquant +1 Gloire.
 
 Si le territoire était fortifié : bonus affiché puis fortification retirée après la bataille. Bonus MVP : défenseur commence avec +1 point de commandement au round 1.
 
-## 18. Explorations
+En bataille multi-joueurs sur territoire neutre, le vainqueur gagne le territoire et +3 Gloire. Chaque autre participant gagne +1 Gloire.
 
-D6 : 1-2 échec, 3-6 succès. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur.
+## 18. Conquêtes neutres automatiques
+
+Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. 1-2 échec, 3-6 succès. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur.
+
+Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 
 ## 19. Fortifications
 
@@ -140,11 +157,11 @@ Un territoire peut être fortifié ou non. Un territoire déjà fortifié ne gag
 
 ## 20. Gloire
 
-Gains MVP : exploration +1, attaquant victorieux +3, défenseur victorieux +2, perdant d’une bataille +1.
+Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défenseur victorieux +2, autre participant/perdant d’une bataille +1.
 
 ## 21. Fin de tour
 
-Le maître termine le tour quand toutes les explorations et batailles sont résolues. Un nouveau tour est créé, la taille d’armée recalculée, et les joueurs peuvent soumettre de nouveaux ordres.
+Le maître termine le tour quand toutes les conquêtes automatiques et batailles sont résolues. Un nouveau tour est créé, la taille d’armée recalculée, et les joueurs peuvent soumettre de nouveaux ordres.
 
 ## 22. Tableaux de bord
 
@@ -156,17 +173,17 @@ La carte utilise `map_width`, `map_height` et les territoires générés. Chaque
 
 ## 24. Historique simple
 
-Enregistrer : campagne créée, joueur rejoint, joueur accepté, campagne lancée, ordres révélés, exploration réussie/échouée, bataille résolue, territoire fortifié, tour terminé.
+Enregistrer : campagne créée, joueur rejoint, joueur accepté, campagne lancée, ordres révélés, conquête réussie/échouée, bataille résolue, territoire fortifié, tour terminé.
 
 ## 25. Messages d’erreur clés
 
-Messages simples : campagne inexistante, campagne plus en lobby, couleur/capitale prise, territoire non contrôlé, cible non adjacente, attaque seulement contre ennemi, exploration seulement neutre, tous les joueurs doivent valider, toutes les batailles doivent être résolues.
+Messages simples : campagne inexistante, campagne plus en lobby, couleur/capitale prise, territoire non contrôlé, cible non adjacente, conquête impossible contre son propre territoire, fortification seulement sur territoire contrôlé, tous les joueurs doivent valider, toutes les batailles doivent être résolues.
 
 ## 26. Priorités MVP
 
 1. Auth, profil, création/rejoindre/lobby/lancement.
 2. Génération de carte et affichage territoires.
-3. Ordres secrets, révélation, génération batailles/explorations.
+3. Ordres secrets, révélation, génération batailles/conquêtes automatiques.
 4. Résolution, Gloire, fin de tour, historique.
 
 ## 27. Définition du MVP terminé

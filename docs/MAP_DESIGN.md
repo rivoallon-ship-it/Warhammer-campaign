@@ -191,4 +191,4 @@ Could-have : icônes custom, animations, plein écran, zoom, export image.
 
 ## 24. Définition de réussite
 
-La carte est réussie si elle fonctionne pour 2 à 6 joueurs, reste lisible, n’est pas codée en 4x4, propriétaires/neutres/fortifications/adjacences sont compréhensibles, et les joueurs comprennent quoi attaquer ou explorer.
+La carte est réussie si elle fonctionne pour 2 à 6 joueurs, reste lisible, n’est pas codée en 4x4, propriétaires/neutres/fortifications/adjacences sont compréhensibles, et les joueurs comprennent quoi conquérir ou fortifier.

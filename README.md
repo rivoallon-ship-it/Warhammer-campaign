@@ -2,13 +2,13 @@
 
 Application web de gestion de campagne narrative pour **Warhammer Age of Sigmar**.
 
-Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une partie avec un code d’invitation, visualiser une carte de territoires, donner des ordres secrets, révéler les ordres, résoudre les batailles et continuer la campagne tour après tour.
+Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une partie avec un code d’invitation, visualiser une carte de territoires, donner des ordres secrets, révéler les ordres, résoudre les conquêtes et batailles, puis continuer la campagne tour après tour.
 
 ## 1. Objectif du projet
 
 **Les Couronnes Brisées** est un gestionnaire de campagne en ligne.
 
-Il ne remplace pas les règles de Warhammer Age of Sigmar. Il gère uniquement la couche campagne : joueurs, cartes, territoires, ordres, batailles, explorations, Gloire et tours de campagne.
+Il ne remplace pas les règles de Warhammer Age of Sigmar. Il gère uniquement la couche campagne : joueurs, cartes, territoires, ordres, conquêtes, batailles, Gloire et tours de campagne.
 
 ## 2. MVP
 
@@ -28,8 +28,8 @@ Le MVP doit permettre :
 - carte interactive ;
 - ordres secrets ;
 - révélation simultanée des ordres ;
-- génération des batailles et explorations ;
-- résolution des explorations ;
+- génération des batailles et conquêtes automatiques ;
+- résolution automatique des conquêtes neutres non contestées ;
 - saisie des résultats de bataille ;
 - mise à jour automatique des territoires et de la Gloire ;
 - passage au tour suivant ;
@@ -55,6 +55,7 @@ Les documents de conception se trouvent dans `/docs` :
 - `DATA_MODEL.md`
 - `IMPLEMENTATION_PLAN.md`
 - `CODEX_INSTRUCTIONS.md`
+- `JOURNAL_DEVELOPPEMENT.md`
 - `UI_WIREFRAMES.md`
 - `MAP_DESIGN.md`
 
@@ -105,6 +106,7 @@ Ordre de priorité en cas de conflit :
     DATA_MODEL.md
     IMPLEMENTATION_PLAN.md
     CODEX_INSTRUCTIONS.md
+    JOURNAL_DEVELOPPEMENT.md
     UI_WIREFRAMES.md
     MAP_DESIGN.md
   /supabase
@@ -157,7 +159,26 @@ export const MAP_CONFIGS = {
 
 ## 9. Ordres MVP
 
-Chaque joueur actif peut soumettre un ordre par tour : `attack`, `explore`, `fortify`.
+Chaque joueur actif peut soumettre un ordre par tour.
+
+Actions affichées dans l'interface :
+
+- `Conquérir`
+- `Fortifier`
+
+Actions stockées en base :
+
+- `conquer`
+- `fortify`
+
+`conquer` remplace les anciens ordres séparés `attack` et `explore`.
+
+Règles :
+
+- conquérir un territoire ennemi crée une bataille ;
+- conquérir seul un territoire neutre lance automatiquement un D6 ;
+- si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;
+- fortifier cible un territoire contrôlé par le joueur.
 
 ## 10. Progression des armées
 
@@ -175,6 +196,8 @@ export function getArmyBasePoints(turnNumber: number): number {
 Le développement doit se faire par lots. Ne jamais demander à Codex de créer toute l’application d’un coup.
 
 Ordre recommandé : initialisation, Supabase, schéma SQL, auth, dashboard, création campagne, rejoindre campagne, lobby, génération carte, dashboard campagne, carte interactive, ordres secrets, révélation, résolution, fin de tour, historique, polish UX.
+
+Le suivi réel du développement est documenté dans `docs/JOURNAL_DEVELOPPEMENT.md`.
 
 ## 12. Premier prompt Codex recommandé
 
@@ -225,4 +248,4 @@ Ne jamais exposer de clé Supabase `service_role` ou `sb_secret_*` côté client
 
 ## 15. Définition du MVP terminé
 
-Le MVP est terminé quand un utilisateur peut créer une campagne 2 à 6 joueurs, inviter les autres, lancer la campagne, générer la carte, soumettre des ordres secrets, révéler, résoudre les batailles/explorations, mettre à jour territoires/Gloire et passer au tour suivant indéfiniment.
+Le MVP est terminé quand un utilisateur peut créer une campagne 2 à 6 joueurs, inviter les autres, lancer la campagne, générer la carte, soumettre des ordres secrets, révéler, résoudre les conquêtes et batailles, mettre à jour territoires/Gloire et passer au tour suivant indéfiniment.

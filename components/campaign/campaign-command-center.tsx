@@ -175,19 +175,6 @@ export function CampaignCommandCenter({
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string | null>(
     initialControlledTerritoryId,
   );
-  const [commandMode, setCommandMode] = useState<"inspect" | "conquer">(
-    existingOrder?.actionType === "conquer" ? "conquer" : "inspect",
-  );
-  const [conquestSourceId, setConquestSourceId] = useState(
-    existingOrder?.actionType === "conquer"
-      ? (existingOrder.sourceTerritoryId ?? "")
-      : "",
-  );
-  const [conquestTargetId, setConquestTargetId] = useState(
-    existingOrder?.actionType === "conquer"
-      ? (existingOrder.targetTerritoryId ?? "")
-      : "",
-  );
 
   const playersById = useMemo(
     () => new Map(players.map((player) => [player.id, player])),
@@ -216,12 +203,6 @@ export function CampaignCommandCenter({
   const selectedTerritory = selectedTerritoryId
     ? (territoryById.get(selectedTerritoryId) ?? territories[0] ?? null)
     : (territories[0] ?? null);
-  const conquestSource = conquestSourceId
-    ? (territoryById.get(conquestSourceId) ?? null)
-    : null;
-  const conquestTarget = conquestTargetId
-    ? (territoryById.get(conquestTargetId) ?? null)
-    : null;
   const selectedOwner = selectedTerritory?.ownerCampaignPlayerId
     ? playersById.get(selectedTerritory.ownerCampaignPlayerId)
     : null;
@@ -232,19 +213,11 @@ export function CampaignCommandCenter({
     .map((code) => territoryByCode.get(code))
     .filter((territory): territory is CommandTerritory => Boolean(territory))
     .sort((left, right) => left.code.localeCompare(right.code, "fr"));
-  const conquestSourceAdjacentCodes = conquestSource
-    ? (adjacentCodesByCode.get(conquestSource.code) ?? new Set<string>())
-    : new Set<string>();
-  const validConquestTargets = conquestSource
+  const controlledTerritories = currentPlayerId
     ? territories.filter(
-        (territory) =>
-          conquestSourceAdjacentCodes.has(territory.code) &&
-          territory.ownerCampaignPlayerId !== currentPlayerId,
+        (territory) => territory.ownerCampaignPlayerId === currentPlayerId,
       )
     : [];
-  const validConquestTargetIds = new Set(
-    validConquestTargets.map((territory) => territory.id),
-  );
   const selectedValidConquestTargets =
     selectedTerritory?.ownerCampaignPlayerId === currentPlayerId
       ? territories.filter(
@@ -253,39 +226,31 @@ export function CampaignCommandCenter({
             territory.ownerCampaignPlayerId !== currentPlayerId,
         )
       : [];
+  const selectedValidConquestTargetIds = new Set(
+    selectedValidConquestTargets.map((territory) => territory.id),
+  );
   const isSelectedControlled =
     Boolean(selectedTerritory) &&
     selectedTerritory?.ownerCampaignPlayerId === currentPlayerId;
-  const canStartConquest =
-    canSubmitOrders && isSelectedControlled && selectedValidConquestTargets.length > 0;
+  const conquestSourcesForSelectedTarget =
+    selectedTerritory && !isSelectedControlled
+      ? controlledTerritories.filter((territory) =>
+          adjacentCodesByCode
+            .get(territory.code)
+            ?.has(selectedTerritory.code),
+        )
+      : [];
+  const conquestSourceIdsForSelectedTarget = new Set(
+    conquestSourcesForSelectedTarget.map((territory) => territory.id),
+  );
+  const canConquerSelectedTerritory =
+    canSubmitOrders && conquestSourcesForSelectedTarget.length > 0;
   const canCancelExistingOrder =
     canSubmitOrders &&
     Boolean(existingOrder && ["draft", "submitted"].includes(existingOrder.status));
 
   function selectTerritory(territory: CommandTerritory) {
     setSelectedTerritoryId(territory.id);
-
-    if (!canSubmitOrders || !currentPlayerId || commandMode !== "conquer") {
-      return;
-    }
-
-    if (territory.ownerCampaignPlayerId === currentPlayerId) {
-      setConquestSourceId(territory.id);
-      setConquestTargetId("");
-      return;
-    }
-
-    if (validConquestTargetIds.has(territory.id)) {
-      setConquestTargetId(territory.id);
-    }
-  }
-
-  function startConquestFromSelected() {
-    if (!selectedTerritory || !canStartConquest) return;
-
-    setCommandMode("conquer");
-    setConquestSourceId(selectedTerritory.id);
-    setConquestTargetId("");
   }
 
   return (
@@ -296,12 +261,11 @@ export function CampaignCommandCenter({
             <div>
               <CardTitle>Carte de campagne</CardTitle>
               <CardDescription>
-                Clique sur tes territoires pour donner un ordre, puis sur une cible
-                adjacente pour conquérir.
+                Clique sur une case : les ordres disponibles apparaissent à droite.
               </CardDescription>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant="warning">Source</Badge>
-                <Badge variant="success">Cible valide</Badge>
+                <Badge variant="warning">Départ possible</Badge>
+                <Badge variant="success">Cible conquérable</Badge>
                 <Badge variant="info">Adjacent</Badge>
                 <Badge variant="neutral">Neutre</Badge>
               </div>
@@ -325,11 +289,15 @@ export function CampaignCommandCenter({
                   ? playersById.get(territory.ownerCampaignPlayerId)
                   : null;
                 const isSelected = territory.id === selectedTerritory?.id;
-                const isSource = territory.id === conquestSource?.id;
-                const isTarget = territory.id === conquestTarget?.id;
+                const isDeparture =
+                  (isSelected && isSelectedControlled) ||
+                  conquestSourceIdsForSelectedTarget.has(territory.id);
+                const isTarget =
+                  isSelected && canConquerSelectedTerritory && !isSelectedControlled;
                 const isAdjacentToSelected = selectedAdjacentCodes.has(territory.code);
                 const isValidConquestTarget =
-                  commandMode === "conquer" && validConquestTargetIds.has(territory.id);
+                  isSelectedControlled &&
+                  selectedValidConquestTargetIds.has(territory.id);
                 const borderColor = owner?.color ?? "#c8bca7";
                 const backgroundColor = owner?.color ? `${owner.color}20` : "#f2eee5";
 
@@ -346,7 +314,7 @@ export function CampaignCommandCenter({
                     style={{
                       borderColor: isTarget
                         ? "#348a67"
-                        : isSource
+                        : isDeparture
                           ? "#b84b35"
                           : isSelected
                             ? "#b84b35"
@@ -373,12 +341,12 @@ export function CampaignCommandCenter({
                       {owner?.displayName ?? "Neutre"}
                     </span>
                     <span className="mt-3 flex flex-wrap gap-1">
-                      {isSource ? (
+                      {isDeparture ? (
                         <span className="rounded-md border border-[#b84b35] bg-[#f7ded9] px-2 py-1 text-[11px] font-semibold text-[#7b2922]">
-                          Source
+                          Départ
                         </span>
                       ) : null}
-                      {isValidConquestTarget ? (
+                      {isValidConquestTarget || isTarget ? (
                         <span className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-[11px] font-semibold text-[#1e5942]">
                           Cible
                         </span>
@@ -488,15 +456,6 @@ export function CampaignCommandCenter({
               <div className="space-y-3">
                 {isSelectedControlled ? (
                   <>
-                    <Button
-                      type="button"
-                      className="w-full"
-                      disabled={!canStartConquest}
-                      onClick={startConquestFromSelected}
-                    >
-                      Conquérir depuis {selectedTerritory.code}
-                    </Button>
-
                     <form action={submitOrderAction}>
                       <input type="hidden" name="returnTo" value="campaign" />
                       <input type="hidden" name="campaignId" value={campaignId} />
@@ -511,68 +470,66 @@ export function CampaignCommandCenter({
                         Fortifier {selectedTerritory.code}
                       </Button>
                     </form>
-                  </>
-                ) : commandMode === "conquer" && conquestSource ? null : (
-                  <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
-                    Sélectionne un territoire que tu contrôles pour donner un ordre.
-                  </p>
-                )}
 
-                {commandMode === "conquer" && conquestSource ? (
-                  <div className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
-                    <p className="font-semibold">
-                      Source : {conquestSource.code} - {conquestSource.name}
-                    </p>
-                    {conquestTarget ? (
-                      <p className="mt-2">
-                        Cible : {conquestTarget.code} - {conquestTarget.name}
-                      </p>
+                    {selectedValidConquestTargets.length ? (
+                      <div className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+                        <p className="font-semibold">Cibles à portée</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {selectedValidConquestTargets.map((territory) => (
+                            <button
+                              key={territory.id}
+                              type="button"
+                              className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-xs font-semibold text-[#1e5942] transition hover:bg-[#c4dfcf]"
+                              onClick={() => selectTerritory(territory)}
+                            >
+                              {territory.code}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ) : (
-                      <p className="mt-2">
-                        Clique sur une cible verte adjacente pour préparer la
-                        conquête.
+                      <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+                        Aucune cible adjacente disponible depuis ce territoire.
                       </p>
                     )}
-                    {validConquestTargets.length ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {validConquestTargets.map((territory) => (
-                          <button
-                            key={territory.id}
-                            type="button"
-                            className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-xs font-semibold text-[#1e5942] transition hover:bg-[#c4dfcf]"
-                            onClick={() => {
-                              setSelectedTerritoryId(territory.id);
-                              setConquestTargetId(territory.id);
-                            }}
-                          >
-                            {territory.code}
-                          </button>
-                        ))}
-                      </div>
-                    ) : null}
+                  </>
+                ) : canConquerSelectedTerritory ? (
+                  <div className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+                    <p className="font-semibold">
+                      Conquérir {selectedTerritory.code} - {selectedTerritory.name}
+                    </p>
+                    <p className="mt-2">
+                      Choisis le territoire de départ pour valider cet ordre.
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      {conquestSourcesForSelectedTarget.map((territory) => (
+                        <form key={territory.id} action={submitOrderAction}>
+                          <input type="hidden" name="returnTo" value="campaign" />
+                          <input type="hidden" name="campaignId" value={campaignId} />
+                          <input type="hidden" name="actionType" value="conquer" />
+                          <input
+                            type="hidden"
+                            name="sourceTerritoryId"
+                            value={territory.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="targetTerritoryId"
+                            value={selectedTerritory.id}
+                          />
+                          <Button type="submit" className="w-full">
+                            Valider depuis {territory.code}
+                          </Button>
+                        </form>
+                      ))}
+                    </div>
                   </div>
-                ) : null}
-
-                {commandMode === "conquer" && conquestSource && conquestTarget ? (
-                  <form action={submitOrderAction}>
-                    <input type="hidden" name="returnTo" value="campaign" />
-                    <input type="hidden" name="campaignId" value={campaignId} />
-                    <input type="hidden" name="actionType" value="conquer" />
-                    <input
-                      type="hidden"
-                      name="sourceTerritoryId"
-                      value={conquestSource.id}
-                    />
-                    <input
-                      type="hidden"
-                      name="targetTerritoryId"
-                      value={conquestTarget.id}
-                    />
-                    <Button type="submit" className="w-full">
-                      Valider la conquête
-                    </Button>
-                  </form>
-                ) : null}
+                ) : (
+                  <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+                    Cette zone ne peut pas être conquise depuis tes territoires
+                    actuels.
+                  </p>
+                )}
               </div>
             ) : null}
           </CardContent>

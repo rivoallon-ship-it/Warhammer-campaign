@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { submitOrder } from "@/lib/orders/order-service";
+import { cancelOrder, submitOrder } from "@/lib/orders/order-service";
 import { createClient } from "@/lib/supabase/server";
 
 function getFormValue(formData: FormData, key: string) {
@@ -53,4 +53,24 @@ export async function submitOrderAction(formData: FormData) {
   }
 
   redirectAfterSubmit(campaignId, formData, { submitted: "1" });
+}
+
+export async function cancelOrderAction(formData: FormData) {
+  const campaignId = getFormValue(formData, "campaignId");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/login?next=${getReturnPath(campaignId, formData)}`);
+  }
+
+  const { error } = await cancelOrder(supabase, user, campaignId);
+
+  if (error) {
+    redirectAfterSubmit(campaignId, formData, { error });
+  }
+
+  redirectAfterSubmit(campaignId, formData, { cancelled: "1" });
 }

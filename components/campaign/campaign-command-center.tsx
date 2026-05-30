@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { submitOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
+import {
+  cancelOrderAction,
+  submitOrderAction,
+} from "@/app/campaigns/[campaignId]/orders/actions";
 import {
   Badge,
   Button,
@@ -255,6 +258,9 @@ export function CampaignCommandCenter({
     selectedTerritory?.ownerCampaignPlayerId === currentPlayerId;
   const canStartConquest =
     canSubmitOrders && isSelectedControlled && selectedValidConquestTargets.length > 0;
+  const canCancelExistingOrder =
+    canSubmitOrders &&
+    Boolean(existingOrder && ["draft", "submitted"].includes(existingOrder.status));
 
   function selectTerritory(territory: CommandTerritory) {
     setSelectedTerritoryId(territory.id);
@@ -419,6 +425,15 @@ export function CampaignCommandCenter({
                     {getOrderStatusLabel(existingOrder.status)}
                   </Badge>
                 </div>
+                {canCancelExistingOrder ? (
+                  <form action={cancelOrderAction} className="mt-3">
+                    <input type="hidden" name="returnTo" value="campaign" />
+                    <input type="hidden" name="campaignId" value={campaignId} />
+                    <Button type="submit" variant="outline" size="sm">
+                      Annuler l&apos;ordre
+                    </Button>
+                  </form>
+                ) : null}
               </div>
             ) : null}
 

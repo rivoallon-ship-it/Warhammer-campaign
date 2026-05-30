@@ -300,3 +300,57 @@ export async function submitOrder(
 
   return { error: null };
 }
+
+export async function cancelOrder(
+  supabase: SupabaseClient<Database>,
+  user: User,
+  campaignId: string,
+) {
+  const { ordersData, error } = await getOrdersPageData(
+    supabase,
+    campaignId,
+    user.id,
+  );
+
+  if (error || !ordersData) {
+    return { error: error ?? "Campagne introuvable." };
+  }
+
+  const { campaign, currentPlayer, currentTurn, existingOrder } = ordersData;
+
+  if (!currentPlayer || currentPlayer.status !== "active") {
+    return { error: "Tu dois être joueur actif pour annuler un ordre." };
+  }
+
+  if (campaign.status !== "active" || campaign.current_phase !== "orders") {
+    return { error: "Les ordres ne sont plus modifiables pour cette campagne." };
+  }
+
+  if (!currentTurn || currentTurn.phase !== "orders") {
+    return { error: "Le tour courant n'accepte plus de modification d'ordres." };
+  }
+
+  if (!existingOrder) {
+    return { error: "Aucun ordre à annuler pour ce tour." };
+  }
+
+  if (!["draft", "submitted"].includes(existingOrder.status)) {
+    return { error: "Cet ordre ne peut plus être annulé." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({
+      status: "draft",
+      submitted_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", existingOrder.id)
+    .in("status", ["draft", "submitted"]);
+
+  if (updateError) {
+    return { error: "Impossible d'annuler ton ordre." };
+  }
+
+  return { error: null };
+}

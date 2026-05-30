@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
 import { Badge, Card, CardContent, buttonVariants } from "@/components/ui";
@@ -22,6 +23,7 @@ type CampaignPageProps = {
     turnFinished?: string;
     turn?: string;
     submitted?: string;
+    cancelled?: string;
     error?: string;
   }>;
 };
@@ -50,7 +52,7 @@ function getPhaseLabel(phase: string) {
 function getOrderStatusLabel(status?: string) {
   if (!status) return "En attente";
   if (status === "pending") return "En attente";
-  if (status === "draft") return "Brouillon";
+  if (status === "draft") return "En attente";
   if (status === "submitted") return "Validé";
   if (status === "revealed") return "Révélé";
   if (status === "resolved") return "Résolu";
@@ -63,7 +65,7 @@ function getOrderStatusVariant(status?: string) {
     return "success" as const;
   }
 
-  if (status === "draft") return "warning" as const;
+  if (status === "draft") return "neutral" as const;
 
   return "neutral" as const;
 }
@@ -83,7 +85,7 @@ function getPublicOrderStatus(status?: string) {
 }
 
 function getOrderVisibilitySummary(order?: CampaignOrderVisibilityRow) {
-  if (!order || order.order_status === "pending") {
+  if (!order || order.order_status === "pending" || order.order_status === "draft") {
     return "En attente";
   }
 
@@ -175,6 +177,10 @@ export default async function CampaignPage({
     currentPlayer && currentTurn
       ? (orders.find((order) => order.campaign_player_id === currentPlayer.id) ?? null)
       : null;
+  const visiblePlayerOrder =
+    existingPlayerOrder && existingPlayerOrder.status !== "draft"
+      ? existingPlayerOrder
+      : null;
   const orderUnavailableMessage = !currentPlayer
     ? "Tu dois rejoindre cette campagne avant de donner un ordre."
     : currentPlayer.status !== "active"
@@ -189,6 +195,12 @@ export default async function CampaignPage({
               ? "La carte n'est pas encore générée."
               : null;
   const canSubmitOrders = !orderUnavailableMessage;
+  const canCancelOrder =
+    canSubmitOrders &&
+    Boolean(
+      existingPlayerOrder &&
+        ["draft", "submitted"].includes(existingPlayerOrder.status),
+    );
 
   return (
     <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
@@ -334,8 +346,30 @@ export default async function CampaignPage({
           </p>
         ) : null}
         {query?.submitted ? (
-          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
-            Ordre enregistré pour ce tour.
+          <div className="mt-4 flex flex-col gap-3 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b] sm:flex-row sm:items-center sm:justify-between">
+            <p>Ordre enregistré pour ce tour.</p>
+            {canCancelOrder ? (
+              <form action={cancelOrderAction}>
+                <input type="hidden" name="returnTo" value="campaign" />
+                <input type="hidden" name="campaignId" value={campaign.id} />
+                <button
+                  type="submit"
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    className:
+                      "border-[#6fa07e] bg-[#f5fff7] text-[#23543b] hover:bg-[#d2ead8]",
+                  })}
+                >
+                  Annuler l&apos;ordre
+                </button>
+              </form>
+            ) : null}
+          </div>
+        ) : null}
+        {query?.cancelled ? (
+          <p className="mt-4 rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+            Ordre annulé. Tu peux en choisir un nouveau pour ce tour.
           </p>
         ) : null}
         {query?.error ? (
@@ -375,12 +409,12 @@ export default async function CampaignPage({
               canSubmitOrders={canSubmitOrders}
               unavailableMessage={orderUnavailableMessage}
               existingOrder={
-                existingPlayerOrder
+                visiblePlayerOrder
                   ? {
-                      actionType: existingPlayerOrder.action_type,
-                      sourceTerritoryId: existingPlayerOrder.source_territory_id,
-                      targetTerritoryId: existingPlayerOrder.target_territory_id,
-                      status: existingPlayerOrder.status,
+                      actionType: visiblePlayerOrder.action_type,
+                      sourceTerritoryId: visiblePlayerOrder.source_territory_id,
+                      targetTerritoryId: visiblePlayerOrder.target_territory_id,
+                      status: visiblePlayerOrder.status,
                     }
                   : null
               }

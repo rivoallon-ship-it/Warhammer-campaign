@@ -1437,12 +1437,7 @@ begin
   end if;
 
   v_next_turn_number := v_campaign.current_turn_number + 1;
-  v_next_army_base_points := case
-    when v_next_turn_number <= 2 then 750
-    when v_next_turn_number <= 4 then 1000
-    when v_next_turn_number <= 6 then 1250
-    else 1500
-  end;
+  v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
   update public.orders
   set status = 'resolved'

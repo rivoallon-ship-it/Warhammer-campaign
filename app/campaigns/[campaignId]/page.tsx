@@ -225,7 +225,7 @@ export default async function CampaignPage({
               <p className="mt-2 text-sm text-[#6a5e54]">
                 Saison {campaign.season_number} - Tour{" "}
                 {campaign.current_turn_number || 1} -{" "}
-                {currentTurn?.army_base_points ?? 750} points
+                {currentTurn?.army_base_points ?? 400} points
               </p>
             </div>
 

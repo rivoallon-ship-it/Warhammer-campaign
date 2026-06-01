@@ -1,7 +1,3 @@
 export function getArmyBasePoints(turnNumber: number) {
-  if (turnNumber <= 2) return 750;
-  if (turnNumber <= 4) return 1000;
-  if (turnNumber <= 6) return 1250;
-
-  return 1500;
+  return Math.min(400 + Math.max(turnNumber - 1, 0) * 200, 2000);
 }

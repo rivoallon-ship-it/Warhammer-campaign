@@ -214,6 +214,8 @@ Commits principaux :
 - Suppression des blocs `Type` et `Adjacents`, déjà visibles sur la carte.
 - Remplacement du bloc explicatif de conquête par un bouton direct `Conquérir`.
 - Sélection automatique d'une source valide quand plusieurs territoires contrôlés peuvent attaquer la cible.
+- Modification de la progression des points d'armée : 400 points au tour 1, +200 points par tour, maximum 2000 points.
+- Ajout du correctif SQL `supabase/02_CORRECTIF_POINTS_ARMEE.sql` pour mettre à jour une base Supabase déjà installée.
 
 ## Fichiers importants
 

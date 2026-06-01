@@ -112,7 +112,7 @@ Créer `/lib/maps/generate-map.ts`, `territory-names.ts`, `territory-distributio
 
 ## Lot 10 — Lancement de campagne
 
-Au clic Lancer : vérifier lobby, appeler `generateMap`, créer tour 1, `army_base_points=750`, status active, phase orders, `current_turn_number=1`, log.
+Au clic Lancer : vérifier lobby, appeler `generateMap`, créer tour 1, `army_base_points=400`, status active, phase orders, `current_turn_number=1`, log.
 
 ## Lot 11 — Dashboard de campagne
 

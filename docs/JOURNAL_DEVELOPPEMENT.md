@@ -217,6 +217,7 @@ Commits principaux :
 - Modification de la progression des points d'armée : 400 points au tour 1, +200 points par tour, maximum 2000 points.
 - Ajout du correctif SQL `supabase/02_CORRECTIF_POINTS_ARMEE.sql` pour mettre à jour une base Supabase déjà installée.
 - Suppression des codes visibles de cases comme `A1` ou `A2` sur la carte et dans les résumés d'ordre ; ces codes restent uniquement techniques pour l'adjacence et les scripts.
+- Suppression des badges d'en-tête `Active`, `Ordres` et `Maître/Joueur` sur la page campagne pour réduire le bruit visuel.
 
 ## Fichiers importants
 

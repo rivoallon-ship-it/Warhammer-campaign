@@ -28,27 +28,6 @@ type CampaignPageProps = {
   }>;
 };
 
-function getStatusLabel(status: string) {
-  if (status === "active") return "Active";
-  if (status === "lobby") return "Lobby";
-  if (status === "season_end") return "Fin de saison";
-  if (status === "archived") return "Archivée";
-  if (status === "finished") return "Terminée";
-
-  return status;
-}
-
-function getPhaseLabel(phase: string) {
-  if (phase === "orders") return "Ordres";
-  if (phase === "lobby") return "Lobby";
-  if (phase === "revealed") return "Révélée";
-  if (phase === "resolving") return "Résolution";
-  if (phase === "end_turn") return "Fin de tour";
-  if (phase === "season_summary") return "Bilan";
-
-  return phase;
-}
-
 function getOrderStatusLabel(status?: string) {
   if (!status) return "En attente";
   if (status === "pending") return "En attente";
@@ -221,18 +200,7 @@ export default async function CampaignPage({
         <header className="rounded-lg border border-[#d8cbb7] bg-[#fffaf0] p-4 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={campaign.status === "active" ? "active" : "lobby"}>
-                  {getStatusLabel(campaign.status)}
-                </Badge>
-                <Badge variant="neutral">{getPhaseLabel(campaign.current_phase)}</Badge>
-                {currentPlayer ? (
-                  <Badge variant={isGameMaster ? "warning" : "neutral"}>
-                    {isGameMaster ? "Maître" : "Joueur"}
-                  </Badge>
-                ) : null}
-              </div>
-              <h1 className="mt-3 text-3xl font-bold tracking-normal text-[#211a16]">
+              <h1 className="text-3xl font-bold tracking-normal text-[#211a16]">
                 {campaign.name}
               </h1>
               <p className="mt-2 text-sm text-[#6a5e54]">

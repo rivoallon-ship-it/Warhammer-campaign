@@ -120,8 +120,8 @@ Les ordres se donnent directement depuis la carte.
 Comportement actuel :
 
 - sélectionner un territoire contrôlé affiche `Fortifier` et les cibles à portée ;
-- sélectionner une cible conquérable affiche l'action de conquête ;
-- si plusieurs territoires contrôlés peuvent attaquer la cible, le joueur choisit le territoire de départ au moment de valider ;
+- sélectionner une cible conquérable affiche directement l'action `Conquérir` ;
+- si plusieurs territoires contrôlés peuvent attaquer la cible, l'application choisit automatiquement une source valide ;
 - un ordre soumis peut être annulé tant que la phase d'ordres est ouverte.
 
 Il n'y a plus de bouton préparatoire `Conquérir depuis ...` sur les territoires contrôlés.

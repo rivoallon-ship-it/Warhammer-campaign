@@ -60,17 +60,6 @@ type CampaignCommandCenterProps = {
   existingOrder: ExistingOrder | null;
 };
 
-const territoryTypeLabels: Record<string, string> = {
-  capital: "Capitale",
-  village: "Village",
-  ruins: "Ruines",
-  fort: "Fort",
-  magic_tower: "Tour",
-  dragon: "Dragon",
-  giant: "Géant",
-  wild: "Sauvage",
-};
-
 const territoryTypeMarks: Record<string, string> = {
   capital: "CA",
   village: "VI",
@@ -81,10 +70,6 @@ const territoryTypeMarks: Record<string, string> = {
   giant: "GE",
   wild: "SA",
 };
-
-function getTerritoryTypeLabel(type: string) {
-  return territoryTypeLabels[type] ?? type;
-}
 
 function getTerritoryTypeMark(type: string) {
   return territoryTypeMarks[type] ?? type.slice(0, 2).toUpperCase();
@@ -184,10 +169,6 @@ export function CampaignCommandCenter({
     () => new Map(territories.map((territory) => [territory.id, territory])),
     [territories],
   );
-  const territoryByCode = useMemo(
-    () => new Map(territories.map((territory) => [territory.code, territory])),
-    [territories],
-  );
   const adjacentCodesByCode = useMemo(() => {
     const map = new Map<string, Set<string>>();
 
@@ -209,10 +190,6 @@ export function CampaignCommandCenter({
   const selectedAdjacentCodes = selectedTerritory
     ? (adjacentCodesByCode.get(selectedTerritory.code) ?? new Set<string>())
     : new Set<string>();
-  const selectedAdjacentTerritories = [...selectedAdjacentCodes]
-    .map((code) => territoryByCode.get(code))
-    .filter((territory): territory is CommandTerritory => Boolean(territory))
-    .sort((left, right) => left.code.localeCompare(right.code, "fr"));
   const controlledTerritories = currentPlayerId
     ? territories.filter(
         (territory) => territory.ownerCampaignPlayerId === currentPlayerId,
@@ -243,8 +220,10 @@ export function CampaignCommandCenter({
   const conquestSourceIdsForSelectedTarget = new Set(
     conquestSourcesForSelectedTarget.map((territory) => territory.id),
   );
+  const conquestSourceForSelectedTarget =
+    conquestSourcesForSelectedTarget[0] ?? null;
   const canConquerSelectedTerritory =
-    canSubmitOrders && conquestSourcesForSelectedTarget.length > 0;
+    canSubmitOrders && Boolean(conquestSourceForSelectedTarget);
   const canCancelExistingOrder =
     canSubmitOrders &&
     Boolean(existingOrder && ["draft", "submitted"].includes(existingOrder.status));
@@ -422,27 +401,6 @@ export function CampaignCommandCenter({
                     )}
                   </dd>
                 </div>
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
-                  <dt className="font-semibold text-[#302720]">Type</dt>
-                  <dd className="mt-1 text-[#5d5148]">
-                    {getTerritoryTypeLabel(selectedTerritory.type)}
-                  </dd>
-                </div>
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
-                  <dt className="font-semibold text-[#302720]">Adjacents</dt>
-                  <dd className="mt-2 flex flex-wrap gap-2">
-                    {selectedAdjacentTerritories.map((territory) => (
-                      <button
-                        key={territory.id}
-                        type="button"
-                        className="rounded-md border border-[#d8cbb7] bg-[#fffdf8] px-2 py-1 text-xs font-semibold text-[#5d5148] transition hover:bg-[#efe4d1]"
-                        onClick={() => selectTerritory(territory)}
-                      >
-                        {territory.code}
-                      </button>
-                    ))}
-                  </dd>
-                </div>
               </dl>
             ) : null}
 
@@ -493,37 +451,25 @@ export function CampaignCommandCenter({
                       </p>
                     )}
                   </>
-                ) : canConquerSelectedTerritory ? (
-                  <div className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
-                    <p className="font-semibold">
-                      Conquérir {selectedTerritory.code} - {selectedTerritory.name}
-                    </p>
-                    <p className="mt-2">
-                      Choisis le territoire de départ pour valider cet ordre.
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {conquestSourcesForSelectedTarget.map((territory) => (
-                        <form key={territory.id} action={submitOrderAction}>
-                          <input type="hidden" name="returnTo" value="campaign" />
-                          <input type="hidden" name="campaignId" value={campaignId} />
-                          <input type="hidden" name="actionType" value="conquer" />
-                          <input
-                            type="hidden"
-                            name="sourceTerritoryId"
-                            value={territory.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="targetTerritoryId"
-                            value={selectedTerritory.id}
-                          />
-                          <Button type="submit" className="w-full">
-                            Valider depuis {territory.code}
-                          </Button>
-                        </form>
-                      ))}
-                    </div>
-                  </div>
+                ) : canConquerSelectedTerritory && conquestSourceForSelectedTarget ? (
+                  <form action={submitOrderAction}>
+                    <input type="hidden" name="returnTo" value="campaign" />
+                    <input type="hidden" name="campaignId" value={campaignId} />
+                    <input type="hidden" name="actionType" value="conquer" />
+                    <input
+                      type="hidden"
+                      name="sourceTerritoryId"
+                      value={conquestSourceForSelectedTarget.id}
+                    />
+                    <input
+                      type="hidden"
+                      name="targetTerritoryId"
+                      value={selectedTerritory.id}
+                    />
+                    <Button type="submit" className="w-full">
+                      Conquérir
+                    </Button>
+                  </form>
                 ) : (
                   <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
                     Cette zone ne peut pas être conquise depuis tes territoires

@@ -178,7 +178,7 @@ Règles :
 - les ordres se donnent depuis `/campaigns/[campaignId]`, en cliquant sur la carte ;
 - les routes `/campaigns/[campaignId]/map` et `/campaigns/[campaignId]/orders` redirigent vers la page campagne ;
 - cliquer sur un territoire contrôlé affiche `Fortifier` et les cibles à portée ;
-- cliquer sur une cible conquérable affiche l'action de conquête et le choix du territoire de départ si plusieurs sources sont possibles ;
+- cliquer sur une cible conquérable affiche directement l'action `Conquérir` ;
 - un ordre soumis peut être annulé ou remplacé tant que la phase est `orders` et que les ordres n'ont pas été révélés ;
 - conquérir un territoire ennemi crée une bataille ;
 - conquérir seul un territoire neutre lance automatiquement un D6 ;

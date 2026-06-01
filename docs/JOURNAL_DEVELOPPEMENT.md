@@ -55,10 +55,9 @@ Flux actuel :
 
 1. Le joueur clique sur une case de la carte.
 2. Si la case lui appartient, le panneau propose `Fortifier` et liste les cibles à portée.
-3. Si la case sélectionnée est conquérable, le panneau affiche l'action de conquête.
-4. Si plusieurs territoires contrôlés peuvent attaquer la même cible, le joueur choisit le territoire de départ au moment de valider.
-5. Une fois l'ordre soumis, le bandeau de confirmation propose `Annuler l'ordre`.
-6. L'ordre peut aussi être annulé depuis le panneau `Ordre actuel`.
+3. Si la case sélectionnée est conquérable, le panneau affiche directement `Conquérir`.
+4. Une fois l'ordre soumis, le bandeau de confirmation propose `Annuler l'ordre`.
+5. L'ordre peut aussi être annulé depuis le panneau `Ordre actuel`.
 
 Techniquement, l'annulation repasse l'ordre en `draft` avec `submitted_at = null`. Il n'est donc plus compté comme ordre validé, et un nouvel ordre peut le remplacer pendant la phase `orders`.
 
@@ -208,6 +207,13 @@ Commits principaux :
 - `de6763c` Simplify campaign command screen
 - `730aeb4` Allow cancelling submitted orders
 - `aa4b9bc` Show conquest actions from target selection
+
+### 2026-06-01
+
+- Simplification du panneau de commandement à droite.
+- Suppression des blocs `Type` et `Adjacents`, déjà visibles sur la carte.
+- Remplacement du bloc explicatif de conquête par un bouton direct `Conquérir`.
+- Sélection automatique d'une source valide quand plusieurs territoires contrôlés peuvent attaquer la cible.
 
 ## Fichiers importants
 

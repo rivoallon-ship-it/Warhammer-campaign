@@ -41,22 +41,23 @@ grid-template-rows: repeat(mapHeight, minmax(90px, auto));
 
 Règles : desktop largeur disponible, mobile scroll horizontal, cases lisibles.
 
-## 5. Codes territoires
+## 5. Codes techniques des territoires
 
 Lignes A, B, C, D... Colonnes 1, 2, 3...
 
 Exemples : x=1 y=1 -> A1 ; x=6 y=4 -> D6.
 
+Ces codes servent aux capitales, à l'adjacence et aux scripts. Ils ne sont plus affichés dans les cases de la carte, car les territoires ont déjà un nom.
+
 ## 6. Case territoire
 
-Structure : code, icône type, nom court, propriétaire, badges type/fortifié.
+Structure : nom court, icône type, propriétaire, badges type/fortifié.
 
 Exemple :
 
 ```text
 +---------------------------+
-| A3                    🐉  |
-| Nid des Dragons           |
+| Nid des Dragons      🐉   |
 | Léa                       |
 | [Dragon] [Fortifié]       |
 +---------------------------+
@@ -91,18 +92,15 @@ Une couleur ne peut être utilisée que par un joueur actif dans une campagne. U
 
 ## 10. Fiche territoire
 
-Champs : code, nom, type, propriétaire, fortifié, faction locale, adjacents.
+Champs : nom, propriétaire, statut utile et actions disponibles.
 
 Wireframe :
 
 ```text
-A3 — Nid des Dragons
-Type : Dragon
+Nid des Dragons
 Propriétaire : Léa
 Statut : Fortifié
-Faction locale : Dragon
-Adjacent à : A2, A4, B3
-Bonus : Territoire narratif Dragon
+[Fortifier]
 ```
 
 ## 11. Légende
@@ -111,7 +109,7 @@ Afficher icônes et badges : Capitale, Village, Ruines, Fort, Tour, Dragon, Géa
 
 ## 12. Carte de campagne
 
-La page campagne affiche la carte complète, pas une miniature. Chaque case affiche code, nom court, propriétaire et états utiles comme source, cible valide ou fortification.
+La page campagne affiche la carte complète, pas une miniature. Chaque case affiche le nom du territoire, le propriétaire et les états utiles comme départ possible, cible valide ou fortification.
 
 ## 13. Ordres depuis la carte
 
@@ -140,7 +138,7 @@ Afficher `🛡️ Fortifié` ou badge `[Fortifié]`. Si attaqué, bonus affiché
 
 ## 17. Accessibilité
 
-Ne jamais communiquer uniquement par couleur. Afficher nom/code, propriétaire, badge. Contraste suffisant. Cases assez grandes, minimum recommandé 90px x 90px.
+Ne jamais communiquer uniquement par couleur. Afficher nom, propriétaire et badge. Contraste suffisant. Cases assez grandes, minimum recommandé 90px x 90px.
 
 ## 18. États
 

@@ -84,7 +84,10 @@ function getPublicOrderStatus(status?: string) {
   return status === "submitted" ? "submitted" : "pending";
 }
 
-function getOrderVisibilitySummary(order?: CampaignOrderVisibilityRow) {
+function getOrderVisibilitySummary(
+  order: CampaignOrderVisibilityRow | undefined,
+  territoryNameById: Map<string, string>,
+) {
   if (!order || order.order_status === "pending" || order.order_status === "draft") {
     return "En attente";
   }
@@ -97,15 +100,22 @@ function getOrderVisibilitySummary(order?: CampaignOrderVisibilityRow) {
     return "Ordre validé";
   }
 
+  const sourceName = order.source_territory_id
+    ? territoryNameById.get(order.source_territory_id)
+    : null;
+  const targetName = order.target_territory_id
+    ? territoryNameById.get(order.target_territory_id)
+    : null;
+
   if (order.action_type === "fortify") {
     return `${getOrderActionLabel(order.action_type)} ${
-      order.target_territory_code ?? "un territoire"
+      targetName ?? "un territoire"
     }`;
   }
 
-  return `${getOrderActionLabel(order.action_type)} depuis ${
-    order.source_territory_code ?? "?"
-  } vers ${order.target_territory_code ?? "?"}`;
+  return `${getOrderActionLabel(order.action_type)} ${
+    targetName ?? sourceName ?? "un territoire"
+  }`;
 }
 
 function ColorSwatch({ color }: { color: string }) {
@@ -153,6 +163,9 @@ export default async function CampaignPage({
   } = dashboard;
   const rankedPlayers = getRankedPlayers(activePlayers);
   const territoryStats = getTerritoryStats(territories);
+  const territoryNameById = new Map(
+    territories.map((territory) => [territory.id, territory.name]),
+  );
   const orderVisibilityByPlayerId =
     getOrderVisibilityByPlayerId(orderVisibility);
   const submittedOrderCount = orderVisibility.filter((order) =>
@@ -500,7 +513,7 @@ export default async function CampaignPage({
                             {getOrderStatusLabel(displayedStatus)}
                           </Badge>
                           <p className="text-[#6a5e54]">
-                            {getOrderVisibilitySummary(order)}
+                            {getOrderVisibilitySummary(order, territoryNameById)}
                           </p>
                         </div>
                       </div>

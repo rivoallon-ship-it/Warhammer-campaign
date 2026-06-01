@@ -117,13 +117,13 @@ function getOrderSummary(
 
   if (existingOrder.actionType === "fortify") {
     return `${getOrderActionLabel(existingOrder.actionType)} ${
-      target?.code ?? "un territoire"
+      target?.name ?? "un territoire"
     }`;
   }
 
-  return `${getOrderActionLabel(existingOrder.actionType)} depuis ${
-    source?.code ?? "?"
-  } vers ${target?.code ?? "?"}`;
+  return `${getOrderActionLabel(existingOrder.actionType)} ${
+    target?.name ?? source?.name ?? "un territoire"
+  }`;
 }
 
 function ColorSwatch({ color }: { color: string }) {
@@ -305,16 +305,13 @@ export function CampaignCommandCenter({
                       backgroundColor,
                     }}
                   >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-[#302720]">
-                        {territory.code}
+                    <span className="flex items-start justify-between gap-2">
+                      <span className="line-clamp-2 min-h-10 font-semibold leading-5 text-[#302720]">
+                        {territory.name}
                       </span>
                       <span className="rounded-md border border-[#d8cbb7] bg-[#fffaf0] px-1.5 py-0.5 text-[10px] font-bold text-[#5d5148]">
                         {getTerritoryTypeMark(territory.type)}
                       </span>
-                    </span>
-                    <span className="mt-3 block line-clamp-2 min-h-10 font-semibold leading-5 text-[#302720]">
-                      {territory.name}
                     </span>
                     <span className="mt-2 block truncate text-xs text-[#5d5148]">
                       {owner?.displayName ?? "Neutre"}
@@ -348,9 +345,7 @@ export function CampaignCommandCenter({
         <Card>
           <CardHeader>
             <CardTitle>
-              {selectedTerritory
-                ? `${selectedTerritory.code} - ${selectedTerritory.name}`
-                : "Commandement"}
+              {selectedTerritory ? selectedTerritory.name : "Commandement"}
             </CardTitle>
             <CardDescription>
               Territoire sélectionné et actions possibles.
@@ -425,7 +420,7 @@ export function CampaignCommandCenter({
                         value={selectedTerritory.id}
                       />
                       <Button type="submit" variant="secondary" className="w-full">
-                        Fortifier {selectedTerritory.code}
+                        Fortifier
                       </Button>
                     </form>
 
@@ -437,10 +432,10 @@ export function CampaignCommandCenter({
                             <button
                               key={territory.id}
                               type="button"
-                              className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-xs font-semibold text-[#1e5942] transition hover:bg-[#c4dfcf]"
+                              className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-left text-xs font-semibold text-[#1e5942] transition hover:bg-[#c4dfcf]"
                               onClick={() => selectTerritory(territory)}
                             >
-                              {territory.code}
+                              {territory.name}
                             </button>
                           ))}
                         </div>

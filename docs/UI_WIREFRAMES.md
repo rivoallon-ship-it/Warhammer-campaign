@@ -117,9 +117,9 @@ Layout desktop de la page campagne : carte à gauche, fiche territoire/actions �
 
 Mobile : carte en haut, fiche en dessous, légende repliable possible.
 
-Case : code, nom court, icône type, propriétaire, badges type/fortifié.
+Case : nom du territoire, icône type, propriétaire, badges type/fortifié. Le code technique de case n'est pas affiché sur la carte.
 
-Fiche : code, nom, type, propriétaire, statut, faction locale, adjacents, bonus narratif.
+Fiche : nom, propriétaire, statut utile et actions disponibles.
 
 États : aucun territoire sélectionné, sélectionné, erreur.
 

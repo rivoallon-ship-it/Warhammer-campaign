@@ -105,7 +105,7 @@ Actions maître : Lancer la campagne, avec messages si impossible : joueur manqu
 
 Afficher : nom, Saison 1 — Tour X, phase, points d’armée, carte interactive, panneau de territoire sélectionné, actions possibles, classement, statut des ordres, historique récent.
 
-Actions joueur : sélectionner un territoire contrôlé, conquérir une cible adjacente, fortifier, voir les batailles/résultats selon la phase.
+Actions joueur : sélectionner une case, fortifier un territoire contrôlé, cliquer une cible conquérable, valider la conquête depuis un territoire de départ possible, annuler un ordre soumis tant que la phase d'ordres est ouverte, voir les batailles/résultats selon la phase.
 
 Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
 
@@ -127,11 +127,16 @@ Fiche : code, nom, type, propriétaire, statut, faction locale, adjacents, bonus
 
 Route conservée pour compatibilité, mais elle redirige vers `/campaigns/[campaignId]`.
 
-Étapes sur la page campagne : choisir un territoire contrôlé, cliquer `Conquérir` ou `Fortifier`, choisir une cible adjacente si nécessaire, valider.
+Étapes sur la page campagne :
 
-N’afficher que les sources contrôlées et cibles valides. Si ordre validé : montrer résumé + bouton Modifier mon ordre.
+1. Cliquer un territoire contrôlé pour voir `Fortifier` et les cibles à portée.
+2. Cliquer une cible conquérable pour faire apparaître l'action de conquête.
+3. Si plusieurs territoires contrôlés peuvent attaquer la cible, choisir le territoire de départ.
+4. Valider l'ordre.
 
-États : aucun territoire contrôlé, aucune cible valide, ordre validé/modifié, phase incorrecte.
+N’afficher que les sources contrôlées et cibles valides. Si ordre validé : montrer résumé + bouton `Annuler l'ordre`. Un nouvel ordre peut remplacer l'ancien tant que la phase est `orders`.
+
+États : aucun territoire contrôlé, aucune cible valide, ordre validé, ordre annulé, phase incorrecte.
 
 ## 14. Révélation `/campaigns/[campaignId]/reveal`
 

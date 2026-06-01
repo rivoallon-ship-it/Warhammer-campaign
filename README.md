@@ -25,8 +25,9 @@ Le MVP doit permettre :
 - choix de faction, couleur et capitale ;
 - validation des joueurs par le maître de campagne ;
 - lancement de campagne ;
-- carte interactive ;
-- ordres secrets ;
+- page de campagne centrale avec carte interactive ;
+- ordres secrets directement depuis la carte ;
+- annulation ou remplacement d'un ordre tant que la phase d'ordres est ouverte ;
 - révélation simultanée des ordres ;
 - génération des batailles et conquêtes automatiques ;
 - résolution automatique des conquêtes neutres non contestées ;
@@ -174,6 +175,11 @@ Actions stockées en base :
 
 Règles :
 
+- les ordres se donnent depuis `/campaigns/[campaignId]`, en cliquant sur la carte ;
+- les routes `/campaigns/[campaignId]/map` et `/campaigns/[campaignId]/orders` redirigent vers la page campagne ;
+- cliquer sur un territoire contrôlé affiche `Fortifier` et les cibles à portée ;
+- cliquer sur une cible conquérable affiche l'action de conquête et le choix du territoire de départ si plusieurs sources sont possibles ;
+- un ordre soumis peut être annulé ou remplacé tant que la phase est `orders` et que les ordres n'ont pas été révélés ;
 - conquérir un territoire ennemi crée une bataille ;
 - conquérir seul un territoire neutre lance automatiquement un D6 ;
 - si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;

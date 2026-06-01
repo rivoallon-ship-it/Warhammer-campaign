@@ -192,6 +192,8 @@ Unique `(turn_id, campaign_player_id)`.
 
 Règles de visibilité : avant révélation, propriétaire seulement ; après révélation, tous les joueurs actifs.
 
+Annulation actuelle : tant que la campagne et le tour sont en phase `orders`, un ordre `submitted` ou `draft` peut être annulé par son propriétaire. L'application conserve la ligne `orders`, repasse `status` à `draft` et met `submitted_at` à `null`. L'ordre n'est alors plus compté comme validé et peut être remplacé.
+
 ## 13. `battles`
 
 Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `territory_id`, `attacker_campaign_player_id`, `defender_campaign_player_id`, `status`, `winner_campaign_player_id`, `army_base_points`, `defender_bonus`, `result_notes`, `created_at`, `resolved_at`.
@@ -234,6 +236,7 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 - `launchCampaign` : vérifier conditions, générer carte, créer tour 1, status active, phase orders, log.
 - `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
 - `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale.
+- `cancelOrder` : vérifier joueur actif, phase orders, ordre non révélé, puis repasser l'ordre en draft.
 - `revealOrders` : maître, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, phase resolving, log.
 - `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
 - `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.

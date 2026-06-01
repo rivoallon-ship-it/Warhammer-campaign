@@ -30,7 +30,7 @@ Priorité : CODEX_INSTRUCTIONS, IMPLEMENTATION_PLAN, DATA_MODEL, PRODUCT_SPEC, U
 
 Avancer par lots. Chaque lot doit être limité, testable et compilable. Garder le MVP strict. Séparer logique métier et interface dans `/lib`.
 
-État au 2026-05-29 : les lots 1 à 20 sont implémentés. Le Lot 21 reste le prochain lot principal. Voir `docs/JOURNAL_DEVELOPPEMENT.md` pour le suivi réel des livraisons.
+État au 2026-06-01 : les lots 1 à 20 sont implémentés. Le Lot 21 est commencé avec la fusion campagne/carte/ordres dans un écran central, l'annulation des ordres soumis et la simplification des actions de conquête depuis la carte. Voir `docs/JOURNAL_DEVELOPPEMENT.md` pour le suivi réel des livraisons.
 
 ## 5. Structure cible
 
@@ -116,7 +116,7 @@ Au clic Lancer : vérifier lobby, appeler `generateMap`, créer tour 1, `army_ba
 
 ## Lot 11 — Dashboard de campagne
 
-Page `/campaigns/[campaignId]`. Écran principal de campagne : nom, Saison/Tour, phase, points d’armée, carte interactive, sélection de territoire, ordres directs depuis la carte, classement, statut ordres, actions selon rôle/phase, historique récent.
+Page `/campaigns/[campaignId]`. Écran principal de campagne : nom, Saison/Tour, phase, points d’armée, carte interactive, sélection de territoire, ordres directs depuis la carte, annulation d'ordre en phase orders, classement, statut ordres, actions selon rôle/phase, historique récent.
 
 ## Lot 12 — Carte interactive dynamique
 
@@ -124,7 +124,7 @@ La carte interactive est intégrée à `/campaigns/[campaignId]`. La route `/cam
 
 ## Lot 13 — Ordres secrets
 
-Les ordres se donnent depuis la carte de `/campaigns/[campaignId]`. La route `/campaigns/[campaignId]/orders` reste disponible mais redirige vers la page campagne. Actions affichées : `Conquérir`, `Fortifier`. Actions internes : `conquer`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification possible en phase orders.
+Les ordres se donnent depuis la carte de `/campaigns/[campaignId]`. La route `/campaigns/[campaignId]/orders` reste disponible mais redirige vers la page campagne. Actions affichées : `Conquérir`, `Fortifier`. Actions internes : `conquer`, `fortify`. Validation source/cible/adjacence/propriété. Un ordre par joueur et par tour. Modification et annulation possibles en phase orders, avant révélation.
 
 ## Lot 14 — Visibilité des ordres
 
@@ -157,6 +157,8 @@ Composant `CampaignLog`. Afficher campagne créée, joueur rejoint/accepté, lan
 ## Lot 21 — Qualité UX et responsive
 
 Navigation, loading/error/empty states, confirmations, responsive, lisibilité carte, badges, icônes, erreurs Supabase. Confirmations pour lancer, révéler, saisir résultat, finir tour, retirer/refuser joueur.
+
+État partiel déjà livré : écran campagne compact, carte et ordres fusionnés, routes legacy redirigées, ordre annulable, action de conquête affichée uniquement quand une cible conquérable est sélectionnée.
 
 ## Backlog post-MVP
 

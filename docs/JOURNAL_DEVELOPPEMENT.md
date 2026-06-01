@@ -2,7 +2,7 @@
 ## Les Couronnes Brisées
 ### Suivi du travail réalisé
 
-Dernière mise à jour : 2026-05-29.
+Dernière mise à jour : 2026-06-01.
 
 Ce document résume le travail réalisé depuis le début du développement. Il complète le `README.md`, le plan d'implémentation et l'historique Git.
 
@@ -15,8 +15,9 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 - lobby avec validation des joueurs ;
 - lancement de campagne ;
 - génération automatique de carte de 2 à 6 joueurs ;
-- carte interactive ;
-- ordres secrets ;
+- page campagne centrale avec carte interactive ;
+- ordres secrets directement depuis la carte ;
+- annulation ou remplacement d'un ordre tant que les ordres ne sont pas révélés ;
 - révélation par le maître de campagne ;
 - génération des batailles ;
 - conquêtes neutres résolues automatiquement ;
@@ -26,7 +27,40 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 - fin de tour et passage au tour suivant sans limite automatique ;
 - historique de campagne.
 
-Le prochain gros lot prévu est le Lot 21 : qualité UX, responsive, confirmations et états d'erreur plus confortables.
+Le Lot 21, consacré à l'ergonomie et au confort d'utilisation, est commencé. Les pages `map` et `orders` ont été fusionnées dans l'écran principal de campagne, mais il reste du polish à faire sur le responsive, les confirmations et les états d'erreur.
+
+## Interface actuelle de campagne
+
+La page centrale est maintenant `/campaigns/[campaignId]`.
+
+Elle regroupe :
+
+- l'en-tête de campagne : statut, phase, rôle, saison, tour, points d'armée, taille de carte, nombre de territoires, neutres et ordres soumis ;
+- les actions de phase : lobby, révélation, résultats, fin de tour, rejoindre, dashboard ;
+- les messages de retour : campagne lancée, tour terminé, ordre enregistré, ordre annulé, erreur ;
+- la carte interactive ;
+- le panneau de commandement du territoire sélectionné ;
+- le classement, le statut des ordres et l'historique.
+
+Les anciennes routes restent présentes pour éviter les liens cassés :
+
+- `/campaigns/[campaignId]/map` redirige vers `/campaigns/[campaignId]` ;
+- `/campaigns/[campaignId]/orders` redirige vers `/campaigns/[campaignId]`.
+
+### UX actuelle des ordres
+
+Le joueur ne passe plus par une page de formulaire séparée.
+
+Flux actuel :
+
+1. Le joueur clique sur une case de la carte.
+2. Si la case lui appartient, le panneau propose `Fortifier` et liste les cibles à portée.
+3. Si la case sélectionnée est conquérable, le panneau affiche l'action de conquête.
+4. Si plusieurs territoires contrôlés peuvent attaquer la même cible, le joueur choisit le territoire de départ au moment de valider.
+5. Une fois l'ordre soumis, le bandeau de confirmation propose `Annuler l'ordre`.
+6. L'ordre peut aussi être annulé depuis le panneau `Ordre actuel`.
+
+Techniquement, l'annulation repasse l'ordre en `draft` avec `submitted_at = null`. Il n'est donc plus compté comme ordre validé, et un nouvel ordre peut le remplacer pendant la phase `orders`.
 
 ## Règle actuelle des ordres
 
@@ -146,11 +180,34 @@ Commits principaux :
 - Mise à jour de la résolution de bataille pour accepter plus de deux participants.
 - Fusion métier des anciennes actions `attack` et `explore` en une action interne `conquer`.
 - Mise à jour des scripts SQL Supabase associés.
+- Création du premier écran de commandement sur la carte.
+- Redirection des anciennes pages `/map` et `/orders` vers la page campagne.
+- Documentation du suivi de développement.
 
 Commits principaux :
 
 - `a3c8b05` Automate conquest resolution
 - `3a693f7` Store conquest orders internally
+- `fbb4f83` Document development progress
+- `da40374` Add campaign command map
+- `f94392a` Redirect legacy campaign pages
+
+### 2026-05-30
+
+- Simplification de l'écran de campagne.
+- Fusion visuelle de l'en-tête, des actions, de la carte et du suivi de campagne.
+- Regroupement `Classement` et `Statut des ordres` dans un bloc `Joueurs et ordres`.
+- Intégration de la légende directement dans la carte.
+- Ajout de l'annulation d'un ordre soumis pendant la phase d'ordres.
+- Suppression du bouton peu explicite `Conquérir depuis ...`.
+- Nouveau flux de conquête : l'action apparaît quand le joueur clique sur une cible conquérable.
+- Affichage des territoires de départ possibles quand plusieurs sources peuvent attaquer la même cible.
+
+Commits principaux :
+
+- `de6763c` Simplify campaign command screen
+- `730aeb4` Allow cancelling submitted orders
+- `aa4b9bc` Show conquest actions from target selection
 
 ## Fichiers importants
 
@@ -172,7 +229,7 @@ Commits principaux :
 
 - `lib/campaigns` : création, rejoindre, lobby, lancement, dashboard, tours.
 - `lib/maps` : configuration et génération de carte.
-- `lib/orders` : validation, soumission et révélation des ordres.
+- `lib/orders` : validation, soumission, annulation et révélation des ordres.
 - `lib/resolution` : lecture des batailles, conquêtes automatiques et résultats.
 - `lib/supabase` : clients Supabase.
 
@@ -207,7 +264,7 @@ NEXT_PUBLIC_SUPABASE_URL="https://icfhmokcjkokgntrerwv.supabase.co" NEXT_PUBLIC_
 
 ## À faire ensuite
 
-- Lot 21 : améliorer l'UX, le responsive, les confirmations et les états d'erreur.
+- Continuer le Lot 21 : responsive, confirmations et états d'erreur.
 - Tester un tour complet avec plusieurs vrais comptes.
 - Ajouter éventuellement des tests automatisés après stabilisation du MVP.
 - Nettoyer progressivement les mentions historiques `exploration` quand elles ne sont plus utiles côté interface.

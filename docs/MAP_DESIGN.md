@@ -115,11 +115,20 @@ La page campagne affiche la carte complète, pas une miniature. Chaque case affi
 
 ## 13. Ordres depuis la carte
 
-Les ordres se donnent directement depuis la carte : sélectionner un territoire contrôlé, choisir `Conquérir` ou `Fortifier`, puis cliquer une cible adjacente valide si nécessaire.
+Les ordres se donnent directement depuis la carte.
+
+Comportement actuel :
+
+- sélectionner un territoire contrôlé affiche `Fortifier` et les cibles à portée ;
+- sélectionner une cible conquérable affiche l'action de conquête ;
+- si plusieurs territoires contrôlés peuvent attaquer la cible, le joueur choisit le territoire de départ au moment de valider ;
+- un ordre soumis peut être annulé tant que la phase d'ordres est ouverte.
+
+Il n'y a plus de bouton préparatoire `Conquérir depuis ...` sur les territoires contrôlés.
 
 ## 14. Comportement clic
 
-Sur la page campagne : sélectionner une case affiche sa fiche, surligne ses adjacents et propose les actions possibles selon propriétaire, phase et joueur courant.
+Sur la page campagne : sélectionner une case affiche sa fiche, surligne ses adjacents et propose seulement les actions réellement possibles selon propriétaire, phase et joueur courant.
 
 ## 15. Adjacences visuelles
 

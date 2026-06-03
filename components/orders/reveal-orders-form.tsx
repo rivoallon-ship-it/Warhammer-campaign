@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useFormStatus } from "react-dom";
 import { revealOrdersAction } from "@/app/campaigns/[campaignId]/reveal/actions";
 import { Button } from "@/components/ui";
 
@@ -9,27 +9,40 @@ type RevealOrdersFormProps = {
   returnTo?: "campaign" | "reveal";
 };
 
+function RevealSubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      className="w-full gap-2"
+      disabled={pending}
+      aria-live="polite"
+    >
+      {pending ? (
+        <>
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            aria-hidden="true"
+          />
+          Révélation...
+        </>
+      ) : (
+        "Révéler les ordres"
+      )}
+    </Button>
+  );
+}
+
 export function RevealOrdersForm({
   campaignId,
   returnTo = "reveal",
 }: RevealOrdersFormProps) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (
-      !window.confirm(
-        "Révéler les ordres va créer les batailles, explorations et fortifications du tour. Continuer ?",
-      )
-    ) {
-      event.preventDefault();
-    }
-  }
-
   return (
-    <form action={revealOrdersAction} onSubmit={handleSubmit}>
+    <form action={revealOrdersAction}>
       <input type="hidden" name="campaignId" value={campaignId} />
       <input type="hidden" name="returnTo" value={returnTo} />
-      <Button type="submit" className="w-full">
-        Révéler les ordres
-      </Button>
+      <RevealSubmitButton />
     </form>
   );
 }

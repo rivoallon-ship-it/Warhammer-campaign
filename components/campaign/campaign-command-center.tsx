@@ -67,10 +67,11 @@ const neutralTerritoryColor = "#c8bca7";
 const neutralTerritoryFill = "#f2eee5";
 const contestedTerritoryColor = "#9f2f45";
 const contestedTerritoryFill = "#f7d7df";
-const hexClipPath = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
+const hexClipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
 const hexTileWidth = 136;
-const hexTileGap = 8;
-const hexRowOffset = 72;
+const hexTileHeight = 144;
+const hexRowOffset = hexTileWidth / 2;
+const hexVerticalOverlap = hexTileHeight / 4;
 
 const territoryTypeMarks: Record<string, string> = {
   capital: "CA",
@@ -352,7 +353,7 @@ export function CampaignCommandCenter({
           aria-pressed={isSelected}
           onClick={() => selectTerritory(territory)}
           className={cn(
-            "h-[124px] w-[136px] shrink-0 p-[2px] text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
+            "h-[144px] w-[136px] shrink-0 p-[2px] text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
             isSelected && "relative z-10 shadow-sm",
           )}
           style={{
@@ -362,7 +363,7 @@ export function CampaignCommandCenter({
           }}
         >
           <span
-            className="flex h-full w-full flex-col justify-center px-4 py-3"
+            className="flex h-full w-full flex-col justify-center overflow-hidden px-5 py-5"
             style={{
               backgroundColor,
               clipPath: hexClipPath,
@@ -418,15 +419,16 @@ export function CampaignCommandCenter({
               <div
                 className="py-3"
                 style={{
-                  minWidth: `${mapWidth * (hexTileWidth + hexTileGap) + hexRowOffset}px`,
+                  minWidth: `${mapWidth * hexTileWidth + hexRowOffset}px`,
                 }}
               >
                 {territoryRows.map(([positionY, rowTerritories], index) => (
                   <div
                     key={positionY}
-                    className={cn("flex gap-2", index > 0 && "-mt-5")}
+                    className="flex"
                     style={{
                       paddingLeft: positionY % 2 === 0 ? `${hexRowOffset}px` : 0,
+                      marginTop: index > 0 ? `-${hexVerticalOverlap}px` : 0,
                     }}
                   >
                     {rowTerritories.map((territory) =>

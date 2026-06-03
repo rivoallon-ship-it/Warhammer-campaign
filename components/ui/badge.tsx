@@ -15,13 +15,13 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 };
 
 const variantClasses: Record<BadgeVariant, string> = {
-  neutral: "border-[#c8bca7] bg-[#efe7d8] text-[#3f352c]",
-  success: "border-[#6fa07e] bg-[#e1f0e4] text-[#23543b]",
-  warning: "border-[#c99a3d] bg-[#f7e7bf] text-[#644512]",
-  danger: "border-[#c76d62] bg-[#f4d9d4] text-[#7b2922]",
-  info: "border-[#7395bd] bg-[#ddeafa] text-[#284d77]",
-  lobby: "border-[#a77b24] bg-[#efe4ba] text-[#5b3c0a]",
-  active: "border-[#348a67] bg-[#d7eadf] text-[#1e5942]",
+  neutral: "border-[#c89a53]/55 bg-[#10191b] text-[#eadfc9]",
+  success: "border-[#6fa07e]/70 bg-[#143621] text-[#d8f0dd]",
+  warning: "border-[#c99a3d]/80 bg-[#332512] text-[#f7d78a]",
+  danger: "border-[#c76d62]/75 bg-[#3a1513] text-[#ffd8c9]",
+  info: "border-[#7395bd]/70 bg-[#15314a] text-[#d8e8ff]",
+  lobby: "border-[#d5a653]/80 bg-[#3a2b18] text-[#f4ce73]",
+  active: "border-[#348a67]/80 bg-[#173a29] text-[#d7eadf]",
 };
 
 export function Badge({

@@ -39,7 +39,7 @@ function formatPlayerStatus(status: string) {
 function ColorSwatch({ color }: { color: string }) {
   return (
     <span
-      className="inline-block size-3 rounded-sm border border-[#c8bca7]"
+      className="inline-block size-3 rounded-sm border border-[#f1dfab]/70"
       style={{ backgroundColor: color }}
       aria-hidden="true"
     />
@@ -76,8 +76,8 @@ export default async function JoinCampaignPage({
     Boolean(details?.availableCapitals.length);
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-5xl">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-10 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto max-w-5xl">
         <PageHeader
           eyebrow="Invitation"
           title="Rejoindre une campagne"
@@ -97,13 +97,13 @@ export default async function JoinCampaignPage({
             </CardHeader>
             <CardContent className="space-y-5">
               {params?.joined ? (
-                <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                <p className="fantasy-alert fantasy-alert-success p-3 text-sm">
                   Demande envoyée. Le maître de campagne doit maintenant la
                   valider.
                 </p>
               ) : null}
               {pageError ? (
-                <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+                <p className="fantasy-alert fantasy-alert-danger p-3 text-sm">
                   {pageError}
                 </p>
               ) : null}
@@ -147,22 +147,22 @@ export default async function JoinCampaignPage({
               {campaign && details ? (
                 <>
                   <dl className="grid gap-3 text-sm sm:grid-cols-3">
-                    <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
-                      <dt className="font-semibold text-[#302720]">Places</dt>
-                      <dd className="mt-1 text-[#5d5148]">
+                    <div className="fantasy-stat p-3">
+                      <dt className="font-semibold text-[#f3ead7]">Places</dt>
+                      <dd className="fantasy-muted mt-1">
                         {details.availableSeatCount} libre
                         {details.availableSeatCount > 1 ? "s" : ""}
                       </dd>
                     </div>
-                    <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
-                      <dt className="font-semibold text-[#302720]">Carte</dt>
-                      <dd className="mt-1 text-[#5d5148]">
+                    <div className="fantasy-stat p-3">
+                      <dt className="font-semibold text-[#f3ead7]">Carte</dt>
+                      <dd className="fantasy-muted mt-1">
                         {campaign.map_width} x {campaign.map_height}
                       </dd>
                     </div>
-                    <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
-                      <dt className="font-semibold text-[#302720]">Validés</dt>
-                      <dd className="mt-1 text-[#5d5148]">
+                    <div className="fantasy-stat p-3">
+                      <dt className="font-semibold text-[#f3ead7]">Validés</dt>
+                      <dd className="fantasy-muted mt-1">
                         {details.activePlayerCount} / {campaign.player_count}
                       </dd>
                     </div>
@@ -170,20 +170,20 @@ export default async function JoinCampaignPage({
 
                   {details.players.length ? (
                     <div className="space-y-2">
-                      <p className="text-sm font-semibold text-[#302720]">
+                      <p className="text-sm font-semibold text-[#f3ead7]">
                         Joueurs et demandes
                       </p>
                       <div className="space-y-2">
                         {details.players.map((player) => (
                           <div
                             key={player.id}
-                            className="flex flex-col gap-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 sm:flex-row sm:items-center sm:justify-between"
+                            className="fantasy-stat flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
                           >
                             <div>
-                              <p className="font-semibold text-[#302720]">
+                              <p className="font-semibold text-[#f3ead7]">
                                 {player.display_name}
                               </p>
-                              <p className="mt-1 text-sm text-[#6a5e54]">
+                              <p className="fantasy-muted mt-1 text-sm">
                                 {player.aos_faction ?? "Faction à renseigner"}
                               </p>
                             </div>
@@ -214,7 +214,7 @@ export default async function JoinCampaignPage({
                   ) : null}
 
                   {details.currentPlayer ? (
-                    <div className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-4 text-sm text-[#284d77]">
+                    <div className="fantasy-alert fantasy-alert-info p-4 text-sm">
                       Tu as déjà rejoint cette campagne. Ton statut actuel est :{" "}
                       {formatPlayerStatus(details.currentPlayer.status)}.
                     </div>
@@ -260,7 +260,7 @@ export default async function JoinCampaignPage({
 
                       {details.unavailableColors.length ||
                       details.unavailableCapitals.length ? (
-                        <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#5d5148]">
+                        <div className="fantasy-alert p-3 text-sm">
                           {details.unavailableColors.length ? (
                             <p>
                               Couleurs déjà prises :{" "}
@@ -292,7 +292,7 @@ export default async function JoinCampaignPage({
                   ) : null}
                 </>
               ) : (
-                <p className="text-sm text-[#5d5148]">
+                <p className="fantasy-muted text-sm">
                   Entre un code invitation pour afficher les places disponibles.
                 </p>
               )}

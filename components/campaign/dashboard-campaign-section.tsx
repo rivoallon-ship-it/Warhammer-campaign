@@ -16,8 +16,8 @@ export function DashboardCampaignSection({
   return (
     <section className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-[#211a16]">{title}</h2>
-        <p className="mt-1 text-sm text-[#6a5e54]">
+        <h2 className="fantasy-panel-title text-xl font-semibold">{title}</h2>
+        <p className="fantasy-muted mt-1 text-sm">
           {campaigns.length} campagne{campaigns.length > 1 ? "s" : ""}
         </p>
       </div>
@@ -34,7 +34,7 @@ export function DashboardCampaignSection({
             <CardDescription>{emptyText}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-[#6a5e54]">
+            <p className="fantasy-muted text-sm">
               Cette section se remplira automatiquement quand tu auras créé ou
               rejoint une campagne.
             </p>

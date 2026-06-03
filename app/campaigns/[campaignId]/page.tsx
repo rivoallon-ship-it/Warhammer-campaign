@@ -108,7 +108,7 @@ function getOrderVisibilitySummary(
 function ColorSwatch({ color }: { color: string }) {
   return (
     <span
-      className="inline-block size-3 rounded-sm border border-[#c8bca7]"
+      className="inline-block size-3 rounded-sm border border-[#f1dfab]/70"
       style={{ backgroundColor: color }}
       aria-hidden="true"
     />

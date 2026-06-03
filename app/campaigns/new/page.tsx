@@ -32,13 +32,13 @@ function MapPreview({ playerCount }: { playerCount: PlayerCount }) {
   const config = MAP_CONFIGS[playerCount];
 
   return (
-    <div className="rounded-md border border-[#d8cbb7] bg-[#fffdf8] p-4">
+    <div className="fantasy-stat p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#302720]">
+          <p className="text-sm font-semibold text-[#f3ead7]">
             Carte hexagonale {config.width} x {config.height}
           </p>
-          <p className="mt-1 text-sm text-[#6a5e54]">
+          <p className="fantasy-muted mt-1 text-sm">
             {config.width * config.height} territoires, capitales proposées :{" "}
             {config.capitalSlots.join(", ")}
           </p>
@@ -63,8 +63,8 @@ export default async function NewCampaignPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-3xl">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-10 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto max-w-3xl">
         <PageHeader
           eyebrow="Campagne"
           title="Créer une campagne"
@@ -83,7 +83,7 @@ export default async function NewCampaignPage({
           </CardHeader>
           <CardContent className="space-y-6">
             {params?.error ? (
-              <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+              <p className="fantasy-alert fantasy-alert-danger p-3 text-sm">
                 {params.error}
               </p>
             ) : null}

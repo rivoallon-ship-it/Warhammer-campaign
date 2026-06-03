@@ -168,8 +168,8 @@ export default async function ResultsPage({
   const readiness = getResultsReadiness(resultsData);
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-6xl">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-10 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto max-w-6xl">
         <PageHeader
           eyebrow="Résolution"
           title="Résultats du tour"
@@ -182,8 +182,8 @@ export default async function ResultsPage({
           <p
             className={
               feedback.variant === "error"
-                ? "mt-6 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]"
-                : "mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]"
+                ? "fantasy-alert fantasy-alert-danger mt-6 p-3 text-sm"
+                : "fantasy-alert fantasy-alert-success mt-6 p-3 text-sm"
             }
           >
             {feedback.text}
@@ -215,7 +215,7 @@ export default async function ResultsPage({
                 explorations.map((exploration) => (
                   <div
                     key={exploration.id}
-                    className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
+                    className="fantasy-stat p-4"
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -229,29 +229,29 @@ export default async function ResultsPage({
                           )}
                         </Badge>
                       </div>
-                      <p className="mt-3 font-semibold text-[#302720]">
+                      <p className="mt-3 font-semibold text-[#f3ead7]">
                         {exploration.player?.display_name ?? "Joueur inconnu"}
                       </p>
-                      <p className="mt-1 text-sm text-[#6a5e54]">
+                      <p className="fantasy-muted mt-1 text-sm">
                         Tente de conquérir{" "}
                         {exploration.territory
                           ? `${exploration.territory.code} - ${exploration.territory.name}`
                           : "un territoire inconnu"}
                       </p>
                       {exploration.success === true ? (
-                        <p className="mt-2 text-sm text-[#23543b]">
+                        <p className="mt-2 text-sm text-[#bfe7c7]">
                           Territoire conquis, +1 Gloire.
                         </p>
                       ) : null}
                       {exploration.success === false ? (
-                        <p className="mt-2 text-sm text-[#7b2922]">
+                        <p className="mt-2 text-sm text-[#ffd8c9]">
                           Territoire non conquis, +1 Gloire.
                         </p>
                       ) : null}
                     </div>
 
                     {exploration.status === "pending" ? (
-                      <p className="mt-2 text-sm text-[#7b2922]">
+                      <p className="mt-2 text-sm text-[#ffd8c9]">
                         Cette ancienne exploration est encore en attente. Révèle à
                         nouveau les ordres sur une campagne mise à jour pour
                         utiliser les D6 automatiques.
@@ -260,7 +260,7 @@ export default async function ResultsPage({
                   </div>
                 ))
               ) : (
-                <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                <p className="fantasy-alert p-4 text-sm">
                   Aucune conquête automatique pour ce tour.
                 </p>
               )}
@@ -278,11 +278,11 @@ export default async function ResultsPage({
               </CardHeader>
               <CardContent>
                 {readiness.canResolveResults ? (
-                  <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                  <p className="fantasy-alert fantasy-alert-success p-3 text-sm">
                     Tu peux résoudre les batailles en attente.
                   </p>
                 ) : (
-                  <ul className="space-y-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                  <ul className="fantasy-alert space-y-2 p-4 text-sm">
                     {readiness.blockers.map((blocker) => (
                       <li key={blocker}>{blocker}</li>
                     ))}
@@ -303,7 +303,7 @@ export default async function ResultsPage({
                   battles.map((battle) => (
                     <div
                       key={battle.id}
-                      className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
+                      className="fantasy-stat p-4"
                     >
                       <div className="flex flex-wrap gap-2">
                         <Badge variant={getStatusVariant(battle.status)}>
@@ -319,20 +319,20 @@ export default async function ResultsPage({
                           <Badge variant="warning">Bonus</Badge>
                         ) : null}
                       </div>
-                      <p className="mt-3 font-semibold text-[#302720]">
+                      <p className="mt-3 font-semibold text-[#f3ead7]">
                         {battle.territory
                           ? `${battle.territory.code} - ${battle.territory.name}`
                           : "Territoire inconnu"}
                       </p>
-                      <p className="mt-1 text-sm text-[#6a5e54]">
+                      <p className="fantasy-muted mt-1 text-sm">
                         {getBattleParticipantsLabel(battle.participants)}
                       </p>
                       {getBestDiceLabel(battle.participants) ? (
-                        <p className="mt-2 text-sm text-[#284d77]">
+                        <p className="mt-2 text-sm text-[#d8e8ff]">
                           {getBestDiceLabel(battle.participants)}
                         </p>
                       ) : null}
-                      <ul className="mt-3 space-y-2 text-sm text-[#6a5e54]">
+                      <ul className="fantasy-muted mt-3 space-y-2 text-sm">
                         {battle.participants.map((participant) => (
                           <li
                             key={participant.id}
@@ -349,12 +349,12 @@ export default async function ResultsPage({
                         ))}
                       </ul>
                       {battle.defender_bonus ? (
-                        <p className="mt-2 text-sm text-[#644512]">
+                        <p className="mt-2 text-sm text-[#f7d78a]">
                           {battle.defender_bonus}
                         </p>
                       ) : null}
                       {battle.result_notes ? (
-                        <p className="mt-2 text-sm text-[#6a5e54]">
+                        <p className="fantasy-muted mt-2 text-sm">
                           Notes : {battle.result_notes}
                         </p>
                       ) : null}
@@ -373,7 +373,7 @@ export default async function ResultsPage({
                     </div>
                   ))
                 ) : (
-                  <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                  <p className="fantasy-alert p-4 text-sm">
                     Aucune bataille à résoudre pour ce tour.
                   </p>
                 )}
@@ -390,13 +390,13 @@ export default async function ResultsPage({
               <CardContent>
                 {readiness.canFinishTurn ? (
                   <div className="space-y-3">
-                    <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                    <p className="fantasy-alert fantasy-alert-success p-3 text-sm">
                       Toutes les explorations et batailles du tour sont résolues.
                     </p>
                     <FinishTurnForm campaignId={campaign.id} />
                   </div>
                 ) : (
-                  <ul className="space-y-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                  <ul className="fantasy-alert space-y-2 p-4 text-sm">
                     {readiness.finishTurnBlockers.map((blocker) => (
                       <li key={blocker}>{blocker}</li>
                     ))}
@@ -427,7 +427,7 @@ export default async function ResultsPage({
         </section>
 
         {currentTurn ? null : (
-          <p className="mt-4 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+          <p className="fantasy-alert fantasy-alert-danger mt-4 p-3 text-sm">
             Aucun tour courant trouvé.
           </p>
         )}

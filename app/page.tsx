@@ -21,15 +21,15 @@ const steps = [
 ];
 
 const mapTiles = [
-  { code: "A1", label: "Capitale", tone: "bg-[#f5d4c8] border-[#b84b35]" },
-  { code: "A2", label: "Ruines", tone: "bg-[#ece6d6] border-[#91826a]" },
-  { code: "A3", label: "Dragon", tone: "bg-[#d7eadf] border-[#348a67]" },
-  { code: "B1", label: "Village", tone: "bg-[#d9e7ef] border-[#397896]" },
-  { code: "B2", label: "Fort", tone: "bg-[#efe4ba] border-[#a77b24]" },
-  { code: "B3", label: "Sauvage", tone: "bg-[#dfe7c8] border-[#627d37]" },
-  { code: "C1", label: "Tour", tone: "bg-[#ded9ee] border-[#6f5ca8]" },
-  { code: "C2", label: "Géant", tone: "bg-[#ead8c6] border-[#98613d]" },
-  { code: "C3", label: "Capitale", tone: "bg-[#cfe0f6] border-[#315d9f]" },
+  { code: "A1", label: "Capitale", tone: "bg-[#4b201b] border-[#b84b35]" },
+  { code: "A2", label: "Ruines", tone: "bg-[#292b28] border-[#91826a]" },
+  { code: "A3", label: "Dragon", tone: "bg-[#173a29] border-[#348a67]" },
+  { code: "B1", label: "Village", tone: "bg-[#15314a] border-[#397896]" },
+  { code: "B2", label: "Fort", tone: "bg-[#3a2b18] border-[#a77b24]" },
+  { code: "B3", label: "Sauvage", tone: "bg-[#263a13] border-[#627d37]" },
+  { code: "C1", label: "Tour", tone: "bg-[#28163b] border-[#6f5ca8]" },
+  { code: "C2", label: "Géant", tone: "bg-[#3a2417] border-[#98613d]" },
+  { code: "C3", label: "Capitale", tone: "bg-[#17335a] border-[#315d9f]" },
 ];
 
 function CampaignMapBackdrop() {
@@ -45,11 +45,11 @@ function CampaignMapBackdrop() {
             key={tile.code}
             className={`h-32 rounded-md border-2 p-4 shadow-xl ${tile.tone}`}
           >
-            <div className="flex items-center justify-between text-sm font-bold text-[#211a16]">
+            <div className="flex items-center justify-between text-sm font-bold text-[#f4ce73]">
               <span>{tile.code}</span>
               <span>◆</span>
             </div>
-            <div className="mt-8 text-base font-semibold text-[#211a16]">
+            <div className="mt-8 text-base font-semibold text-[#f3ead7]">
               {tile.label}
             </div>
           </div>
@@ -62,7 +62,7 @@ function CampaignMapBackdrop() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#f7f0e2] text-[#211a16]">
+    <main className="campaign-fantasy-shell min-h-screen text-[#f3ead7]">
       <section className="relative flex min-h-[88vh] items-center overflow-hidden px-6 py-8 text-[#fffaf0]">
         <CampaignMapBackdrop />
         <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col">
@@ -112,7 +112,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 py-16">
+      <section className="campaign-fantasy-content px-6 py-16">
         <div className="mx-auto max-w-6xl">
           <PageHeader
             eyebrow="Comment ça marche ?"
@@ -123,11 +123,11 @@ export default function Home() {
             {steps.map((step, index) => (
               <Card key={step.title}>
                 <CardContent>
-                  <div className="mb-5 grid size-10 place-items-center rounded-md bg-[#b84b35] text-sm font-bold text-white">
+                  <div className="mb-5 grid size-10 place-items-center rounded-md border border-[#d5a653]/70 bg-[#3a2b18] text-sm font-bold text-[#f4ce73]">
                     {index + 1}
                   </div>
                   <h2 className="text-xl font-semibold">{step.title}</h2>
-                  <p className="mt-3 text-sm leading-6 text-[#5d5148]">
+                  <p className="fantasy-muted mt-3 text-sm leading-6">
                     {step.description}
                   </p>
                 </CardContent>

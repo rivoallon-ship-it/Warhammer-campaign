@@ -62,22 +62,22 @@ export function DashboardCampaignCard({ campaign }: DashboardCampaignCardProps) 
       <CardContent className="space-y-4">
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <dt className="font-semibold text-[#302720]">Tour</dt>
-            <dd className="mt-1 text-[#5d5148]">{getTurnLabel(campaign)}</dd>
+            <dt className="font-semibold text-[#f3ead7]">Tour</dt>
+            <dd className="fantasy-muted mt-1">{getTurnLabel(campaign)}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-[#302720]">Phase</dt>
-            <dd className="mt-1 text-[#5d5148]">{phaseLabels[campaign.phase]}</dd>
+            <dt className="font-semibold text-[#f3ead7]">Phase</dt>
+            <dd className="fantasy-muted mt-1">{phaseLabels[campaign.phase]}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-[#302720]">Carte</dt>
-            <dd className="mt-1 text-[#5d5148]">
+            <dt className="font-semibold text-[#f3ead7]">Carte</dt>
+            <dd className="fantasy-muted mt-1">
               {campaign.mapWidth} x {campaign.mapHeight}
             </dd>
           </div>
           <div>
-            <dt className="font-semibold text-[#302720]">Gloire</dt>
-            <dd className="mt-1 text-[#5d5148]">{campaign.glory}</dd>
+            <dt className="font-semibold text-[#f3ead7]">Gloire</dt>
+            <dd className="fantasy-muted mt-1">{campaign.glory}</dd>
           </div>
         </dl>
         <Link

@@ -21,10 +21,10 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const params = await searchParams;
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-12 text-[#211a16]">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col justify-center">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-12 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col justify-center">
         <Link href="/" className="mb-8 inline-flex items-center gap-3 font-semibold">
-          <span className="grid size-10 place-items-center rounded-md border border-[#c8bca7] bg-[#211a16] text-sm text-[#fffaf0]">
+          <span className="grid size-10 place-items-center rounded-md border border-[#d5a653]/70 bg-[#211a16] text-sm text-[#f4ce73]">
             LC
           </span>
           <span>Les Couronnes Brisées</span>
@@ -42,7 +42,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
           </CardHeader>
           <CardContent>
             {params?.error ? (
-              <p className="mb-5 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+              <p className="fantasy-alert fantasy-alert-danger mb-5 p-3 text-sm">
                 {params.error}
               </p>
             ) : null}
@@ -75,9 +75,9 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               </Button>
             </form>
 
-            <p className="mt-6 text-sm text-[#5d5148]">
+            <p className="fantasy-muted mt-6 text-sm">
               Déjà un compte ?{" "}
-              <Link href="/login" className="font-semibold text-[#8a3f2d]">
+              <Link href="/login" className="font-semibold text-[#f4ce73]">
                 Se connecter
               </Link>
             </p>

@@ -79,7 +79,7 @@ function getFeedbackMessage(query?: Awaited<LobbyPageProps["searchParams"]>) {
 function ColorSwatch({ color }: { color: string }) {
   return (
     <span
-      className="inline-block size-3 rounded-sm border border-[#c8bca7]"
+      className="inline-block size-3 rounded-sm border border-[#f1dfab]/70"
       style={{ backgroundColor: color }}
       aria-hidden="true"
     />
@@ -88,15 +88,15 @@ function ColorSwatch({ color }: { color: string }) {
 
 function PlayerSummary({ player }: { player: CampaignPlayerRow }) {
   return (
-    <div className="flex flex-col justify-between gap-3 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 sm:flex-row sm:items-center">
+    <div className="fantasy-stat flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-semibold text-[#302720]">{player.display_name}</p>
+          <p className="font-semibold text-[#f3ead7]">{player.display_name}</p>
           <Badge variant={player.role === "game_master" ? "warning" : "neutral"}>
             {player.role === "game_master" ? "Maître" : "Joueur"}
           </Badge>
         </div>
-        <p className="mt-1 text-sm text-[#6a5e54]">
+        <p className="fantasy-muted mt-1 text-sm">
           {player.aos_faction?.trim() || "Faction à renseigner"}
         </p>
       </div>
@@ -157,8 +157,8 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
   );
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-6xl">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-10 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto max-w-6xl">
         <PageHeader
           eyebrow="Lobby"
           title={lobby.campaign.name}
@@ -169,8 +169,8 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
           <p
             className={
               feedback.variant === "error"
-                ? "mt-6 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]"
-                : "mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]"
+                ? "fantasy-alert fantasy-alert-danger mt-6 p-3 text-sm"
+                : "fantasy-alert fantasy-alert-success mt-6 p-3 text-sm"
             }
           >
             {feedback.text}
@@ -196,26 +196,26 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                 <InviteCodeCopy code={lobby.campaign.invite_code} />
                 <dl className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <dt className="font-semibold text-[#302720]">Joueurs</dt>
-                    <dd className="mt-1 text-[#5d5148]">
+                    <dt className="font-semibold text-[#f3ead7]">Joueurs</dt>
+                    <dd className="fantasy-muted mt-1">
                       {lobby.activePlayers.length} / {lobby.campaign.player_count}
                     </dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-[#302720]">Demandes</dt>
-                    <dd className="mt-1 text-[#5d5148]">
+                    <dt className="font-semibold text-[#f3ead7]">Demandes</dt>
+                    <dd className="fantasy-muted mt-1">
                       {lobby.pendingPlayers.length}
                     </dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-[#302720]">Carte</dt>
-                    <dd className="mt-1 text-[#5d5148]">
+                    <dt className="font-semibold text-[#f3ead7]">Carte</dt>
+                    <dd className="fantasy-muted mt-1">
                       {lobby.campaign.map_width} x {lobby.campaign.map_height}
                     </dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-[#302720]">Phase</dt>
-                    <dd className="mt-1 text-[#5d5148]">
+                    <dt className="font-semibold text-[#f3ead7]">Phase</dt>
+                    <dd className="fantasy-muted mt-1">
                       {lobby.campaign.current_phase}
                     </dd>
                   </div>
@@ -233,15 +233,15 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
               </CardHeader>
               <CardContent className="space-y-4">
                 {lobby.launchChecks.canLaunch ? (
-                  <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                  <p className="fantasy-alert fantasy-alert-success p-3 text-sm">
                     Toutes les conditions sont réunies.
                   </p>
                 ) : (
-                  <ul className="space-y-2 text-sm text-[#5d5148]">
+                  <ul className="fantasy-muted space-y-2 text-sm">
                     {lobby.launchChecks.blockers.map((blocker) => (
                       <li
                         key={blocker}
-                        className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3"
+                        className="fantasy-alert p-3"
                       >
                         {blocker}
                       </li>
@@ -266,7 +266,7 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                     </Button>
                   )
                 ) : (
-                  <p className="text-sm text-[#6a5e54]">
+                  <p className="fantasy-muted text-sm">
                     Seul le maître de campagne pourra lancer la campagne.
                   </p>
                 )}
@@ -303,7 +303,7 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                   lobby.pendingPlayers.map((player) => (
                     <div
                       key={player.id}
-                      className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4"
+                      className="fantasy-stat p-4"
                     >
                       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                         <PlayerSummary player={player} />
@@ -347,7 +347,7 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-[#6a5e54]">
+                  <p className="fantasy-muted text-sm">
                     Aucune demande en attente.
                   </p>
                 )}
@@ -436,14 +436,14 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                       </Button>
                     </form>
                     {currentPlayer.status === "pending" ? (
-                      <p className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+                      <p className="fantasy-alert fantasy-alert-info p-3 text-sm">
                         Ta demande doit être acceptée avant le statut prêt.
                       </p>
                     ) : null}
                   </>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-sm text-[#6a5e54]">
+                    <p className="fantasy-muted text-sm">
                       Tu dois rejoindre cette campagne avec son code invitation
                       avant de pouvoir régler ton joueur.
                     </p>

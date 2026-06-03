@@ -148,8 +148,8 @@ export default async function RevealPage({
   const readiness = getRevealReadiness(revealData);
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-5xl">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-10 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto max-w-5xl">
         <PageHeader
           eyebrow="Révélation"
           title="Révéler les ordres"
@@ -162,8 +162,8 @@ export default async function RevealPage({
           <p
             className={
               feedback.variant === "error"
-                ? "mt-6 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]"
-                : "mt-6 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]"
+                ? "fantasy-alert fantasy-alert-danger mt-6 p-3 text-sm"
+                : "fantasy-alert fantasy-alert-success mt-6 p-3 text-sm"
             }
           >
             {feedback.text}
@@ -195,13 +195,13 @@ export default async function RevealPage({
                 return (
                   <div
                     key={player.id}
-                    className="flex flex-col justify-between gap-3 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 sm:flex-row sm:items-center"
+                    className="fantasy-stat flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
                   >
                     <div>
-                      <p className="font-semibold text-[#302720]">
+                      <p className="font-semibold text-[#f3ead7]">
                         {player.display_name}
                       </p>
-                      <p className="mt-1 text-sm text-[#6a5e54]">
+                      <p className="fantasy-muted mt-1 text-sm">
                         {order ? getOrderSummary(order) : "En attente"}
                       </p>
                     </div>
@@ -226,11 +226,11 @@ export default async function RevealPage({
                 {readiness.canReveal ? (
                   <RevealOrdersForm campaignId={campaign.id} />
                 ) : (
-                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                    <p className="text-sm font-semibold text-[#302720]">
+                  <div className="fantasy-alert p-4">
+                    <p className="text-sm font-semibold text-[#f3ead7]">
                       Révélation indisponible
                     </p>
-                    <ul className="mt-3 space-y-2 text-sm text-[#6a5e54]">
+                    <ul className="fantasy-muted mt-3 space-y-2 text-sm">
                       {readiness.blockers.map((blocker) => (
                         <li key={blocker}>{blocker}</li>
                       ))}
@@ -239,7 +239,7 @@ export default async function RevealPage({
                 )}
 
                 {readiness.missingPlayers.length ? (
-                  <div className="rounded-md border border-[#c99a3d] bg-[#f7e7bf] p-4 text-sm text-[#644512]">
+                  <div className="fantasy-alert fantasy-alert-info p-4 text-sm">
                     En attente :{" "}
                     {readiness.missingPlayers
                       .map((player) => player.display_name)
@@ -255,15 +255,15 @@ export default async function RevealPage({
               </CardHeader>
               <CardContent>
                 <dl className="grid gap-4 text-sm">
-                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                    <dt className="font-semibold text-[#302720]">Phase actuelle</dt>
-                    <dd className="mt-1 text-[#5d5148]">
+                  <div className="fantasy-stat p-4">
+                    <dt className="font-semibold text-[#f3ead7]">Phase actuelle</dt>
+                    <dd className="fantasy-muted mt-1">
                       {getPhaseLabel(currentTurn?.phase ?? campaign.current_phase)}
                     </dd>
                   </div>
-                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
-                    <dt className="font-semibold text-[#302720]">Après révélation</dt>
-                    <dd className="mt-1 text-[#5d5148]">
+                  <div className="fantasy-stat p-4">
+                    <dt className="font-semibold text-[#f3ead7]">Après révélation</dt>
+                    <dd className="fantasy-muted mt-1">
                       Batailles, conquêtes automatiques et fortifications sont
                       générées.
                     </dd>

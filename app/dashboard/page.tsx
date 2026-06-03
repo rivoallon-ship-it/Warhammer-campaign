@@ -59,11 +59,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     : null;
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-8 text-[#211a16]">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-10 flex flex-col justify-between gap-4 border-b border-[#d8cbb7] pb-6 sm:flex-row sm:items-center">
+    <main className="campaign-fantasy-shell min-h-screen px-6 py-8 text-[#f3ead7]">
+      <div className="campaign-fantasy-content mx-auto max-w-6xl">
+        <header className="mb-10 flex flex-col justify-between gap-4 border-b border-[#c89a53]/45 pb-6 sm:flex-row sm:items-center">
           <Link href="/" className="flex items-center gap-3 font-semibold">
-            <span className="grid size-10 place-items-center rounded-md border border-[#c8bca7] bg-[#211a16] text-sm text-[#fffaf0]">
+            <span className="grid size-10 place-items-center rounded-md border border-[#d5a653]/70 bg-[#211a16] text-sm text-[#f4ce73]">
               LC
             </span>
             <span>Les Couronnes Brisées</span>
@@ -104,12 +104,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </CardHeader>
             <CardContent className="space-y-4">
               {profileError || params?.profileError ? (
-                <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+                <p className="fantasy-alert fantasy-alert-danger p-3 text-sm">
                   {params?.profileError ?? "Profil recréé depuis ton compte Auth."}
                 </p>
               ) : null}
               {params?.profileSuccess ? (
-                <p className="rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+                <p className="fantasy-alert fantasy-alert-success p-3 text-sm">
                   {params.profileSuccess}
                 </p>
               ) : null}
@@ -137,8 +137,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </Button>
               </form>
               <div>
-                <p className="text-sm font-semibold text-[#302720]">Email</p>
-                <p className="mt-1 text-sm text-[#5d5148]">{user.email}</p>
+                <p className="text-sm font-semibold text-[#f3ead7]">Email</p>
+                <p className="fantasy-muted mt-1 text-sm">{user.email}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Badge variant={user.email_confirmed_at ? "success" : "warning"}>
@@ -158,24 +158,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </CardHeader>
             <CardContent>
               {campaignsError ? (
-                <p className="rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+                <p className="fantasy-alert fantasy-alert-danger p-3 text-sm">
                   Impossible de charger tes campagnes pour le moment.
                 </p>
               ) : (
                 <div className="grid gap-4 md:grid-cols-3">
-                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
+                  <div className="fantasy-stat p-4">
                     <p className="text-2xl font-bold">{groupedCampaigns.active.length}</p>
-                    <p className="mt-1 text-sm text-[#6a5e54]">Actives</p>
+                    <p className="fantasy-muted mt-1 text-sm">Actives</p>
                   </div>
-                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
+                  <div className="fantasy-stat p-4">
                     <p className="text-2xl font-bold">{groupedCampaigns.lobby.length}</p>
-                    <p className="mt-1 text-sm text-[#6a5e54]">En lobby</p>
+                    <p className="fantasy-muted mt-1 text-sm">En lobby</p>
                   </div>
-                  <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4">
+                  <div className="fantasy-stat p-4">
                     <p className="text-2xl font-bold">
                       {groupedCampaigns.archived.length}
                     </p>
-                    <p className="mt-1 text-sm text-[#6a5e54]">Archivées</p>
+                    <p className="fantasy-muted mt-1 text-sm">Archivées</p>
                   </div>
                 </div>
               )}

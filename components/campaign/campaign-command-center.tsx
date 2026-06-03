@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useFormStatus } from "react-dom";
 import {
   cancelOrderAction,
   submitOrderAction,
@@ -139,6 +140,31 @@ function ColorSwatch({ color }: { color: string }) {
       style={{ backgroundColor: color }}
       aria-hidden="true"
     />
+  );
+}
+
+function ConquestSubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      className="w-full gap-2"
+      disabled={pending}
+      aria-live="polite"
+    >
+      {pending ? (
+        <>
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            aria-hidden="true"
+          />
+          Enregistrement...
+        </>
+      ) : (
+        "Conquérir"
+      )}
+    </Button>
   );
 }
 
@@ -462,9 +488,7 @@ export function CampaignCommandCenter({
                       name="targetTerritoryId"
                       value={selectedTerritory.id}
                     />
-                    <Button type="submit" className="w-full">
-                      Conquérir
-                    </Button>
+                    <ConquestSubmitButton />
                   </form>
                 ) : (
                   <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">

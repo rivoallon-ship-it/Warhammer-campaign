@@ -220,6 +220,7 @@ Commits principaux :
 - Suppression des badges d'en-tête `Active`, `Ordres` et `Maître/Joueur` sur la page campagne pour réduire le bruit visuel.
 - Suppression de la légende permanente du bloc carte (`Départ possible`, `Cible conquérable`, `Adjacent`, `Neutre`) pour garder l'écran plus lisible.
 - Simplification des couleurs de carte : suppression des surlignages d'adjacence/départ/cible, affichage par couleur de propriétaire, neutre ou bataille en cours.
+- Ajout d'un état de chargement sur le bouton `Conquérir` pour indiquer que l'ordre est en cours d'enregistrement et éviter les doubles clics.
 
 ## Fichiers importants
 

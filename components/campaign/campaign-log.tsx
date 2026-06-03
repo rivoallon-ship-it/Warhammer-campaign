@@ -80,10 +80,12 @@ export function CampaignLog({ logs }: CampaignLogProps) {
   const groups = groupLogs(logs);
 
   return (
-    <Card>
+    <Card className="fantasy-panel">
       <CardHeader>
-        <CardTitle>Historique récent</CardTitle>
-        <CardDescription>
+        <CardTitle className="fantasy-panel-title">
+          Historique récent
+        </CardTitle>
+        <CardDescription className="fantasy-muted">
           Les derniers événements importants de la campagne.
         </CardDescription>
       </CardHeader>
@@ -94,31 +96,31 @@ export function CampaignLog({ logs }: CampaignLogProps) {
               <section key={group.label} className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Badge variant="neutral">{group.label}</Badge>
-                  <div className="h-px flex-1 bg-[#eadfce]" />
+                  <div className="fantasy-divider flex-1" />
                 </div>
                 <ol className="space-y-3">
                   {group.logs.map((log) => (
                     <li
                       key={log.id}
-                      className="grid gap-3 border-l-2 border-[#d8cbb7] pl-4 sm:grid-cols-[1fr_auto]"
+                      className="grid gap-3 border-l-2 border-[#c89a53]/45 pl-4 sm:grid-cols-[1fr_auto]"
                     >
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant={getLogVariant(log.type)}>
                             {logTypeLabels[log.type] ?? log.type}
                           </Badge>
-                          <p className="font-semibold text-[#302720]">
+                          <p className="font-semibold text-[#f3ead7]">
                             {log.title}
                           </p>
                         </div>
                         {log.description ? (
-                          <p className="mt-2 text-sm leading-6 text-[#6a5e54]">
+                          <p className="fantasy-muted mt-2 text-sm leading-6">
                             {log.description}
                           </p>
                         ) : null}
                       </div>
                       <time
-                        className="text-sm font-semibold text-[#6a5e54]"
+                        className="text-sm font-semibold text-[#c9a45d]"
                         dateTime={log.created_at}
                       >
                         {formatDate(log.created_at)}
@@ -130,7 +132,7 @@ export function CampaignLog({ logs }: CampaignLogProps) {
             ))}
           </div>
         ) : (
-          <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+          <p className="fantasy-alert p-4 text-sm">
             Aucun événement enregistré pour le moment.
           </p>
         )}

@@ -119,14 +119,14 @@ type StepState = "done" | "current" | "waiting";
 
 function getStepClasses(state: StepState) {
   if (state === "done") {
-    return "border-[#6fa07e] bg-[#e1f0e4]";
+    return "border-[#6fa07e]/70 bg-[#173121]/80";
   }
 
   if (state === "current") {
-    return "border-[#b84b35] bg-[#fff7e7]";
+    return "border-[#d6a957]/80 bg-[#3b2c16]/80";
   }
 
-  return "border-[#eadfce] bg-[#fffdf8]";
+  return "border-[#c89a53]/35 bg-[#0b1113]/70";
 }
 
 function getStepBadgeVariant(state: StepState) {
@@ -162,16 +162,16 @@ function TurnProgressStep({
     <div className={`rounded-md border p-4 ${getStepClasses(state)}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-normal text-[#6a5e54]">
+          <p className="text-xs font-bold uppercase tracking-normal text-[#c9a45d]">
             {phase}
           </p>
-          <h3 className="mt-1 font-bold text-[#302720]">{title}</h3>
+          <h3 className="mt-1 font-bold text-[#f3ead7]">{title}</h3>
         </div>
         <Badge variant={getStepBadgeVariant(state)}>
           {getStepStatusLabel(state)}
         </Badge>
       </div>
-      <p className="mt-3 text-sm text-[#5d5148]">{detail}</p>
+      <p className="mt-3 text-sm text-[#cbbda6]">{detail}</p>
       {children ? <div className="mt-4">{children}</div> : null}
     </div>
   );
@@ -227,14 +227,14 @@ function TurnProgress({
     : "Les batailles apparaissent après la révélation.";
 
   return (
-    <Card className="mt-4">
+    <Card className="fantasy-panel mt-4">
       <CardContent className="p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#302720]">
+            <h2 className="fantasy-panel-title text-lg font-bold">
               Progression du tour
             </h2>
-            <p className="mt-1 text-sm text-[#6a5e54]">
+            <p className="fantasy-muted mt-1 text-sm">
               Suivi des ordres, de la révélation et des résultats.
             </p>
           </div>
@@ -266,7 +266,7 @@ function TurnProgress({
             {canRevealOrders ? (
               <RevealOrdersForm campaignId={campaignId} returnTo="campaign" />
             ) : allOrdersSubmitted && !isGameMaster && isOrdersPhase ? (
-              <p className="text-sm text-[#6a5e54]">
+              <p className="fantasy-muted text-sm">
                 En attente du maître de campagne.
               </p>
             ) : null}
@@ -281,7 +281,9 @@ function TurnProgress({
             {canOpenResults ? (
               <Link
                 href={`/campaigns/${campaignId}/results`}
-                className={buttonVariants({ className: "w-full" })}
+                className={buttonVariants({
+                  className: "fantasy-action-button w-full",
+                })}
               >
                 Saisir les résultats
               </Link>
@@ -391,15 +393,15 @@ export default async function CampaignPage({
     );
 
   return (
-    <main className="min-h-screen bg-[#f7f0e2] px-6 py-10 text-[#211a16]">
-      <div className="mx-auto max-w-7xl">
-        <header className="rounded-lg border border-[#d8cbb7] bg-[#fffaf0] p-4 shadow-sm">
+    <main className="campaign-fantasy-shell min-h-screen px-4 py-8 text-[#f3ead7] sm:px-6 lg:py-10">
+      <div className="campaign-fantasy-content mx-auto max-w-[1540px]">
+        <header className="fantasy-panel p-4 sm:p-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-normal text-[#211a16]">
+              <h1 className="fantasy-panel-title text-3xl font-bold tracking-normal sm:text-4xl">
                 {campaign.name}
               </h1>
-              <p className="mt-2 text-sm text-[#6a5e54]">
+              <p className="fantasy-muted mt-2 text-sm">
                 Saison {campaign.season_number} - Tour{" "}
                 {campaign.current_turn_number || 1} -{" "}
                 {currentTurn?.army_base_points ?? 400} points
@@ -408,35 +410,35 @@ export default async function CampaignPage({
 
             <div className="flex flex-col gap-3 xl:items-end">
               <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4 xl:grid-cols-4">
-                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                <span className="fantasy-stat px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#c9a45d]">
                     Carte
                   </span>
-                  <span className="font-bold text-[#302720]">
+                  <span className="font-bold text-[#f3ead7]">
                     {campaign.map_width} x {campaign.map_height}
                   </span>
                 </span>
-                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                <span className="fantasy-stat px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#c9a45d]">
                     Territoires
                   </span>
-                  <span className="font-bold text-[#302720]">
+                  <span className="font-bold text-[#f3ead7]">
                     {territoryStats.total}
                   </span>
                 </span>
-                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                <span className="fantasy-stat px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#c9a45d]">
                     Neutres
                   </span>
-                  <span className="font-bold text-[#302720]">
+                  <span className="font-bold text-[#f3ead7]">
                     {territoryStats.neutral}
                   </span>
                 </span>
-                <span className="rounded-md border border-[#eadfce] bg-[#fffdf8] px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#6a5e54]">
+                <span className="fantasy-stat px-3 py-2">
+                  <span className="block text-xs font-semibold text-[#c9a45d]">
                     Ordres
                   </span>
-                  <span className="font-bold text-[#302720]">
+                  <span className="font-bold text-[#f3ead7]">
                     {submittedOrderCount} / {activePlayers.length}
                   </span>
                 </span>
@@ -446,7 +448,10 @@ export default async function CampaignPage({
                 {campaign.status === "lobby" ? (
                   <Link
                     href={`/campaigns/${campaign.id}/lobby`}
-                    className={buttonVariants({ size: "sm" })}
+                    className={buttonVariants({
+                      size: "sm",
+                      className: "fantasy-action-button",
+                    })}
                   >
                     Ouvrir le lobby
                   </Link>
@@ -454,14 +459,21 @@ export default async function CampaignPage({
                 {!currentPlayer ? (
                   <Link
                     href={`/campaigns/join?code=${campaign.invite_code}`}
-                    className={buttonVariants({ size: "sm" })}
+                    className={buttonVariants({
+                      size: "sm",
+                      className: "fantasy-action-button",
+                    })}
                   >
                     Rejoindre
                   </Link>
                 ) : null}
                 <Link
                   href="/dashboard"
-                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                  className={buttonVariants({
+                    variant: "outlineDark",
+                    size: "sm",
+                    className: "fantasy-action-button",
+                  })}
                 >
                   Dashboard
                 </Link>
@@ -470,7 +482,7 @@ export default async function CampaignPage({
           </div>
 
           {canUseCampaignActions ? (
-            <p className="mt-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+            <p className="fantasy-alert mt-4 p-3 text-sm">
               {campaign.current_phase === "orders"
                 ? "Sélectionne un territoire contrôlé sur la carte pour donner ton ordre."
                 : "La carte reste consultable, mais les ordres ne sont pas ouverts dans cette phase."}
@@ -479,18 +491,18 @@ export default async function CampaignPage({
         </header>
 
         {query?.launched ? (
-          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+          <p className="fantasy-alert fantasy-alert-success mt-4 p-3 text-sm">
             Campagne lancée. La carte a été générée et le tour 1 est ouvert.
           </p>
         ) : null}
         {query?.turnFinished ? (
-          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+          <p className="fantasy-alert fantasy-alert-success mt-4 p-3 text-sm">
             Tour terminé. Le tour {query.turn || campaign.current_turn_number} est
             ouvert.
           </p>
         ) : null}
         {query?.revealed ? (
-          <p className="mt-4 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b]">
+          <p className="fantasy-alert fantasy-alert-success mt-4 p-3 text-sm">
             Ordres révélés : {query.battles ?? "0"} bataille
             {Number(query.battles ?? 0) > 1 ? "s" : ""},{" "}
             {query.explorations ?? "0"} conquête
@@ -504,7 +516,7 @@ export default async function CampaignPage({
           </p>
         ) : null}
         {query?.submitted ? (
-          <div className="mt-4 flex flex-col gap-3 rounded-md border border-[#6fa07e] bg-[#e1f0e4] p-3 text-sm text-[#23543b] sm:flex-row sm:items-center sm:justify-between">
+          <div className="fantasy-alert fantasy-alert-success mt-4 flex flex-col gap-3 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p>Ordre enregistré pour ce tour.</p>
             {canCancelOrder ? (
               <form action={cancelOrderAction}>
@@ -513,10 +525,9 @@ export default async function CampaignPage({
                 <button
                   type="submit"
                   className={buttonVariants({
-                    variant: "outline",
+                    variant: "outlineDark",
                     size: "sm",
-                    className:
-                      "border-[#6fa07e] bg-[#f5fff7] text-[#23543b] hover:bg-[#d2ead8]",
+                    className: "fantasy-action-button",
                   })}
                 >
                   Annuler l&apos;ordre
@@ -526,12 +537,12 @@ export default async function CampaignPage({
           </div>
         ) : null}
         {query?.cancelled ? (
-          <p className="mt-4 rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+          <p className="fantasy-alert fantasy-alert-info mt-4 p-3 text-sm">
             Ordre annulé. Tu peux en choisir un nouveau pour ce tour.
           </p>
         ) : null}
         {query?.error ? (
-          <p className="mt-4 rounded-md border border-[#c76d62] bg-[#f4d9d4] p-3 text-sm text-[#7b2922]">
+          <p className="fantasy-alert fantasy-alert-danger mt-4 p-3 text-sm">
             {query.error}
           </p>
         ) : null}
@@ -593,12 +604,12 @@ export default async function CampaignPage({
               }
             />
           ) : (
-            <Card>
+            <Card className="fantasy-panel">
               <CardContent className="p-4">
-                <h2 className="text-lg font-bold text-[#302720]">
+                <h2 className="fantasy-panel-title text-lg font-bold">
                   Carte de campagne
                 </h2>
-                <p className="mt-2 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 text-sm text-[#6a5e54]">
+                <p className="fantasy-alert mt-2 p-4 text-sm">
                   La carte sera générée au lancement de la campagne. Ouvre le lobby
                   quand tous les joueurs sont prêts.
                 </p>
@@ -608,14 +619,14 @@ export default async function CampaignPage({
         </section>
 
         <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <Card>
+          <Card className="fantasy-panel">
             <CardContent className="p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-[#302720]">
+                  <h2 className="fantasy-panel-title text-lg font-bold">
                     Joueurs et ordres
                   </h2>
-                  <p className="text-sm text-[#6a5e54]">
+                  <p className="fantasy-muted text-sm">
                     Classement, territoire et statut du tour courant.
                   </p>
                 </div>
@@ -636,7 +647,7 @@ export default async function CampaignPage({
                   return (
                     <div
                       key={player.id}
-                      className="grid gap-4 rounded-md border border-[#eadfce] bg-[#fffdf8] p-4 lg:grid-cols-[minmax(0,1fr)_210px]"
+                      className="fantasy-stat grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_210px]"
                     >
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -648,13 +659,13 @@ export default async function CampaignPage({
                             </Badge>
                           ) : null}
                         </div>
-                        <p className="mt-3 font-semibold text-[#302720]">
+                        <p className="mt-3 font-semibold text-[#f3ead7]">
                           {player.display_name}
                         </p>
-                        <p className="mt-1 text-sm text-[#6a5e54]">
+                        <p className="fantasy-muted mt-1 text-sm">
                           {player.aos_faction ?? "Faction non renseignée"}
                         </p>
-                        <p className="mt-2 text-sm text-[#6a5e54]">
+                        <p className="fantasy-muted mt-2 text-sm">
                           {controlledTerritories} territoire
                           {controlledTerritories > 1 ? "s" : ""} contrôlé
                           {controlledTerritories > 1 ? "s" : ""}
@@ -663,16 +674,16 @@ export default async function CampaignPage({
 
                       <div className="flex flex-col gap-3 text-sm lg:items-end lg:text-right">
                         <div>
-                          <p className="text-xl font-bold text-[#302720]">
+                          <p className="text-xl font-bold text-[#f4ce73]">
                             {player.glory}
                           </p>
-                          <p className="text-[#6a5e54]">Gloire</p>
+                          <p className="fantasy-muted">Gloire</p>
                         </div>
                         <div className="space-y-2">
                           <Badge variant={getOrderStatusVariant(displayedStatus)}>
                             {getOrderStatusLabel(displayedStatus)}
                           </Badge>
-                          <p className="text-[#6a5e54]">
+                          <p className="fantasy-muted">
                             {getOrderVisibilitySummary(order, territoryNameById)}
                           </p>
                         </div>
@@ -683,7 +694,7 @@ export default async function CampaignPage({
               </div>
 
               {pendingPlayers.length ? (
-                <p className="mt-3 rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+                <p className="fantasy-alert fantasy-alert-info mt-3 p-3 text-sm">
                   {pendingPlayers.length} demande
                   {pendingPlayers.length > 1 ? "s" : ""} encore en attente.
                 </p>

@@ -33,3 +33,187 @@ body {
   background: #b84b35;
   color: #fffaf0;
 }
+
+.campaign-fantasy-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 54% 12%, rgb(181 133 54 / 20%), transparent 34rem),
+    radial-gradient(circle at 12% 82%, rgb(58 96 122 / 16%), transparent 28rem),
+    linear-gradient(135deg, #11191a 0%, #071012 46%, #06090b 100%);
+  color: #f3ead7;
+}
+
+.campaign-fantasy-shell::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  background-image:
+    linear-gradient(30deg, rgb(190 143 64 / 16%) 1px, transparent 1px),
+    linear-gradient(150deg, rgb(190 143 64 / 12%) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgb(255 247 221 / 6%) 0 1px, transparent 1px);
+  background-size:
+    96px 56px,
+    96px 56px,
+    34px 34px;
+  opacity: 0.65;
+}
+
+.campaign-fantasy-shell::after {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 3%) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(255 255 255 / 2%) 1px, transparent 1px);
+  background-size: 4px 4px;
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+}
+
+.campaign-fantasy-content {
+  position: relative;
+  z-index: 1;
+}
+
+.fantasy-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(200 154 83 / 70%);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgb(18 27 29 / 96%), rgb(8 13 15 / 97%)),
+    #0b1113;
+  box-shadow:
+    0 20px 60px rgb(0 0 0 / 36%),
+    inset 0 0 0 1px rgb(255 237 190 / 8%),
+    inset 0 18px 30px rgb(255 235 176 / 5%);
+}
+
+.fantasy-panel::before {
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+  content: "";
+  border: 1px solid rgb(205 165 91 / 22%);
+  border-radius: 8px;
+}
+
+.fantasy-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.fantasy-panel-title {
+  color: #f4ce73;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 70%);
+}
+
+.fantasy-muted {
+  color: #cbbda6;
+}
+
+.fantasy-stat {
+  border: 1px solid rgb(196 151 82 / 38%);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgb(255 244 211 / 7%), rgb(0 0 0 / 12%)),
+    rgb(11 17 19 / 82%);
+}
+
+.fantasy-alert {
+  border: 1px solid rgb(196 151 82 / 36%);
+  border-radius: 8px;
+  background: rgb(10 16 18 / 78%);
+  color: #eadfc9;
+}
+
+.fantasy-alert-success {
+  border-color: rgb(111 160 126 / 60%);
+  background: rgb(20 54 33 / 55%);
+}
+
+.fantasy-alert-info {
+  border-color: rgb(78 132 171 / 56%);
+  background: rgb(20 48 72 / 55%);
+}
+
+.fantasy-alert-danger {
+  border-color: rgb(184 75 53 / 66%);
+  background: rgb(79 23 20 / 60%);
+}
+
+.fantasy-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(211 166 88 / 70%), transparent);
+}
+
+.fantasy-map-board {
+  border: 1px solid rgb(200 154 83 / 40%);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 50% 36%, rgb(41 72 83 / 34%), transparent 28rem),
+    linear-gradient(30deg, rgb(198 151 70 / 15%) 1px, transparent 1px),
+    linear-gradient(150deg, rgb(198 151 70 / 10%) 1px, transparent 1px),
+    #0a1214;
+  background-size:
+    auto,
+    112px 64px,
+    112px 64px,
+    auto;
+}
+
+.hex-territory {
+  filter: drop-shadow(0 9px 10px rgb(0 0 0 / 36%));
+}
+
+.hex-territory:hover {
+  filter: drop-shadow(0 0 12px rgb(244 206 115 / 42%))
+    drop-shadow(0 9px 10px rgb(0 0 0 / 36%));
+}
+
+.hex-territory-selected {
+  filter: drop-shadow(0 0 13px rgb(244 206 115 / 80%))
+    drop-shadow(0 10px 12px rgb(0 0 0 / 46%));
+}
+
+.hex-territory-inner {
+  background-image:
+    radial-gradient(circle at 28% 28%, rgb(255 255 255 / 28%), transparent 1.8rem),
+    radial-gradient(circle at 78% 72%, rgb(88 71 48 / 13%), transparent 2.3rem),
+    linear-gradient(145deg, rgb(255 255 255 / 25%), rgb(80 58 30 / 8%));
+  box-shadow:
+    inset 0 0 0 2px rgb(255 248 224 / 18%),
+    inset 0 -10px 18px rgb(48 32 13 / 13%);
+}
+
+.hex-type-badge {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2.25rem;
+  border: 1px solid rgb(255 241 196 / 64%);
+  background:
+    linear-gradient(180deg, rgb(136 94 35 / 90%), rgb(55 36 16 / 94%));
+  color: #fff4d1;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 70%);
+}
+
+.fantasy-action-button {
+  border-color: rgb(213 166 83 / 52%);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 242 202 / 18%),
+    0 8px 18px rgb(0 0 0 / 22%);
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}

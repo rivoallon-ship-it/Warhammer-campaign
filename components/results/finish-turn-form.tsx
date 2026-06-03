@@ -15,7 +15,7 @@ function FinishTurnButton() {
     <Button
       type="submit"
       variant="danger"
-      className="w-full gap-2"
+      className="fantasy-action-button w-full gap-2"
       disabled={pending}
       aria-live="polite"
     >

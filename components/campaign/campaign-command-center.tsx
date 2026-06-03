@@ -66,7 +66,7 @@ type CampaignCommandCenterProps = {
 const neutralTerritoryColor = "#c8bca7";
 const neutralTerritoryFill = "#f2eee5";
 const contestedTerritoryColor = "#9f2f45";
-const contestedTerritoryFill = "#f7d7df";
+const contestedTerritoryFill = "#68221f";
 const hexClipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
 const hexTileWidth = 136;
 const hexTileHeight = 144;
@@ -82,6 +82,44 @@ const territoryTypeMarks: Record<string, string> = {
   dragon: "DR",
   giant: "GE",
   wild: "SA",
+};
+
+const territoryTypeBadgeStyles: Record<
+  string,
+  { background: string; borderColor: string }
+> = {
+  capital: {
+    background: "linear-gradient(180deg, #9f722c, #4d3012)",
+    borderColor: "#f3d58c",
+  },
+  village: {
+    background: "linear-gradient(180deg, #315c8c, #142b45)",
+    borderColor: "#9dc4ee",
+  },
+  ruins: {
+    background: "linear-gradient(180deg, #77756b, #363633)",
+    borderColor: "#d8d3bd",
+  },
+  fort: {
+    background: "linear-gradient(180deg, #a75b20, #4c230c)",
+    borderColor: "#efb26b",
+  },
+  magic_tower: {
+    background: "linear-gradient(180deg, #7a336f, #32152e)",
+    borderColor: "#dca8d7",
+  },
+  dragon: {
+    background: "linear-gradient(180deg, #6f3d86, #28163b)",
+    borderColor: "#caa3ef",
+  },
+  giant: {
+    background: "linear-gradient(180deg, #567b2c, #263a13)",
+    borderColor: "#b8df82",
+  },
+  wild: {
+    background: "linear-gradient(180deg, #8b793d, #433816)",
+    borderColor: "#e5d18b",
+  },
 };
 
 function getTerritoryTypeMark(type: string) {
@@ -142,7 +180,7 @@ function getOrderSummary(
 function ColorSwatch({ color }: { color: string }) {
   return (
     <span
-      className="inline-block size-3 rounded-sm border border-[#c8bca7]"
+      className="inline-block size-3 rounded-sm border border-[#f1dfab]/70"
       style={{ backgroundColor: color }}
       aria-hidden="true"
     />
@@ -155,7 +193,7 @@ function ConquestSubmitButton() {
   return (
     <Button
       type="submit"
-      className="w-full gap-2"
+      className="fantasy-action-button w-full gap-2"
       disabled={pending}
       aria-live="polite"
     >
@@ -298,32 +336,61 @@ export function CampaignCommandCenter({
       : null;
     const isSelected = territory.id === selectedTerritory?.id;
     const isContested = contestedTerritoryIdSet.has(territory.id);
-    const territoryColor = isContested
+    const ownerColor = isContested
       ? contestedTerritoryColor
       : (owner?.color ?? neutralTerritoryColor);
+    const isOwnedByCurrentPlayer = owner?.id === currentPlayerId;
+    const isConquerableByCurrentPlayer =
+      canSubmitOrders &&
+      !isOwnedByCurrentPlayer &&
+      controlledTerritories.some((sourceTerritory) =>
+        adjacentCodesByCode
+          .get(sourceTerritory.code)
+          ?.has(territory.code),
+      );
+    const territoryColor =
+      isSelected && isConquerableByCurrentPlayer ? "#79a83d" : ownerColor;
     const backgroundColor = isContested
       ? contestedTerritoryFill
       : owner?.color
-        ? `${owner.color}2b`
+        ? `${owner.color}52`
         : neutralTerritoryFill;
     const ownerLabel = isContested
       ? "Bataille en cours"
       : (owner?.displayName ?? "Neutre");
+    const isDarkTile = isContested;
 
     const content = (
       <>
         <span className="flex items-start justify-between gap-2">
-          <span className="line-clamp-2 min-h-10 font-semibold leading-5 text-[#302720]">
+          <span
+            className={cn(
+              "line-clamp-2 min-h-10 font-semibold leading-5",
+              isDarkTile ? "text-[#fff4d1]" : "text-[#211a16]",
+            )}
+          >
             {territory.name}
           </span>
-          <span className="rounded-md border border-[#d8cbb7] bg-[#fffaf0] px-1.5 py-0.5 text-[10px] font-bold text-[#5d5148]">
+          <span
+            className="hex-type-badge shrink-0"
+            style={{
+              clipPath: hexClipPath,
+              ...(territoryTypeBadgeStyles[territory.type] ??
+                territoryTypeBadgeStyles.wild),
+            }}
+          >
             {getTerritoryTypeMark(territory.type)}
           </span>
         </span>
-        <span className="mt-2 flex items-center gap-2 text-xs font-medium text-[#5d5148]">
+        <span
+          className={cn(
+            "mt-2 flex items-center gap-2 text-xs font-medium",
+            isDarkTile ? "text-[#f5dca8]" : "text-[#55483a]",
+          )}
+        >
           <span
-            className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fffdf8]"
-            style={{ backgroundColor: territoryColor }}
+            className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fff8dd]"
+            style={{ backgroundColor: ownerColor }}
             aria-hidden="true"
           />
           <span className="truncate">{ownerLabel}</span>
@@ -331,12 +398,12 @@ export function CampaignCommandCenter({
         {isContested || territory.isFortified ? (
           <span className="mt-3 flex flex-wrap gap-1">
             {isContested ? (
-              <span className="rounded-md border border-[#9f2f45] bg-[#f7d7df] px-2 py-1 text-[11px] font-semibold text-[#64172a]">
+              <span className="rounded-md border border-[#f0674f] bg-[#3a1513] px-2 py-1 text-[11px] font-semibold text-[#ffd8c9]">
                 Bataille
               </span>
             ) : null}
             {territory.isFortified ? (
-              <span className="rounded-md border border-[#c99a3d] bg-[#f7e7bf] px-2 py-1 text-[11px] font-semibold text-[#644512]">
+              <span className="rounded-md border border-[#d5a653] bg-[#2b2214] px-2 py-1 text-[11px] font-semibold text-[#f7d78a]">
                 Fortifié
               </span>
             ) : null}
@@ -353,17 +420,16 @@ export function CampaignCommandCenter({
           aria-pressed={isSelected}
           onClick={() => selectTerritory(territory)}
           className={cn(
-            "h-[144px] w-[136px] shrink-0 p-[2px] text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
-            isSelected && "relative z-10 shadow-sm",
+            "hex-territory h-[144px] w-[136px] shrink-0 p-[4px] text-left text-sm transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ce73]",
+            isSelected && "hex-territory-selected relative z-10",
           )}
           style={{
             backgroundColor: territoryColor,
             clipPath: hexClipPath,
-            boxShadow: isSelected ? "0 0 0 3px #302720" : undefined,
           }}
         >
           <span
-            className="flex h-full w-full flex-col justify-center overflow-hidden px-5 py-5"
+            className="hex-territory-inner flex h-full w-full flex-col justify-center overflow-hidden px-5 py-5"
             style={{
               backgroundColor,
               clipPath: hexClipPath,
@@ -382,8 +448,8 @@ export function CampaignCommandCenter({
         aria-pressed={isSelected}
         onClick={() => selectTerritory(territory)}
         className={cn(
-          "min-h-28 rounded-md border-2 p-3 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
-          isSelected && "shadow-sm",
+          "min-h-28 rounded-md border-2 p-3 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ce73]",
+          isSelected && "shadow-sm shadow-[#f4ce73]/30",
         )}
         style={{
           borderColor: territoryColor,
@@ -398,23 +464,28 @@ export function CampaignCommandCenter({
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_380px]">
-      <Card>
+      <Card className="fantasy-panel">
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <CardTitle>Carte de campagne</CardTitle>
-              <CardDescription>
+              <CardTitle className="fantasy-panel-title text-2xl">
+                Carte de campagne
+              </CardTitle>
+              <CardDescription className="fantasy-muted">
                 Clique sur un territoire : les ordres disponibles apparaissent à droite.
               </CardDescription>
             </div>
-            <Badge variant="neutral">
+            <Badge
+              variant="neutral"
+              className="border-[#c89a53]/60 bg-[#11191a] text-[#f4ce73]"
+            >
               {isHexMap ? "Hex" : "Grille"} {mapWidth} x {mapHeight} -{" "}
               {territories.length} territoires
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto pb-2">
+          <div className="fantasy-map-board overflow-x-auto p-4 pb-6">
             {isHexMap ? (
               <div
                 className="py-3"
@@ -455,24 +526,24 @@ export function CampaignCommandCenter({
       </Card>
 
       <div className="space-y-4">
-        <Card>
+        <Card className="fantasy-panel">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="fantasy-panel-title text-2xl">
               {selectedTerritory ? selectedTerritory.name : "Commandement"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="fantasy-muted">
               Territoire sélectionné et actions possibles.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {existingOrder ? (
-              <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
+              <div className="fantasy-stat p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-[#302720]">
+                    <p className="text-sm font-semibold text-[#f3ead7]">
                       Ordre actuel
                     </p>
-                    <p className="mt-1 text-sm text-[#6a5e54]">
+                    <p className="fantasy-muted mt-1 text-sm">
                       {getOrderSummary(existingOrder, territoryById)}
                     </p>
                   </div>
@@ -484,7 +555,12 @@ export function CampaignCommandCenter({
                   <form action={cancelOrderAction} className="mt-3">
                     <input type="hidden" name="returnTo" value="campaign" />
                     <input type="hidden" name="campaignId" value={campaignId} />
-                    <Button type="submit" variant="outline" size="sm">
+                    <Button
+                      type="submit"
+                      variant="outlineDark"
+                      size="sm"
+                      className="fantasy-action-button"
+                    >
                       Annuler l&apos;ordre
                     </Button>
                   </form>
@@ -494,9 +570,9 @@ export function CampaignCommandCenter({
 
             {selectedTerritory ? (
               <dl className="grid gap-3 text-sm">
-                <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
-                  <dt className="font-semibold text-[#302720]">Propriétaire</dt>
-                  <dd className="mt-1 space-y-2 text-[#5d5148]">
+                <div className="fantasy-stat p-3">
+                  <dt className="font-semibold text-[#f3ead7]">Propriétaire</dt>
+                  <dd className="fantasy-muted mt-1 space-y-2">
                     {selectedOwner ? (
                       <div className="inline-flex items-center gap-2">
                         {selectedOwner.color ? (
@@ -508,7 +584,7 @@ export function CampaignCommandCenter({
                       <div>Neutre</div>
                     )}
                     {isSelectedContested ? (
-                      <div className="inline-flex rounded-md border border-[#9f2f45] bg-[#f7d7df] px-2 py-1 text-xs font-semibold text-[#64172a]">
+                      <div className="inline-flex rounded-md border border-[#f0674f] bg-[#3a1513] px-2 py-1 text-xs font-semibold text-[#ffd8c9]">
                         Bataille en cours
                       </div>
                     ) : null}
@@ -518,7 +594,7 @@ export function CampaignCommandCenter({
             ) : null}
 
             {unavailableMessage ? (
-              <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+              <p className="fantasy-alert p-3 text-sm">
                 {unavailableMessage}
               </p>
             ) : null}
@@ -537,20 +613,24 @@ export function CampaignCommandCenter({
                         name="targetTerritoryId"
                         value={selectedTerritory.id}
                       />
-                      <Button type="submit" variant="secondary" className="w-full">
+                      <Button
+                        type="submit"
+                        variant="outlineDark"
+                        className="fantasy-action-button w-full border-[#2f5f91] bg-[#17456d] text-[#f4e6c8] hover:bg-[#1f5786]"
+                      >
                         Fortifier
                       </Button>
                     </form>
 
                     {selectedValidConquestTargets.length ? (
-                      <div className="rounded-md border border-[#7395bd] bg-[#ddeafa] p-3 text-sm text-[#284d77]">
+                      <div className="fantasy-alert fantasy-alert-info p-3 text-sm">
                         <p className="font-semibold">Cibles à portée</p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {selectedValidConquestTargets.map((territory) => (
                             <button
                               key={territory.id}
                               type="button"
-                              className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-left text-xs font-semibold text-[#1e5942] transition hover:bg-[#c4dfcf]"
+                              className="rounded-md border border-[#87b75c] bg-[#263f19] px-2 py-1 text-left text-xs font-semibold text-[#e6f6cf] transition hover:bg-[#315022]"
                               onClick={() => selectTerritory(territory)}
                             >
                               {territory.name}
@@ -559,7 +639,7 @@ export function CampaignCommandCenter({
                         </div>
                       </div>
                     ) : (
-                      <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+                      <p className="fantasy-alert p-3 text-sm">
                         Aucune cible adjacente disponible depuis ce territoire.
                       </p>
                     )}
@@ -582,7 +662,7 @@ export function CampaignCommandCenter({
                     <ConquestSubmitButton />
                   </form>
                 ) : (
-                  <p className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3 text-sm text-[#6a5e54]">
+                  <p className="fantasy-alert p-3 text-sm">
                     Cette zone ne peut pas être conquise depuis tes territoires
                     actuels.
                   </p>

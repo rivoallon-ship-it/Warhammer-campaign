@@ -10,6 +10,20 @@ type RevealRpcResult =
 
 export type RevealPageData = CampaignDashboardData;
 
+function getRevealRpcErrorMessage(rpcError: { code?: string; message?: string }) {
+  const message = rpcError.message ?? "";
+
+  if (
+    rpcError.code === "PGRST202" ||
+    message.toLowerCase().includes("could not find the function") ||
+    message.toLowerCase().includes("function public.reveal_current_turn_orders")
+  ) {
+    return "La fonction SQL de révélation n'est pas encore installée dans Supabase.";
+  }
+
+  return `Erreur SQL pendant la révélation : ${message || "erreur inconnue"}`;
+}
+
 export function getRevealReadiness(revealData: RevealPageData) {
   const { campaign, currentPlayer, currentTurn, activePlayers, orderVisibility } =
     revealData;
@@ -108,8 +122,7 @@ export async function revealOrders(
   if (rpcError) {
     return {
       result: null,
-      error:
-        "La fonction SQL de révélation n'est pas encore installée dans Supabase.",
+      error: getRevealRpcErrorMessage(rpcError),
     };
   }
 

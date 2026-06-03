@@ -122,8 +122,33 @@ const territoryTypeBadgeStyles: Record<
   },
 };
 
+const territoryTypeLegend = [
+  { type: "capital", label: "Capitale" },
+  { type: "village", label: "Village" },
+  { type: "ruins", label: "Ruines" },
+  { type: "fort", label: "Forteresse" },
+  { type: "magic_tower", label: "Tour arcanique" },
+  { type: "dragon", label: "Dragons" },
+  { type: "giant", label: "Géants" },
+  { type: "wild", label: "Sauvage" },
+];
+
 function getTerritoryTypeMark(type: string) {
   return territoryTypeMarks[type] ?? type.slice(0, 2).toUpperCase();
+}
+
+function TerritoryTypeBadge({ type }: { type: string }) {
+  return (
+    <span
+      className="hex-type-badge shrink-0"
+      style={{
+        clipPath: hexClipPath,
+        ...(territoryTypeBadgeStyles[type] ?? territoryTypeBadgeStyles.wild),
+      }}
+    >
+      {getTerritoryTypeMark(type)}
+    </span>
+  );
 }
 
 function getOrderStatusLabel(status: string) {
@@ -360,18 +385,7 @@ export function CampaignCommandCenter({
       : (owner?.displayName ?? "Neutre");
     const isDarkTile = isContested;
 
-    const typeBadge = (
-      <span
-        className="hex-type-badge shrink-0"
-        style={{
-          clipPath: hexClipPath,
-          ...(territoryTypeBadgeStyles[territory.type] ??
-            territoryTypeBadgeStyles.wild),
-        }}
-      >
-        {getTerritoryTypeMark(territory.type)}
-      </span>
-    );
+    const typeBadge = <TerritoryTypeBadge type={territory.type} />;
     const ownerLine = (
       <span
         className={cn(
@@ -558,6 +572,25 @@ export function CampaignCommandCenter({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="mt-4 border-t border-[#c89a53]/35 pt-4">
+            <h3 className="fantasy-panel-title text-sm font-bold">
+              Légende des tags
+            </h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {territoryTypeLegend.map((item) => (
+                <div
+                  key={item.type}
+                  className="fantasy-stat inline-flex items-center gap-2 px-2.5 py-2 text-xs"
+                >
+                  <TerritoryTypeBadge type={item.type} />
+                  <span className="font-semibold text-[#f3ead7]">
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

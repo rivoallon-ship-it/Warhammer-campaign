@@ -6,9 +6,13 @@ import { Button } from "@/components/ui";
 
 type RevealOrdersFormProps = {
   campaignId: string;
+  returnTo?: "campaign" | "reveal";
 };
 
-export function RevealOrdersForm({ campaignId }: RevealOrdersFormProps) {
+export function RevealOrdersForm({
+  campaignId,
+  returnTo = "reveal",
+}: RevealOrdersFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     if (
       !window.confirm(
@@ -22,6 +26,7 @@ export function RevealOrdersForm({ campaignId }: RevealOrdersFormProps) {
   return (
     <form action={revealOrdersAction} onSubmit={handleSubmit}>
       <input type="hidden" name="campaignId" value={campaignId} />
+      <input type="hidden" name="returnTo" value={returnTo} />
       <Button type="submit" className="w-full">
         Révéler les ordres
       </Button>

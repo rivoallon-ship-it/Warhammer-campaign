@@ -9,16 +9,23 @@ function getFormValue(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function redirectToReveal(
+function redirectAfterReveal(
   campaignId: string,
   params: Record<string, string>,
+  returnTo: string,
 ): never {
   const searchParams = new URLSearchParams(params);
-  redirect(`/campaigns/${campaignId}/reveal?${searchParams.toString()}`);
+  const path =
+    returnTo === "campaign"
+      ? `/campaigns/${campaignId}`
+      : `/campaigns/${campaignId}/reveal`;
+
+  redirect(`${path}?${searchParams.toString()}`);
 }
 
 export async function revealOrdersAction(formData: FormData) {
   const campaignId = getFormValue(formData, "campaignId");
+  const returnTo = getFormValue(formData, "returnTo");
   const supabase = await createClient();
   const {
     data: { user },
@@ -31,14 +38,22 @@ export async function revealOrdersAction(formData: FormData) {
   const { result, error } = await revealOrders(supabase, user, campaignId);
 
   if (error || !result) {
-    redirectToReveal(campaignId, { error: error ?? "Révélation impossible." });
+    redirectAfterReveal(
+      campaignId,
+      { error: error ?? "Révélation impossible." },
+      returnTo,
+    );
   }
 
-  redirectToReveal(campaignId, {
-    revealed: "1",
-    battles: String(result.battle_count),
-    explorations: String(result.exploration_count),
-    fortifications: String(result.fortification_count),
-    multi: String(result.multiple_attack_count),
-  });
+  redirectAfterReveal(
+    campaignId,
+    {
+      revealed: "1",
+      battles: String(result.battle_count),
+      explorations: String(result.exploration_count),
+      fortifications: String(result.fortification_count),
+      multi: String(result.multiple_attack_count),
+    },
+    returnTo,
+  );
 }

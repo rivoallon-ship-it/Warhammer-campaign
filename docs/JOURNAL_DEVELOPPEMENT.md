@@ -221,6 +221,7 @@ Commits principaux :
 - Suppression de la légende permanente du bloc carte (`Départ possible`, `Cible conquérable`, `Adjacent`, `Neutre`) pour garder l'écran plus lisible.
 - Simplification des couleurs de carte : suppression des surlignages d'adjacence/départ/cible, affichage par couleur de propriétaire, neutre ou bataille en cours.
 - Ajout d'un état de chargement sur le bouton `Conquérir` pour indiquer que l'ordre est en cours d'enregistrement et éviter les doubles clics.
+- Ajout du bloc `Progression du tour` : phase Ordres, Révélation et Résultats, avec les actions maître au bon moment.
 
 ## Fichiers importants
 

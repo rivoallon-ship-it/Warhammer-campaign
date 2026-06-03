@@ -164,6 +164,8 @@ Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défense
 
 Le maître termine le tour quand toutes les conquêtes automatiques et batailles sont résolues. Un nouveau tour est créé, la taille d’armée recalculée, et les joueurs peuvent soumettre de nouveaux ordres.
 
+La page campagne affiche une progression de tour en trois étapes : ordres, révélation, résultats. Elle sert à montrer l'état courant, les compteurs utiles et l'action maître disponible au bon moment.
+
 ## 22. Tableaux de bord
 
 Le dashboard personnel affiche campagnes en lobby, actives, terminées/archivées. Le dashboard de campagne affiche nom, saison, tour, phase, taille d’armée, carte miniature, classement, statut des ordres, actions disponibles et historique récent.

@@ -25,7 +25,7 @@ export type CampaignDashboardData = {
   territories: TerritoryRow[];
   adjacencies: AdjacencyRow[];
   orders: OrderRow[];
-  pendingBattles: BattleRow[];
+  battles: BattleRow[];
   orderVisibility: CampaignOrderVisibilityRow[];
   logs: CampaignLogItem[];
 };
@@ -169,13 +169,12 @@ export async function getCampaignDashboard(
         .eq("campaign_id", campaign.id)
         .eq("turn_id", currentTurn.id)
     : { data: [] };
-  const { data: pendingBattles } = currentTurn
+  const { data: battles } = currentTurn
     ? await supabase
         .from("battles")
         .select("*")
         .eq("campaign_id", campaign.id)
         .eq("turn_id", currentTurn.id)
-        .eq("status", "pending")
     : { data: [] as BattleRow[] };
   const fallbackOrderVisibility = buildOrderVisibilityFallback(
     activePlayers,
@@ -235,7 +234,7 @@ export async function getCampaignDashboard(
       territories: territories ?? [],
       adjacencies: adjacencies ?? [],
       orders: orders ?? [],
-      pendingBattles: pendingBattles ?? [],
+      battles: battles ?? [],
       orderVisibility,
       logs: logsWithTurns,
     } satisfies CampaignDashboardData,

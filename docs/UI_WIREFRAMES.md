@@ -109,6 +109,8 @@ Actions joueur : sélectionner une case, fortifier un territoire contrôlé, cli
 
 Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
 
+Bloc progression : trois étapes visibles `Ordres`, `Révélation`, `Résultats`. Le bouton `Révéler les ordres` apparaît au maître quand tous les ordres sont validés. Le bloc résultats affiche l'avancement des batailles et propose la saisie des résultats ou la fin de tour.
+
 ## 12. Carte interactive `/campaigns/[campaignId]/map`
 
 Route conservée pour compatibilité, mais elle redirige vers `/campaigns/[campaignId]`.

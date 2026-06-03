@@ -170,7 +170,7 @@ Le dashboard personnel affiche campagnes en lobby, actives, terminées/archivée
 
 ## 23. Carte interactive
 
-La carte utilise `map_width`, `map_height` et les territoires générés. Chaque case affiche le nom du territoire, le type, le propriétaire, la couleur du propriétaire et la fortification. Le code technique de case reste en base mais n'est pas affiché sur la carte.
+La carte utilise `map_width`, `map_height` et les territoires générés. Chaque case affiche le nom du territoire, le type, le propriétaire, la couleur du propriétaire et la fortification. Les batailles non résolues utilisent une couleur dédiée de territoire contesté. Le code technique de case reste en base mais n'est pas affiché sur la carte.
 
 ## 24. Historique simple
 

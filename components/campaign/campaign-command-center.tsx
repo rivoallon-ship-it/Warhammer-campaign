@@ -54,11 +54,17 @@ type CampaignCommandCenterProps = {
   players: CommandPlayer[];
   territories: CommandTerritory[];
   adjacencies: CommandAdjacency[];
+  contestedTerritoryIds: string[];
   currentPlayerId: string | null;
   canSubmitOrders: boolean;
   unavailableMessage: string | null;
   existingOrder: ExistingOrder | null;
 };
+
+const neutralTerritoryColor = "#c8bca7";
+const neutralTerritoryFill = "#f2eee5";
+const contestedTerritoryColor = "#9f2f45";
+const contestedTerritoryFill = "#f7d7df";
 
 const territoryTypeMarks: Record<string, string> = {
   capital: "CA",
@@ -143,6 +149,7 @@ export function CampaignCommandCenter({
   players,
   territories,
   adjacencies,
+  contestedTerritoryIds,
   currentPlayerId,
   canSubmitOrders,
   unavailableMessage,
@@ -169,6 +176,10 @@ export function CampaignCommandCenter({
     () => new Map(territories.map((territory) => [territory.id, territory])),
     [territories],
   );
+  const contestedTerritoryIdSet = useMemo(
+    () => new Set(contestedTerritoryIds),
+    [contestedTerritoryIds],
+  );
   const adjacentCodesByCode = useMemo(() => {
     const map = new Map<string, Set<string>>();
 
@@ -187,6 +198,9 @@ export function CampaignCommandCenter({
   const selectedOwner = selectedTerritory?.ownerCampaignPlayerId
     ? playersById.get(selectedTerritory.ownerCampaignPlayerId)
     : null;
+  const isSelectedContested = selectedTerritory
+    ? contestedTerritoryIdSet.has(selectedTerritory.id)
+    : false;
   const selectedAdjacentCodes = selectedTerritory
     ? (adjacentCodesByCode.get(selectedTerritory.code) ?? new Set<string>())
     : new Set<string>();
@@ -203,9 +217,6 @@ export function CampaignCommandCenter({
             territory.ownerCampaignPlayerId !== currentPlayerId,
         )
       : [];
-  const selectedValidConquestTargetIds = new Set(
-    selectedValidConquestTargets.map((territory) => territory.id),
-  );
   const isSelectedControlled =
     Boolean(selectedTerritory) &&
     selectedTerritory?.ownerCampaignPlayerId === currentPlayerId;
@@ -217,9 +228,6 @@ export function CampaignCommandCenter({
             ?.has(selectedTerritory.code),
         )
       : [];
-  const conquestSourceIdsForSelectedTarget = new Set(
-    conquestSourcesForSelectedTarget.map((territory) => territory.id),
-  );
   const conquestSourceForSelectedTarget =
     conquestSourcesForSelectedTarget[0] ?? null;
   const canConquerSelectedTerritory =
@@ -262,17 +270,18 @@ export function CampaignCommandCenter({
                   ? playersById.get(territory.ownerCampaignPlayerId)
                   : null;
                 const isSelected = territory.id === selectedTerritory?.id;
-                const isDeparture =
-                  (isSelected && isSelectedControlled) ||
-                  conquestSourceIdsForSelectedTarget.has(territory.id);
-                const isTarget =
-                  isSelected && canConquerSelectedTerritory && !isSelectedControlled;
-                const isAdjacentToSelected = selectedAdjacentCodes.has(territory.code);
-                const isValidConquestTarget =
-                  isSelectedControlled &&
-                  selectedValidConquestTargetIds.has(territory.id);
-                const borderColor = owner?.color ?? "#c8bca7";
-                const backgroundColor = owner?.color ? `${owner.color}20` : "#f2eee5";
+                const isContested = contestedTerritoryIdSet.has(territory.id);
+                const territoryColor = isContested
+                  ? contestedTerritoryColor
+                  : (owner?.color ?? neutralTerritoryColor);
+                const backgroundColor = isContested
+                  ? contestedTerritoryFill
+                  : owner?.color
+                    ? `${owner.color}2b`
+                    : neutralTerritoryFill;
+                const ownerLabel = isContested
+                  ? "Bataille en cours"
+                  : (owner?.displayName ?? "Neutre");
 
                 return (
                   <button
@@ -281,22 +290,13 @@ export function CampaignCommandCenter({
                     aria-pressed={isSelected}
                     onClick={() => selectTerritory(territory)}
                     className={cn(
-                      "min-h-28 rounded-md border-2 p-3 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b84b35]",
-                      isValidConquestTarget && "ring-2 ring-[#348a67] ring-offset-2",
+                      "min-h-28 rounded-md border-2 p-3 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
+                      isSelected && "shadow-sm",
                     )}
                     style={{
-                      borderColor: isTarget
-                        ? "#348a67"
-                        : isDeparture
-                          ? "#b84b35"
-                          : isSelected
-                            ? "#b84b35"
-                            : isValidConquestTarget
-                              ? "#348a67"
-                              : isAdjacentToSelected
-                                ? "#7395bd"
-                                : borderColor,
+                      borderColor: territoryColor,
                       backgroundColor,
+                      boxShadow: isSelected ? "0 0 0 2px #302720" : undefined,
                     }}
                   >
                     <span className="flex items-start justify-between gap-2">
@@ -307,26 +307,28 @@ export function CampaignCommandCenter({
                         {getTerritoryTypeMark(territory.type)}
                       </span>
                     </span>
-                    <span className="mt-2 block truncate text-xs text-[#5d5148]">
-                      {owner?.displayName ?? "Neutre"}
+                    <span className="mt-2 flex items-center gap-2 text-xs font-medium text-[#5d5148]">
+                      <span
+                        className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fffdf8]"
+                        style={{ backgroundColor: territoryColor }}
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{ownerLabel}</span>
                     </span>
-                    <span className="mt-3 flex flex-wrap gap-1">
-                      {isDeparture ? (
-                        <span className="rounded-md border border-[#b84b35] bg-[#f7ded9] px-2 py-1 text-[11px] font-semibold text-[#7b2922]">
-                          Départ
-                        </span>
-                      ) : null}
-                      {isValidConquestTarget || isTarget ? (
-                        <span className="rounded-md border border-[#348a67] bg-[#d7eadf] px-2 py-1 text-[11px] font-semibold text-[#1e5942]">
-                          Cible
-                        </span>
-                      ) : null}
-                      {territory.isFortified ? (
-                        <span className="rounded-md border border-[#c99a3d] bg-[#f7e7bf] px-2 py-1 text-[11px] font-semibold text-[#644512]">
-                          Fortifié
-                        </span>
-                      ) : null}
-                    </span>
+                    {isContested || territory.isFortified ? (
+                      <span className="mt-3 flex flex-wrap gap-1">
+                        {isContested ? (
+                          <span className="rounded-md border border-[#9f2f45] bg-[#f7d7df] px-2 py-1 text-[11px] font-semibold text-[#64172a]">
+                            Bataille
+                          </span>
+                        ) : null}
+                        {territory.isFortified ? (
+                          <span className="rounded-md border border-[#c99a3d] bg-[#f7e7bf] px-2 py-1 text-[11px] font-semibold text-[#644512]">
+                            Fortifié
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : null}
                   </button>
                 );
               })}
@@ -377,17 +379,22 @@ export function CampaignCommandCenter({
               <dl className="grid gap-3 text-sm">
                 <div className="rounded-md border border-[#eadfce] bg-[#fffdf8] p-3">
                   <dt className="font-semibold text-[#302720]">Propriétaire</dt>
-                  <dd className="mt-1 text-[#5d5148]">
+                  <dd className="mt-1 space-y-2 text-[#5d5148]">
                     {selectedOwner ? (
-                      <span className="inline-flex items-center gap-2">
+                      <div className="inline-flex items-center gap-2">
                         {selectedOwner.color ? (
                           <ColorSwatch color={selectedOwner.color} />
                         ) : null}
                         {selectedOwner.displayName}
-                      </span>
+                      </div>
                     ) : (
-                      "Neutre"
+                      <div>Neutre</div>
                     )}
+                    {isSelectedContested ? (
+                      <div className="inline-flex rounded-md border border-[#9f2f45] bg-[#f7d7df] px-2 py-1 text-xs font-semibold text-[#64172a]">
+                        Bataille en cours
+                      </div>
+                    ) : null}
                   </dd>
                 </div>
               </dl>

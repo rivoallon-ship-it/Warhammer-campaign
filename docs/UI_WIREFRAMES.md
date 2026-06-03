@@ -113,11 +113,11 @@ Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
 
 Route conservée pour compatibilité, mais elle redirige vers `/campaigns/[campaignId]`.
 
-Layout desktop de la page campagne : carte à gauche, fiche territoire/actions à droite, légende compacte.
+Layout desktop de la page campagne : carte à gauche, fiche territoire/actions à droite.
 
-Mobile : carte en haut, fiche en dessous, légende repliable possible.
+Mobile : carte en haut, fiche en dessous.
 
-Case : nom du territoire, icône type, propriétaire, badges type/fortifié. Le code technique de case n'est pas affiché sur la carte.
+Case : nom du territoire, icône type, propriétaire, couleur du joueur ou couleur neutre, badge bataille/fortifié si utile. Le code technique de case n'est pas affiché sur la carte.
 
 Fiche : nom, propriétaire, statut utile et actions disponibles.
 

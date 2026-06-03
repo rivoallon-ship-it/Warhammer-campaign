@@ -67,9 +67,9 @@ Exemple :
 
 - Neutre : fond gris clair, bordure grise, texte Neutre.
 - Contrôlé : fond teinté couleur joueur, bordure couleur joueur, propriétaire visible.
-- Sélectionné : bordure épaisse, surbrillance, fiche mise à jour.
+- Contesté / bataille en cours : couleur dédiée, badge `Bataille`, fiche mise à jour.
+- Sélectionné : indication discrète, fiche mise à jour.
 - Fortifié : badge ou icône bouclier.
-- Cible valide pendant ordres : surbrillance positive.
 
 ## 8. Types et icônes provisoires
 
@@ -105,11 +105,11 @@ Statut : Fortifié
 
 ## 11. Légende
 
-Ne pas afficher de légende permanente dans le bloc carte. Les états utiles restent visibles directement dans les cases concernées : départ, cible, propriétaire, type et fortification.
+Ne pas afficher de légende permanente dans le bloc carte. Les états utiles restent visibles directement dans les cases concernées : propriétaire, type, bataille et fortification.
 
 ## 12. Carte de campagne
 
-La page campagne affiche la carte complète, pas une miniature. Chaque case affiche le nom du territoire, le propriétaire et les états utiles comme départ possible, cible valide ou fortification.
+La page campagne affiche la carte complète, pas une miniature. Chaque case affiche le nom du territoire, le propriétaire et les états utiles comme bataille en cours ou fortification. Les couleurs principales de la carte correspondent aux joueurs, aux territoires neutres et aux territoires contestés.
 
 ## 13. Ordres depuis la carte
 
@@ -126,11 +126,11 @@ Il n'y a plus de bouton préparatoire `Conquérir depuis ...` sur les territoire
 
 ## 14. Comportement clic
 
-Sur la page campagne : sélectionner une case affiche sa fiche, surligne ses adjacents et propose seulement les actions réellement possibles selon propriétaire, phase et joueur courant.
+Sur la page campagne : sélectionner une case affiche sa fiche et propose seulement les actions réellement possibles selon propriétaire, phase et joueur courant. La carte ne surligne plus les adjacences, car l'information utile est donnée par les actions du panneau.
 
 ## 15. Adjacences visuelles
 
-Quand un territoire est sélectionné, surligner légèrement ses adjacents.
+Ne pas surligner les adjacences sur la carte. Elles restent utilisées en interne pour valider les conquêtes et afficher les actions possibles.
 
 ## 16. Fortifications
 
@@ -166,9 +166,8 @@ type TerritoryCardProps = {
   ownerName?: string;
   ownerColor?: string;
   isFortified: boolean;
+  isContested?: boolean;
   isSelected?: boolean;
-  isAdjacent?: boolean;
-  isValidTarget?: boolean;
   onClick?: () => void;
 };
 ```
@@ -179,8 +178,7 @@ type TerritoryGridProps = {
   mapWidth: number;
   mapHeight: number;
   selectedTerritoryId?: string;
-  highlightedTerritoryIds?: string[];
-  validTargetIds?: string[];
+  contestedTerritoryIds?: string[];
   onSelectTerritory?: (territoryId: string) => void;
   compact?: boolean;
 };
@@ -188,16 +186,16 @@ type TerritoryGridProps = {
 
 ## 22. Données nécessaires
 
-Charger : campaign, territories, campaign_players, territory_adjacencies, éventuellement ordre courant.
+Charger : campaign, territories, campaign_players, territory_adjacencies, batailles en attente, éventuellement ordre courant.
 
 ## 23. Priorités
 
-Must-have : grille dynamique, propriétaire, type, fortification, fiche, légende, responsive.
+Must-have : grille dynamique, propriétaire, type, fortification, bataille en cours, fiche, responsive.
 
-Should-have : surlignage adjacents, carte miniature, surlignage cibles valides.
+Should-have : carte miniature.
 
 Could-have : icônes custom, animations, plein écran, zoom, export image.
 
 ## 24. Définition de réussite
 
-La carte est réussie si elle fonctionne pour 2 à 6 joueurs, reste lisible, n’est pas codée en 4x4, propriétaires/neutres/fortifications/adjacences sont compréhensibles, et les joueurs comprennent quoi conquérir ou fortifier.
+La carte est réussie si elle fonctionne pour 2 à 6 joueurs, reste lisible, n’est pas codée en 4x4, et permet d'identifier rapidement propriétaires, neutres, batailles en cours et fortifications.

@@ -137,6 +137,7 @@ export default async function CampaignPage({
     territories,
     adjacencies,
     orders,
+    pendingBattles,
     orderVisibility,
     logs,
   } = dashboard;
@@ -144,6 +145,9 @@ export default async function CampaignPage({
   const territoryStats = getTerritoryStats(territories);
   const territoryNameById = new Map(
     territories.map((territory) => [territory.id, territory.name]),
+  );
+  const contestedTerritoryIds = Array.from(
+    new Set(pendingBattles.map((battle) => battle.territory_id)),
   );
   const orderVisibilityByPlayerId =
     getOrderVisibilityByPlayerId(orderVisibility);
@@ -386,6 +390,7 @@ export default async function CampaignPage({
                 territoryCode: adjacency.territory_code,
                 adjacentTerritoryCode: adjacency.adjacent_territory_code,
               }))}
+              contestedTerritoryIds={contestedTerritoryIds}
               currentPlayerId={currentPlayer?.id ?? null}
               canSubmitOrders={canSubmitOrders}
               unavailableMessage={orderUnavailableMessage}

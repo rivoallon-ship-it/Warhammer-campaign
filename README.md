@@ -139,6 +139,8 @@ Une campagne accepte entre **2 et 6 joueurs**.
 
 Ne jamais coder en dur une carte 4 x 4.
 
+L'écran de campagne utilise une direction graphique fantasy sombre : panneaux bordés or, carte hexagonale sombre, hexagones parchemin et badges de types colorés.
+
 ### Ordres secrets
 
 Avant révélation, le joueur voit son propre ordre ; les autres joueurs voient seulement “validé” ou “en attente” ; le maître de campagne ne voit pas les détails des ordres adverses. Après révélation, tous les joueurs actifs voient tous les ordres.

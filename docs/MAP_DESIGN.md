@@ -46,25 +46,31 @@ Ces codes servent aux capitales, à l'adjacence et aux scripts. Ils ne sont plus
 
 ## 6. Territoire
 
-Structure : nom court, icône type, propriétaire, badges type/fortifié.
+Structure actuelle des hexagones :
+
+- tag de type en haut ;
+- nom du territoire au centre, sur deux lignes maximum, avec une typographie compacte pour préserver le nom complet autant que possible ;
+- propriétaire en bas ;
+- état utile visible seulement si nécessaire : `Bataille` pour un territoire contesté, `Fortifié` pour une fortification.
 
 Exemple :
 
 ```text
-+---------------------------+
-| Nid des Dragons      🐉   |
-| Léa                       |
-| [Dragon] [Fortifié]       |
-+---------------------------+
+       [DR]
+
+  Nid des Dragons
+
+       Léa
 ```
 
 ## 7. États visuels
 
-- Neutre : fond gris clair, bordure grise, texte Neutre.
-- Contrôlé : fond teinté couleur joueur, bordure couleur joueur, propriétaire visible.
-- Contesté / bataille en cours : couleur dédiée, badge `Bataille`, fiche mise à jour.
-- Sélectionné : indication discrète, fiche mise à jour.
-- Fortifié : badge ou icône bouclier.
+- Neutre : fond parchemin, bordure neutre, propriétaire `Neutre`.
+- Contrôlé : fond teinté couleur joueur, bordure couleur joueur, propriétaire visible en bas.
+- Contesté / bataille en cours : couleur dédiée rouge sombre, badge `Bataille`, fiche mise à jour.
+- Sélectionné : halo lumineux, fiche mise à jour.
+- Cible conquérable sélectionnée : bordure/halo vert pour signaler l'action possible.
+- Fortifié : badge discret en haut de l'hexagone et mention dans la fiche.
 
 ## 8. Types et icônes provisoires
 
@@ -104,7 +110,7 @@ Ne pas afficher de légende permanente dans le bloc carte. Les états utiles res
 
 ## 12. Carte de campagne
 
-La page campagne affiche la carte complète, pas une miniature. Chaque hexagone affiche le nom du territoire, le propriétaire et les états utiles comme bataille en cours ou fortification. Les couleurs principales de la carte correspondent aux joueurs, aux territoires neutres et aux territoires contestés.
+La page campagne affiche la carte complète, pas une miniature. Chaque hexagone affiche le tag de type en haut, le nom du territoire au centre, le propriétaire en bas et les états utiles comme bataille en cours ou fortification. Les couleurs principales de la carte correspondent aux joueurs, aux territoires neutres et aux territoires contestés.
 
 ## 13. Ordres depuis la carte
 
@@ -145,11 +151,19 @@ Carte vide : “La carte n’a pas encore été générée. Elle sera créée au
 
 2 joueurs : carte centrée, territoires grands. 3/4 joueurs : lisible desktop. 5/6 joueurs : plus large, scroll horizontal sur mobile.
 
-## 20. Style MVP
+## 20. Style graphique actuel
 
-Cartes hexagonales, lignes décalées, bordures visibles, fond parchemin léger, badges simples, icônes emoji ou lucide-icons.
+L'écran de campagne suit désormais une direction fantasy sombre inspirée d'un jeu de stratégie :
 
-Éviter : carte dessinée main, drag/drop, animations lourdes, zoom/pan avancé, fonds trop illustrés, territoires trop petits.
+- fond sombre texturé ;
+- panneaux bordés or ;
+- typographie de titres plus médiévale ;
+- carte dans un panneau sombre ;
+- hexagones parchemin avec bordures fortes ;
+- badges de types colorés ;
+- boutons d'action stylés, avec chargement quand une action prend du temps.
+
+Éviter : carte dessinée main, drag/drop, animations lourdes, zoom/pan avancé, fonds trop illustrés, territoires trop petits, texte trop grand dans les hexagones.
 
 ## 21. Composants conceptuels
 

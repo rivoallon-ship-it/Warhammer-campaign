@@ -2,7 +2,7 @@
 ## Les Couronnes Brisées
 ### Suivi du travail réalisé
 
-Dernière mise à jour : 2026-06-01.
+Dernière mise à jour : 2026-06-03.
 
 Ce document résume le travail réalisé depuis le début du développement. Il complète le `README.md`, le plan d'implémentation et l'historique Git.
 
@@ -27,7 +27,7 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 - fin de tour et passage au tour suivant sans limite automatique ;
 - historique de campagne.
 
-Le Lot 21, consacré à l'ergonomie et au confort d'utilisation, est commencé. Les pages `map` et `orders` ont été fusionnées dans l'écran principal de campagne, mais il reste du polish à faire sur le responsive, les confirmations et les états d'erreur.
+Le Lot 21, consacré à l'ergonomie et au confort d'utilisation, est bien avancé. Les pages `map` et `orders` ont été fusionnées dans l'écran principal de campagne, la carte est passée en hexagones et l'écran de jeu a reçu une direction graphique fantasy sombre. Il reste du polish à faire sur le responsive, les états d'erreur et quelques détails visuels après tests réels.
 
 ## Interface actuelle de campagne
 
@@ -41,6 +41,23 @@ Elle regroupe :
 - la carte interactive ;
 - le panneau de commandement du territoire sélectionné ;
 - le classement, le statut des ordres et l'historique.
+
+Direction graphique actuelle :
+
+- fond sombre texturé ;
+- panneaux bordés or ;
+- carte dans un panneau sombre ;
+- hexagones en style parchemin ;
+- badges de type colorés ;
+- halos de sélection ;
+- boutons d'action fantasy avec loader quand une action prend du temps.
+
+Affichage actuel des hexagones :
+
+- tag de type en haut ;
+- nom du territoire au centre sur deux lignes maximum, avec une typographie compacte ;
+- propriétaire en bas ;
+- badge `Bataille` ou `Fortifié` seulement quand l'état est utile.
 
 Les anciennes routes restent présentes pour éviter les liens cassés :
 
@@ -226,6 +243,20 @@ Commits principaux :
 - Suppression de la confirmation navigateur sur `Résoudre la bataille` et ajout d'un état de chargement dédié.
 - Suppression de la confirmation navigateur sur `Terminer le tour` et ajout d'un état de chargement dédié.
 - Passage des nouvelles campagnes aux cartes hexagonales `hex_v1_*` : cartes plus grandes, capitales repositionnées, adjacence à six voisins et rendu de carte en lignes décalées.
+
+### 2026-06-03
+
+- Correction de l'alignement visuel des hexagones : lignes décalées de manière cohérente avec l'adjacence.
+- Adaptation de l'écran de campagne à une direction graphique fantasy sombre : fond texturé, panneaux bordés or, carte sombre, hexagones parchemin, badges de types colorés et boutons stylés.
+- Séparation du rendu interne des hexagones et du rendu carré de secours pour éviter les effets de bord.
+- Réorganisation de l'affichage dans les hexagones : type en haut, nom centré sur deux lignes en plus petit, propriétaire en bas.
+
+Commits principaux :
+
+- `4d8ae25` Add hex campaign maps
+- `339e1a7` Fix hex map alignment
+- `3a429f3` Apply fantasy campaign interface theme
+- `d390552` Refine hex territory label layout
 
 ## Fichiers importants
 

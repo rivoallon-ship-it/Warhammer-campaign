@@ -172,7 +172,9 @@ Le dashboard personnel affiche campagnes en lobby, actives, terminées/archivée
 
 ## 23. Carte interactive
 
-La carte utilise `map_width`, `map_height`, `map_template` et les territoires générés. Chaque hexagone affiche le nom du territoire, le type, le propriétaire, la couleur du propriétaire et la fortification. Les batailles non résolues utilisent une couleur dédiée de territoire contesté. Le code technique de territoire reste en base mais n'est pas affiché sur la carte.
+La carte utilise `map_width`, `map_height`, `map_template` et les territoires générés. Chaque hexagone affiche le tag de type en haut, le nom du territoire au centre sur deux lignes maximum, le propriétaire en bas, la couleur du propriétaire et la fortification si elle existe. Les batailles non résolues utilisent une couleur dédiée de territoire contesté. Le code technique de territoire reste en base mais n'est pas affiché sur la carte.
+
+La direction graphique de l'écran de campagne est fantasy sombre : fond texturé, panneaux bordés or, carte sombre, hexagones parchemin, badges de type colorés et boutons d'action lisibles.
 
 ## 24. Historique simple
 

@@ -1,3 +1,7 @@
+-- Correctif à copier dans Supabase SQL Editor.
+-- Il remplace uniquement la fonction de révélation des ordres.
+-- But : corriger l'erreur PostgreSQL "column reference success is ambiguous".
+
 create or replace function public.reveal_current_turn_orders(target_campaign_id uuid)
 returns table (success boolean, error text, battle_count int, exploration_count int, fortification_count int, multiple_attack_count int)
 language plpgsql volatile security definer set search_path = public as $$
@@ -58,3 +62,6 @@ begin
   return query select true, null::text, v_battle_count, v_exploration_count, v_fortification_count, v_multiple_attack_count;
 end;
 $$;
+
+grant execute on function public.reveal_current_turn_orders(uuid) to authenticated;
+notify pgrst, 'reload schema';

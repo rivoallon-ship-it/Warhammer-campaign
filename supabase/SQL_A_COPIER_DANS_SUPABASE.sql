@@ -854,7 +854,7 @@ begin
       target.code as territory_code,
       target.name as territory_name,
       roll.dice_result,
-      roll.dice_result >= 3 as success
+      roll.dice_result >= 3 as exploration_success
     from public.orders o
     join public.territories target on target.id = o.target_territory_id
     cross join lateral (
@@ -878,7 +878,7 @@ begin
       )
   ),
   inserted_explorations as (
-    insert into public.explorations (
+    insert into public.explorations as inserted_exploration (
       campaign_id,
       turn_id,
       order_id,
@@ -890,17 +890,23 @@ begin
       resolved_at
     )
     select
-      campaign_id,
-      turn_id,
-      order_id,
-      campaign_player_id,
-      territory_id,
+      single_orders.campaign_id,
+      single_orders.turn_id,
+      single_orders.order_id,
+      single_orders.campaign_player_id,
+      single_orders.territory_id,
       'resolved',
-      dice_result,
-      success,
+      single_orders.dice_result,
+      single_orders.exploration_success,
       now()
     from single_orders
-    returning campaign_id, turn_id, campaign_player_id, territory_id, dice_result, success
+    returning
+      inserted_exploration.campaign_id,
+      inserted_exploration.turn_id,
+      inserted_exploration.campaign_player_id,
+      inserted_exploration.territory_id,
+      inserted_exploration.dice_result,
+      inserted_exploration.success as exploration_success
   ),
   glory_updates as (
     update public.campaign_players cp
@@ -916,7 +922,7 @@ begin
         updated_at = now()
     from inserted_explorations ie
     where target.id = ie.territory_id
-      and ie.success
+      and ie.exploration_success
     returning target.id
   )
   insert into public.campaign_logs (
@@ -931,10 +937,10 @@ begin
     ie.campaign_id,
     ie.turn_id,
     'exploration_result',
-    case when ie.success then 'Conquête réussie' else 'Conquête échouée' end,
+    case when ie.exploration_success then 'Conquête réussie' else 'Conquête échouée' end,
     cp.display_name || ' tente de conquérir ' || target.code || ' - '
       || target.name || ' : '
-      || case when ie.success then 'réussite' else 'échec' end
+      || case when ie.exploration_success then 'réussite' else 'échec' end
       || ' sur un D6 automatique de ' || ie.dice_result || '. +1 Gloire.',
     auth.uid()
   from inserted_explorations ie

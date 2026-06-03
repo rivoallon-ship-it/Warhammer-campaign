@@ -259,6 +259,7 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `02c_conquer_action_type.sql`
 - `06b_multi_battle_support.sql`
 - `07_reveal_orders_function.sql`
+- `04_CORRECTIF_REVELATION_SUCCESS_AMBIGU.sql` : correctif court à copier si Supabase affiche `column reference "success" is ambiguous` pendant la révélation.
 - `09_resolve_battle_function.sql`
 - `14_logs_grants.sql`
 

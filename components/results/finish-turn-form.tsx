@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useFormStatus } from "react-dom";
 import { finishTurnAction } from "@/app/campaigns/[campaignId]/results/actions";
 import { Button } from "@/components/ui";
 
@@ -8,23 +8,37 @@ type FinishTurnFormProps = {
   campaignId: string;
 };
 
-export function FinishTurnForm({ campaignId }: FinishTurnFormProps) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (
-      !window.confirm(
-        "Terminer le tour et ouvrir le tour suivant ? Les joueurs pourront alors donner leurs nouveaux ordres.",
-      )
-    ) {
-      event.preventDefault();
-    }
-  }
+function FinishTurnButton() {
+  const { pending } = useFormStatus();
 
   return (
-    <form action={finishTurnAction} onSubmit={handleSubmit}>
+    <Button
+      type="submit"
+      variant="danger"
+      className="w-full gap-2"
+      disabled={pending}
+      aria-live="polite"
+    >
+      {pending ? (
+        <>
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            aria-hidden="true"
+          />
+          Fin du tour...
+        </>
+      ) : (
+        "Terminer le tour"
+      )}
+    </Button>
+  );
+}
+
+export function FinishTurnForm({ campaignId }: FinishTurnFormProps) {
+  return (
+    <form action={finishTurnAction}>
       <input type="hidden" name="campaignId" value={campaignId} />
-      <Button type="submit" variant="danger" className="w-full">
-        Terminer le tour
-      </Button>
+      <FinishTurnButton />
     </form>
   );
 }

@@ -224,6 +224,7 @@ Commits principaux :
 - Ajout du bloc `Progression du tour` : phase Ordres, Révélation et Résultats, avec les actions maître au bon moment.
 - Suppression de la confirmation navigateur sur `Révéler les ordres` et ajout d'un état de chargement dédié.
 - Suppression de la confirmation navigateur sur `Résoudre la bataille` et ajout d'un état de chargement dédié.
+- Suppression de la confirmation navigateur sur `Terminer le tour` et ajout d'un état de chargement dédié.
 
 ## Fichiers importants
 

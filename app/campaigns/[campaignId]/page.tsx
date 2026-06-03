@@ -117,34 +117,28 @@ function ColorSwatch({ color }: { color: string }) {
 
 type StepState = "done" | "current" | "waiting";
 
-function getStepClasses(state: StepState) {
+function getStepCircleClasses(state: StepState) {
   if (state === "done") {
-    return "border-[#6fa07e]/70 bg-[#173121]/80";
+    return "border-[#6fa07e] bg-[#2f8050] text-[#f3ead7]";
   }
 
   if (state === "current") {
-    return "border-[#d6a957]/80 bg-[#3b2c16]/80";
+    return "border-[#d5a653] bg-[#d5a653] text-[#17100a]";
   }
 
-  return "border-[#c89a53]/35 bg-[#0b1113]/70";
+  return "border-[#c89a53]/45 bg-[#eadfc9]/10 text-[#cbbda6]";
 }
 
-function getStepBadgeVariant(state: StepState) {
-  if (state === "done") return "success" as const;
-  if (state === "current") return "warning" as const;
+function getStepTitleClasses(state: StepState) {
+  if (state === "current") return "text-[#f4ce73]";
+  if (state === "done") return "text-[#d8f0dd]";
 
-  return "neutral" as const;
-}
-
-function getStepStatusLabel(state: StepState) {
-  if (state === "done") return "Terminé";
-  if (state === "current") return "En cours";
-
-  return "À venir";
+  return "text-[#cbbda6]";
 }
 
 type TurnProgressStepProps = {
-  phase: string;
+  index: number;
+  isLast: boolean;
   title: string;
   detail: string;
   state: StepState;
@@ -152,28 +146,42 @@ type TurnProgressStepProps = {
 };
 
 function TurnProgressStep({
-  phase,
+  index,
+  isLast,
   title,
   detail,
   state,
   children,
 }: TurnProgressStepProps) {
   return (
-    <div className={`rounded-md border p-4 ${getStepClasses(state)}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-normal text-[#c9a45d]">
-            {phase}
-          </p>
-          <h3 className="mt-1 font-bold text-[#f3ead7]">{title}</h3>
-        </div>
-        <Badge variant={getStepBadgeVariant(state)}>
-          {getStepStatusLabel(state)}
-        </Badge>
-      </div>
-      <p className="mt-3 text-sm text-[#cbbda6]">{detail}</p>
-      {children ? <div className="mt-4">{children}</div> : null}
-    </div>
+    <li className="relative min-w-0 text-center">
+      {!isLast ? (
+        <span
+          className={`absolute top-[18px] h-px ${
+            state === "done" ? "bg-[#6fa07e]" : "bg-[#c89a53]/35"
+          }`}
+          style={{
+            left: "calc(50% + 1.125rem)",
+            right: "calc(-50% + 1.125rem)",
+          }}
+          aria-hidden="true"
+        />
+      ) : null}
+      <span
+        className={`relative z-10 mx-auto grid size-9 place-items-center rounded-full border-2 text-sm font-bold ${getStepCircleClasses(
+          state,
+        )}`}
+      >
+        {index + 1}
+      </span>
+      <h3 className={`mt-3 text-sm font-bold ${getStepTitleClasses(state)}`}>
+        {title}
+      </h3>
+      <p className="mx-auto mt-1 max-w-48 text-xs leading-5 text-[#cbbda6]">
+        {detail}
+      </p>
+      {children ? <div className="mx-auto mt-3 max-w-52">{children}</div> : null}
+    </li>
   );
 }
 
@@ -227,75 +235,66 @@ function TurnProgress({
     : "Les batailles apparaissent après la révélation.";
 
   return (
-    <Card className="fantasy-panel mt-4">
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="fantasy-panel-title text-lg font-bold">
-              Progression du tour
-            </h2>
-            <p className="fantasy-muted mt-1 text-sm">
-              Suivi des ordres, de la révélation et des résultats.
+    <section className="mt-5 border-t border-[#c89a53]/35 pt-4">
+      <h2 className="fantasy-panel-title text-lg font-bold">
+        Progression du tour
+      </h2>
+
+      <ol className="mt-4 grid grid-cols-3 gap-2 overflow-hidden px-1 sm:px-4">
+        <TurnProgressStep
+          index={0}
+          isLast={false}
+          title="Ordres"
+          detail={`${submittedOrderCount} / ${activePlayerCount} ordre${
+            activePlayerCount > 1 ? "s" : ""
+          } validé${submittedOrderCount > 1 ? "s" : ""}.`}
+          state={ordersState}
+        />
+
+        <TurnProgressStep
+          index={1}
+          isLast={false}
+          title="Révélation"
+          detail={
+            allOrdersSubmitted
+              ? "Tous les ordres sont prêts."
+              : "Disponible quand tous les joueurs ont validé."
+          }
+          state={revealState}
+        >
+          {canRevealOrders ? (
+            <RevealOrdersForm campaignId={campaignId} returnTo="campaign" />
+          ) : allOrdersSubmitted && !isGameMaster && isOrdersPhase ? (
+            <p className="fantasy-muted text-xs">
+              En attente du maître de campagne.
             </p>
-          </div>
-          <Badge variant="neutral">
-            {submittedOrderCount} / {activePlayerCount} ordres
-          </Badge>
-        </div>
+          ) : null}
+        </TurnProgressStep>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
-          <TurnProgressStep
-            phase="Phase 1"
-            title="Ordres"
-            detail={`${submittedOrderCount} / ${activePlayerCount} ordre${
-              activePlayerCount > 1 ? "s" : ""
-            } validé${submittedOrderCount > 1 ? "s" : ""}.`}
-            state={ordersState}
-          />
-
-          <TurnProgressStep
-            phase="Phase 2"
-            title="Révélation"
-            detail={
-              allOrdersSubmitted
-                ? "Tous les ordres sont prêts."
-                : "Disponible quand tous les joueurs ont validé."
-            }
-            state={revealState}
-          >
-            {canRevealOrders ? (
-              <RevealOrdersForm campaignId={campaignId} returnTo="campaign" />
-            ) : allOrdersSubmitted && !isGameMaster && isOrdersPhase ? (
-              <p className="fantasy-muted text-sm">
-                En attente du maître de campagne.
-              </p>
-            ) : null}
-          </TurnProgressStep>
-
-          <TurnProgressStep
-            phase="Phase 3"
-            title="Résultats"
-            detail={battleDetail}
-            state={resultsState}
-          >
-            {canOpenResults ? (
-              <Link
-                href={`/campaigns/${campaignId}/results`}
-                className={buttonVariants({
-                  className: "fantasy-action-button w-full",
-                })}
-              >
-                Saisir les résultats
-              </Link>
-            ) : null}
-            {canFinishTurn ? <FinishTurnForm campaignId={campaignId} /> : null}
-          </TurnProgressStep>
-        </div>
-      </CardContent>
-    </Card>
+        <TurnProgressStep
+          index={2}
+          isLast
+          title="Résultats"
+          detail={battleDetail}
+          state={resultsState}
+        >
+          {canOpenResults ? (
+            <Link
+              href={`/campaigns/${campaignId}/results`}
+              className={buttonVariants({
+                size: "sm",
+                className: "fantasy-action-button w-full",
+              })}
+            >
+              Saisir les résultats
+            </Link>
+          ) : null}
+          {canFinishTurn ? <FinishTurnForm campaignId={campaignId} /> : null}
+        </TurnProgressStep>
+      </ol>
+    </section>
   );
 }
-
 export default async function CampaignPage({
   params,
   searchParams,
@@ -362,7 +361,6 @@ export default async function CampaignPage({
 
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
-  const canUseCampaignActions = campaign.status === "active" && currentPlayer;
   const existingPlayerOrder =
     currentPlayer && currentTurn
       ? (orders.find((order) => order.campaign_player_id === currentPlayer.id) ?? null)
@@ -409,7 +407,7 @@ export default async function CampaignPage({
             </div>
 
             <div className="flex flex-col gap-3 xl:items-end">
-              <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4 xl:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2 text-sm">
                 <span className="fantasy-stat px-3 py-2">
                   <span className="block text-xs font-semibold text-[#c9a45d]">
                     Carte
@@ -432,14 +430,6 @@ export default async function CampaignPage({
                   </span>
                   <span className="font-bold text-[#f3ead7]">
                     {territoryStats.neutral}
-                  </span>
-                </span>
-                <span className="fantasy-stat px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#c9a45d]">
-                    Ordres
-                  </span>
-                  <span className="font-bold text-[#f3ead7]">
-                    {submittedOrderCount} / {activePlayers.length}
                   </span>
                 </span>
               </div>
@@ -481,12 +471,17 @@ export default async function CampaignPage({
             </div>
           </div>
 
-          {canUseCampaignActions ? (
-            <p className="fantasy-alert mt-4 p-3 text-sm">
-              {campaign.current_phase === "orders"
-                ? "Sélectionne un territoire contrôlé sur la carte pour donner ton ordre."
-                : "La carte reste consultable, mais les ordres ne sont pas ouverts dans cette phase."}
-            </p>
+          {campaign.status === "active" ? (
+            <TurnProgress
+              campaignId={campaign.id}
+              currentPhase={campaign.current_phase}
+              isGameMaster={isGameMaster}
+              submittedOrderCount={submittedOrderCount}
+              activePlayerCount={activePlayers.length}
+              battleCount={battles.length}
+              resolvedBattleCount={resolvedBattleCount}
+              pendingBattleCount={pendingBattleCount}
+            />
           ) : null}
         </header>
 
@@ -545,19 +540,6 @@ export default async function CampaignPage({
           <p className="fantasy-alert fantasy-alert-danger mt-4 p-3 text-sm">
             {query.error}
           </p>
-        ) : null}
-
-        {campaign.status === "active" ? (
-          <TurnProgress
-            campaignId={campaign.id}
-            currentPhase={campaign.current_phase}
-            isGameMaster={isGameMaster}
-            submittedOrderCount={submittedOrderCount}
-            activePlayerCount={activePlayers.length}
-            battleCount={battles.length}
-            resolvedBattleCount={resolvedBattleCount}
-            pendingBattleCount={pendingBattleCount}
-          />
         ) : null}
 
         <section className="mt-4">

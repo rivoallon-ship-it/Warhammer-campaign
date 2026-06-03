@@ -507,7 +507,9 @@ export function CampaignCommandCenter({
                 Carte de campagne
               </CardTitle>
               <CardDescription className="fantasy-muted">
-                Clique sur un territoire : les ordres disponibles apparaissent à droite.
+                {canSubmitOrders
+                  ? "Sélectionne un territoire contrôlé sur la carte pour donner ton ordre."
+                  : "Clique sur un territoire pour consulter ses informations et les actions disponibles."}
               </CardDescription>
             </div>
             <Badge

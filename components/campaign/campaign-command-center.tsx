@@ -360,7 +360,74 @@ export function CampaignCommandCenter({
       : (owner?.displayName ?? "Neutre");
     const isDarkTile = isContested;
 
-    const content = (
+    const typeBadge = (
+      <span
+        className="hex-type-badge shrink-0"
+        style={{
+          clipPath: hexClipPath,
+          ...(territoryTypeBadgeStyles[territory.type] ??
+            territoryTypeBadgeStyles.wild),
+        }}
+      >
+        {getTerritoryTypeMark(territory.type)}
+      </span>
+    );
+    const ownerLine = (
+      <span
+        className={cn(
+          "flex min-w-0 max-w-full items-center gap-2 font-medium",
+          isDarkTile ? "text-[#f5dca8]" : "text-[#55483a]",
+        )}
+      >
+        <span
+          className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fff8dd]"
+          style={{ backgroundColor: ownerColor }}
+          aria-hidden="true"
+        />
+        <span className="truncate">{ownerLabel}</span>
+      </span>
+    );
+    const statusBadges =
+      isContested || territory.isFortified ? (
+        <>
+          {isContested ? (
+            <span className="rounded-md border border-[#f0674f] bg-[#3a1513] px-2 py-1 text-[11px] font-semibold text-[#ffd8c9]">
+              Bataille
+            </span>
+          ) : null}
+          {territory.isFortified ? (
+            <span className="rounded-md border border-[#d5a653] bg-[#2b2214] px-2 py-1 text-[11px] font-semibold text-[#f7d78a]">
+              Fortifié
+            </span>
+          ) : null}
+        </>
+      ) : null;
+
+    const hexContent = (
+      <>
+        <span className="flex min-h-9 items-start justify-center gap-1.5">
+          {typeBadge}
+          {territory.isFortified ? (
+            <span className="rounded-md border border-[#d5a653] bg-[#2b2214] px-1.5 py-0.5 text-[10px] font-semibold text-[#f7d78a]">
+              Fortifié
+            </span>
+          ) : null}
+        </span>
+        <span
+          className={cn(
+            "my-auto line-clamp-2 px-1 text-center text-[13px] font-bold leading-[15px]",
+            isDarkTile ? "text-[#fff4d1]" : "text-[#211a16]",
+          )}
+        >
+          {territory.name}
+        </span>
+        <span className="flex min-h-5 justify-center text-[11px] leading-none">
+          {ownerLine}
+        </span>
+      </>
+    );
+
+    const squareContent = (
       <>
         <span className="flex items-start justify-between gap-2">
           <span
@@ -371,43 +438,11 @@ export function CampaignCommandCenter({
           >
             {territory.name}
           </span>
-          <span
-            className="hex-type-badge shrink-0"
-            style={{
-              clipPath: hexClipPath,
-              ...(territoryTypeBadgeStyles[territory.type] ??
-                territoryTypeBadgeStyles.wild),
-            }}
-          >
-            {getTerritoryTypeMark(territory.type)}
-          </span>
+          {typeBadge}
         </span>
-        <span
-          className={cn(
-            "mt-2 flex items-center gap-2 text-xs font-medium",
-            isDarkTile ? "text-[#f5dca8]" : "text-[#55483a]",
-          )}
-        >
-          <span
-            className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fff8dd]"
-            style={{ backgroundColor: ownerColor }}
-            aria-hidden="true"
-          />
-          <span className="truncate">{ownerLabel}</span>
-        </span>
-        {isContested || territory.isFortified ? (
-          <span className="mt-3 flex flex-wrap gap-1">
-            {isContested ? (
-              <span className="rounded-md border border-[#f0674f] bg-[#3a1513] px-2 py-1 text-[11px] font-semibold text-[#ffd8c9]">
-                Bataille
-              </span>
-            ) : null}
-            {territory.isFortified ? (
-              <span className="rounded-md border border-[#d5a653] bg-[#2b2214] px-2 py-1 text-[11px] font-semibold text-[#f7d78a]">
-                Fortifié
-              </span>
-            ) : null}
-          </span>
+        <span className="mt-2 text-xs">{ownerLine}</span>
+        {statusBadges ? (
+          <span className="mt-3 flex flex-wrap gap-1">{statusBadges}</span>
         ) : null}
       </>
     );
@@ -429,13 +464,13 @@ export function CampaignCommandCenter({
           }}
         >
           <span
-            className="hex-territory-inner flex h-full w-full flex-col justify-center overflow-hidden px-5 py-5"
+            className="hex-territory-inner flex h-full w-full flex-col overflow-hidden px-4 py-4"
             style={{
               backgroundColor,
               clipPath: hexClipPath,
             }}
           >
-            {content}
+            {hexContent}
           </span>
         </button>
       );
@@ -457,7 +492,7 @@ export function CampaignCommandCenter({
           boxShadow: isSelected ? "0 0 0 2px #302720" : undefined,
         }}
       >
-        {content}
+        {squareContent}
       </button>
     );
   }

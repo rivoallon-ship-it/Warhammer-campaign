@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useFormStatus } from "react-dom";
 import { resolveBattleAction } from "@/app/campaigns/[campaignId]/results/actions";
 import { Button, Select, Textarea } from "@/components/ui";
 
@@ -13,23 +13,38 @@ type ResolveBattleFormProps = {
   }[];
 };
 
+function ResolveBattleButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      className="w-full gap-2"
+      disabled={pending}
+      aria-live="polite"
+    >
+      {pending ? (
+        <>
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            aria-hidden="true"
+          />
+          Résolution...
+        </>
+      ) : (
+        "Résoudre la bataille"
+      )}
+    </Button>
+  );
+}
+
 export function ResolveBattleForm({
   campaignId,
   battleId,
   participants,
 }: ResolveBattleFormProps) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (
-      !window.confirm(
-        "Enregistrer ce résultat de bataille ? La Gloire, le territoire et la fortification seront mis à jour.",
-      )
-    ) {
-      event.preventDefault();
-    }
-  }
-
   return (
-    <form action={resolveBattleAction} onSubmit={handleSubmit} className="space-y-3">
+    <form action={resolveBattleAction} className="space-y-3">
       <input type="hidden" name="campaignId" value={campaignId} />
       <input type="hidden" name="battleId" value={battleId} />
       <Select
@@ -45,9 +60,7 @@ export function ResolveBattleForm({
         label="Notes"
         placeholder="Score, scénario, moment marquant..."
       />
-      <Button type="submit" className="w-full">
-        Résoudre la bataille
-      </Button>
+      <ResolveBattleButton />
     </form>
   );
 }

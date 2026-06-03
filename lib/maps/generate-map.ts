@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getMapConfig, isSupportedPlayerCount } from "@/lib/maps/map-configs";
 import {
+  generateHexAdjacencies,
   generateOrthogonalAdjacencies,
   generateTerritoryCoordinates,
   sortByStableSeed,
@@ -61,6 +62,10 @@ function getLocalFaction(type: TerritoryType) {
   if (type === "dragon" || type === "giant") return type;
 
   return null;
+}
+
+function isHexTemplate(template: string) {
+  return template.startsWith("hex_");
 }
 
 function getTypeByCode(
@@ -196,10 +201,10 @@ function buildMapRows({ campaign, activePlayers }: MapGenerationData) {
     };
   });
 
-  const adjacencies: AdjacencyInsert[] = generateOrthogonalAdjacencies(
-    campaign.map_width,
-    campaign.map_height,
-  ).map((adjacency) => ({
+  const adjacencyRows = isHexTemplate(campaign.map_template)
+    ? generateHexAdjacencies(campaign.map_width, campaign.map_height)
+    : generateOrthogonalAdjacencies(campaign.map_width, campaign.map_height);
+  const adjacencies: AdjacencyInsert[] = adjacencyRows.map((adjacency) => ({
     campaign_id: campaign.id,
     territory_code: adjacency.territoryCode,
     adjacent_territory_code: adjacency.adjacentTerritoryCode,

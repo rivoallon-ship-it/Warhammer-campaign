@@ -108,7 +108,7 @@ Page `/campaigns/[campaignId]/lobby`. Afficher joueurs actifs/pending, code, pla
 
 ## Lot 9 — Génération automatique de carte
 
-Créer `/lib/maps/generate-map.ts`, `territory-names.ts`, `territory-distribution.ts`, `map-utils.ts`. Générer codes, coordonnées, capitales, propriétaires, fortifications centrales, types, noms, adjacences orthogonales, insert DB.
+Créer `/lib/maps/generate-map.ts`, `territory-names.ts`, `territory-distribution.ts`, `map-utils.ts`. Générer codes, coordonnées, capitales, propriétaires, fortifications centrales, types, noms, adjacences hexagonales pour les templates `hex_v1_*`, insert DB.
 
 ## Lot 10 — Lancement de campagne
 
@@ -120,7 +120,7 @@ Page `/campaigns/[campaignId]`. Écran principal de campagne : nom, Saison/Tour,
 
 ## Lot 12 — Carte interactive dynamique
 
-La carte interactive est intégrée à `/campaigns/[campaignId]`. La route `/campaigns/[campaignId]/map` reste disponible mais redirige vers la page campagne. Grille dynamique `map_width` x `map_height`, couleurs, neutres, types, noms/codes, fortifications, fiche au clic. Ne jamais supposer 4x4.
+La carte interactive est intégrée à `/campaigns/[campaignId]`. La route `/campaigns/[campaignId]/map` reste disponible mais redirige vers la page campagne. Carte dynamique `map_width` x `map_height`, rendu hexagonal pour `hex_v1_*`, couleurs, neutres, types, noms, fortifications, fiche au clic. Ne jamais supposer 4x4.
 
 ## Lot 13 — Ordres secrets
 

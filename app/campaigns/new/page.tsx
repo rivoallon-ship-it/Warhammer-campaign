@@ -24,7 +24,7 @@ type NewCampaignPageProps = {
 };
 
 const playerOptions = Object.entries(MAP_CONFIGS).map(([playerCount, config]) => ({
-  label: `${playerCount} joueurs — ${config.width} x ${config.height} (${config.width * config.height} territoires)`,
+  label: `${playerCount} joueurs - carte hex ${config.width} x ${config.height} (${config.width * config.height} territoires)`,
   value: playerCount,
 }));
 
@@ -36,7 +36,7 @@ function MapPreview({ playerCount }: { playerCount: PlayerCount }) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[#302720]">
-            Carte {config.width} x {config.height}
+            Carte hexagonale {config.width} x {config.height}
           </p>
           <p className="mt-1 text-sm text-[#6a5e54]">
             {config.width * config.height} territoires, capitales proposées :{" "}
@@ -68,7 +68,7 @@ export default async function NewCampaignPage({
         <PageHeader
           eyebrow="Campagne"
           title="Créer une campagne"
-          description="Choisis le format de campagne. La carte sera dimensionnée automatiquement selon le nombre de joueurs."
+          description="Choisis le format de campagne. Les nouvelles cartes utilisent des territoires hexagonaux plus vastes."
         />
         <Card className="mt-8">
           <CardHeader>

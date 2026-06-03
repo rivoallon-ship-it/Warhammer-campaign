@@ -71,6 +71,50 @@ export function generateOrthogonalAdjacencies(width: number, height: number) {
   return adjacencies;
 }
 
+export function generateHexAdjacencies(width: number, height: number) {
+  const adjacencies: TerritoryAdjacency[] = [];
+
+  for (const coordinate of generateTerritoryCoordinates(width, height)) {
+    const isEvenRow = coordinate.positionY % 2 === 0;
+    const diagonalOffset = isEvenRow ? 1 : -1;
+    const candidates = [
+      { positionX: coordinate.positionX - 1, positionY: coordinate.positionY },
+      { positionX: coordinate.positionX + 1, positionY: coordinate.positionY },
+      { positionX: coordinate.positionX, positionY: coordinate.positionY - 1 },
+      { positionX: coordinate.positionX, positionY: coordinate.positionY + 1 },
+      {
+        positionX: coordinate.positionX + diagonalOffset,
+        positionY: coordinate.positionY - 1,
+      },
+      {
+        positionX: coordinate.positionX + diagonalOffset,
+        positionY: coordinate.positionY + 1,
+      },
+    ];
+
+    candidates.forEach((candidate) => {
+      if (
+        candidate.positionX < 1 ||
+        candidate.positionX > width ||
+        candidate.positionY < 1 ||
+        candidate.positionY > height
+      ) {
+        return;
+      }
+
+      adjacencies.push({
+        territoryCode: coordinate.code,
+        adjacentTerritoryCode: getTerritoryCode(
+          candidate.positionX,
+          candidate.positionY,
+        ),
+      });
+    });
+  }
+
+  return adjacencies;
+}
+
 export function stableHash(value: string) {
   let hash = 2166136261;
 

@@ -105,7 +105,7 @@ Actions maître : Lancer la campagne, avec messages si impossible : joueur manqu
 
 Afficher : nom, Saison 1 — Tour X, phase, points d’armée, carte interactive, panneau de territoire sélectionné, actions possibles, classement, statut des ordres, historique récent.
 
-Actions joueur : sélectionner une case, fortifier un territoire contrôlé, cliquer une cible conquérable, valider `Conquérir`, annuler un ordre soumis tant que la phase d'ordres est ouverte, voir les batailles/résultats selon la phase.
+Actions joueur : sélectionner un territoire, fortifier un territoire contrôlé, cliquer une cible conquérable, valider `Conquérir`, annuler un ordre soumis tant que la phase d'ordres est ouverte, voir les batailles/résultats selon la phase.
 
 Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
 
@@ -119,7 +119,7 @@ Layout desktop de la page campagne : carte à gauche, fiche territoire/actions �
 
 Mobile : carte en haut, fiche en dessous.
 
-Case : nom du territoire, icône type, propriétaire, couleur du joueur ou couleur neutre, badge bataille/fortifié si utile. Le code technique de case n'est pas affiché sur la carte.
+Territoire hexagonal : nom du territoire, icône type, propriétaire, couleur du joueur ou couleur neutre, badge bataille/fortifié si utile. Le code technique du territoire n'est pas affiché sur la carte.
 
 Fiche : nom, propriétaire, statut utile et actions disponibles.
 

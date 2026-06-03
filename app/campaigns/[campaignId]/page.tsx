@@ -555,6 +555,7 @@ export default async function CampaignPage({
               campaignId={campaign.id}
               mapWidth={campaign.map_width}
               mapHeight={campaign.map_height}
+              mapTemplate={campaign.map_template}
               players={activePlayers.map((player) => ({
                 id: player.id,
                 displayName: player.display_name,

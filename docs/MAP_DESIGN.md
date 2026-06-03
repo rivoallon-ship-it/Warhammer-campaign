@@ -12,11 +12,11 @@ Elle doit fonctionner pour 2 à 6 joueurs.
 
 | Joueurs | Carte | Territoires |
 |---:|---|---:|
-| 2 | 3 x 3 | 9 |
-| 3 | 4 x 3 | 12 |
-| 4 | 4 x 4 | 16 |
-| 5 | 5 x 4 | 20 |
-| 6 | 6 x 4 | 24 |
+| 2 | hex 5 x 4 | 20 |
+| 3 | hex 6 x 5 | 30 |
+| 4 | hex 7 x 5 | 35 |
+| 5 | hex 8 x 6 | 48 |
+| 6 | hex 9 x 6 | 54 |
 
 Utiliser `campaign.map_width` et `campaign.map_height`.
 
@@ -30,16 +30,11 @@ Desktop : header compact, carte à gauche, fiche territoire/actions à droite, l
 
 Mobile : header, carte scrollable, fiche sélectionnée, légende.
 
-## 4. Grille dynamique
+## 4. Carte hexagonale
 
-CSS conceptuel :
+Les campagnes `hex_v1_*` utilisent des territoires hexagonaux en lignes horizontales décalées. Les lignes paires sont décalées vers la droite, ce qui correspond au calcul d'adjacence à six voisins.
 
-```css
-grid-template-columns: repeat(mapWidth, minmax(90px, 1fr));
-grid-template-rows: repeat(mapHeight, minmax(90px, auto));
-```
-
-Règles : desktop largeur disponible, mobile scroll horizontal, cases lisibles.
+Règles : desktop largeur disponible, mobile scroll horizontal, territoires lisibles.
 
 ## 5. Codes techniques des territoires
 
@@ -47,9 +42,9 @@ Lignes A, B, C, D... Colonnes 1, 2, 3...
 
 Exemples : x=1 y=1 -> A1 ; x=6 y=4 -> D6.
 
-Ces codes servent aux capitales, à l'adjacence et aux scripts. Ils ne sont plus affichés dans les cases de la carte, car les territoires ont déjà un nom.
+Ces codes servent aux capitales, à l'adjacence et aux scripts. Ils ne sont plus affichés dans les territoires de la carte, car les territoires ont déjà un nom.
 
-## 6. Case territoire
+## 6. Territoire
 
 Structure : nom court, icône type, propriétaire, badges type/fortifié.
 
@@ -105,11 +100,11 @@ Statut : Fortifié
 
 ## 11. Légende
 
-Ne pas afficher de légende permanente dans le bloc carte. Les états utiles restent visibles directement dans les cases concernées : propriétaire, type, bataille et fortification.
+Ne pas afficher de légende permanente dans le bloc carte. Les états utiles restent visibles directement dans les territoires concernés : propriétaire, type, bataille et fortification.
 
 ## 12. Carte de campagne
 
-La page campagne affiche la carte complète, pas une miniature. Chaque case affiche le nom du territoire, le propriétaire et les états utiles comme bataille en cours ou fortification. Les couleurs principales de la carte correspondent aux joueurs, aux territoires neutres et aux territoires contestés.
+La page campagne affiche la carte complète, pas une miniature. Chaque hexagone affiche le nom du territoire, le propriétaire et les états utiles comme bataille en cours ou fortification. Les couleurs principales de la carte correspondent aux joueurs, aux territoires neutres et aux territoires contestés.
 
 ## 13. Ordres depuis la carte
 
@@ -126,7 +121,7 @@ Il n'y a plus de bouton préparatoire `Conquérir depuis ...` sur les territoire
 
 ## 14. Comportement clic
 
-Sur la page campagne : sélectionner une case affiche sa fiche et propose seulement les actions réellement possibles selon propriétaire, phase et joueur courant. La carte ne surligne plus les adjacences, car l'information utile est donnée par les actions du panneau.
+Sur la page campagne : sélectionner un territoire affiche sa fiche et propose seulement les actions réellement possibles selon propriétaire, phase et joueur courant. La carte ne surligne plus les adjacences, car l'information utile est donnée par les actions du panneau.
 
 ## 15. Adjacences visuelles
 
@@ -138,7 +133,7 @@ Afficher `🛡️ Fortifié` ou badge `[Fortifié]`. Si attaqué, bonus affiché
 
 ## 17. Accessibilité
 
-Ne jamais communiquer uniquement par couleur. Afficher nom, propriétaire et badge. Contraste suffisant. Cases assez grandes, minimum recommandé 90px x 90px.
+Ne jamais communiquer uniquement par couleur. Afficher nom, propriétaire et badge. Contraste suffisant. Hexagones assez grands, minimum recommandé 120px de large.
 
 ## 18. États
 
@@ -148,13 +143,13 @@ Carte vide : “La carte n’a pas encore été générée. Elle sera créée au
 
 ## 19. Cas par taille
 
-2 joueurs : carte centrée, cases grandes. 3/4 joueurs : lisible desktop. 5/6 joueurs : plus large, scroll horizontal sur mobile.
+2 joueurs : carte centrée, territoires grands. 3/4 joueurs : lisible desktop. 5/6 joueurs : plus large, scroll horizontal sur mobile.
 
 ## 20. Style MVP
 
-Cartes rectangulaires, coins arrondis, bordures visibles, fond parchemin léger, badges simples, icônes emoji ou lucide-icons.
+Cartes hexagonales, lignes décalées, bordures visibles, fond parchemin léger, badges simples, icônes emoji ou lucide-icons.
 
-Éviter : carte dessinée main, hexagones complexes, drag/drop, animations lourdes, zoom/pan avancé, fonds trop illustrés, cases trop petites.
+Éviter : carte dessinée main, drag/drop, animations lourdes, zoom/pan avancé, fonds trop illustrés, territoires trop petits.
 
 ## 21. Composants conceptuels
 

@@ -67,31 +67,27 @@ Ne jamais coder une carte fixe 4x4. Utiliser `campaign.map_width` et `campaign.m
 
 | Joueurs | Carte |
 |---:|---|
-| 2 | 3 x 3 |
-| 3 | 4 x 3 |
-| 4 | 4 x 4 |
-| 5 | 5 x 4 |
-| 6 | 6 x 4 |
+| 2 | hex 5 x 4 |
+| 3 | hex 6 x 5 |
+| 4 | hex 7 x 5 |
+| 5 | hex 8 x 6 |
+| 6 | hex 9 x 6 |
 
 ### MAP_CONFIGS
 
 ```ts
 export const MAP_CONFIGS = {
-  2: { width: 3, height: 3, template: "auto_2p", capitalSlots: ["A1", "C3"] },
-  3: { width: 4, height: 3, template: "auto_3p", capitalSlots: ["A1", "A4", "C2"] },
-  4: { width: 4, height: 4, template: "auto_4p", capitalSlots: ["A1", "A4", "D1", "D4"] },
-  5: { width: 5, height: 4, template: "auto_5p", capitalSlots: ["A1", "A5", "D1", "D5", "B3"], fortifiedCapitalSlots: ["B3"] },
-  6: { width: 6, height: 4, template: "auto_6p", capitalSlots: ["A1", "A6", "D1", "D6", "B3", "C4"], fortifiedCapitalSlots: ["B3", "C4"] },
+  2: { width: 5, height: 4, template: "hex_v1_2p", capitalSlots: ["A1", "D5"] },
+  3: { width: 6, height: 5, template: "hex_v1_3p", capitalSlots: ["A1", "A6", "E3"] },
+  4: { width: 7, height: 5, template: "hex_v1_4p", capitalSlots: ["A1", "A7", "E1", "E7"] },
+  5: { width: 8, height: 6, template: "hex_v1_5p", capitalSlots: ["A1", "A8", "F1", "F8", "C4"], fortifiedCapitalSlots: ["C4"] },
+  6: { width: 9, height: 6, template: "hex_v1_6p", capitalSlots: ["A1", "A9", "F1", "F9", "C4", "D6"], fortifiedCapitalSlots: ["C4", "D6"] },
 } as const;
 ```
 
 ### Adjacence
 
-Orthogonale seulement :
-
-```ts
-Math.abs(x1 - x2) + Math.abs(y1 - y2) === 1
-```
+Les nouvelles campagnes utilisent une carte hexagonale `hex_v1_*`. Chaque territoire peut avoir jusqu'à six voisins. Les lignes paires sont décalées visuellement et dans le calcul d'adjacence.
 
 ### Ordres secrets
 

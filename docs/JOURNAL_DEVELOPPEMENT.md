@@ -53,9 +53,9 @@ Le joueur ne passe plus par une page de formulaire séparée.
 
 Flux actuel :
 
-1. Le joueur clique sur une case de la carte.
-2. Si la case lui appartient, le panneau propose `Fortifier` et liste les cibles à portée.
-3. Si la case sélectionnée est conquérable, le panneau affiche directement `Conquérir`.
+1. Le joueur clique sur un territoire de la carte.
+2. Si le territoire lui appartient, le panneau propose `Fortifier` et liste les cibles à portée.
+3. Si le territoire sélectionné est conquérable, le panneau affiche directement `Conquérir`.
 4. Une fois l'ordre soumis, le bandeau de confirmation propose `Annuler l'ordre`.
 5. L'ordre peut aussi être annulé depuis le panneau `Ordre actuel`.
 
@@ -216,7 +216,7 @@ Commits principaux :
 - Sélection automatique d'une source valide quand plusieurs territoires contrôlés peuvent attaquer la cible.
 - Modification de la progression des points d'armée : 400 points au tour 1, +200 points par tour, maximum 2000 points.
 - Ajout du correctif SQL `supabase/02_CORRECTIF_POINTS_ARMEE.sql` pour mettre à jour une base Supabase déjà installée.
-- Suppression des codes visibles de cases comme `A1` ou `A2` sur la carte et dans les résumés d'ordre ; ces codes restent uniquement techniques pour l'adjacence et les scripts.
+- Suppression des codes visibles de territoires comme `A1` ou `A2` sur la carte et dans les résumés d'ordre ; ces codes restent uniquement techniques pour l'adjacence et les scripts.
 - Suppression des badges d'en-tête `Active`, `Ordres` et `Maître/Joueur` sur la page campagne pour réduire le bruit visuel.
 - Suppression de la légende permanente du bloc carte (`Départ possible`, `Cible conquérable`, `Adjacent`, `Neutre`) pour garder l'écran plus lisible.
 - Simplification des couleurs de carte : suppression des surlignages d'adjacence/départ/cible, affichage par couleur de propriétaire, neutre ou bataille en cours.
@@ -225,6 +225,7 @@ Commits principaux :
 - Suppression de la confirmation navigateur sur `Révéler les ordres` et ajout d'un état de chargement dédié.
 - Suppression de la confirmation navigateur sur `Résoudre la bataille` et ajout d'un état de chargement dédié.
 - Suppression de la confirmation navigateur sur `Terminer le tour` et ajout d'un état de chargement dédié.
+- Passage des nouvelles campagnes aux cartes hexagonales `hex_v1_*` : cartes plus grandes, capitales repositionnées, adjacence à six voisins et rendu de carte en lignes décalées.
 
 ## Fichiers importants
 

@@ -16,7 +16,7 @@ Le MVP doit permettre de jouer une campagne complète en ligne avec un nombre de
 
 ## 3. Hors périmètre du MVP
 
-Ne pas développer en V1 : héros, progression des héros, XP, blessures, artefacts, mercenaires, Dragons et Géants comme système actif, Influence Dragon/Géant, alliances, trahisons, détachements, raids avancés, garnisons avancées, diversions, éditeur de carte, cartes non rectangulaires, cases bloquées, chat intégré, notifications, paiement, rôles admin globaux, application mobile native.
+Ne pas développer en V1 : héros, progression des héros, XP, blessures, artefacts, mercenaires, Dragons et Géants comme système actif, Influence Dragon/Géant, alliances, trahisons, détachements, raids avancés, garnisons avancées, diversions, éditeur de carte, cases bloquées, chat intégré, notifications, paiement, rôles admin globaux, application mobile native.
 
 ## 4. Public cible
 
@@ -63,11 +63,11 @@ Une campagne peut être créée pour **2 à 6 joueurs**.
 
 | Joueurs | Taille de carte | Territoires |
 |---:|---|---:|
-| 2 | 3 x 3 | 9 |
-| 3 | 4 x 3 | 12 |
-| 4 | 4 x 4 | 16 |
-| 5 | 5 x 4 | 20 |
-| 6 | 6 x 4 | 24 |
+| 2 | hex 5 x 4 | 20 |
+| 3 | hex 6 x 5 | 30 |
+| 4 | hex 7 x 5 | 35 |
+| 5 | hex 8 x 6 | 48 |
+| 6 | hex 9 x 6 | 54 |
 
 L’application ne doit jamais supposer que la carte est toujours 4 x 4.
 
@@ -75,13 +75,13 @@ L’application ne doit jamais supposer que la carte est toujours 4 x 4.
 
 | Joueurs | Capitales disponibles |
 |---:|---|
-| 2 | A1, C3 |
-| 3 | A1, A4, C2 |
-| 4 | A1, A4, D1, D4 |
-| 5 | A1, A5, D1, D5, B3 |
-| 6 | A1, A6, D1, D6, B3, C4 |
+| 2 | A1, D5 |
+| 3 | A1, A6, E3 |
+| 4 | A1, A7, E1, E7 |
+| 5 | A1, A8, F1, F8, C4 |
+| 6 | A1, A9, F1, F9, C4, D6 |
 
-Capitales centrales fortifiées : 5 joueurs = B3 ; 6 joueurs = B3, C4.
+Capitales centrales fortifiées : 5 joueurs = C4 ; 6 joueurs = C4, D6.
 
 ## 10. Types de territoires
 
@@ -91,7 +91,7 @@ Dans le MVP, les types donnent surtout de l’identité à la carte. Les bonus d
 
 ## 11. Carte et adjacence
 
-La carte est une grille rectangulaire. Deux territoires sont adjacents s’ils se touchent horizontalement ou verticalement. Les diagonales ne sont pas adjacentes.
+Les nouvelles campagnes utilisent une carte hexagonale `hex_v1_*`. Deux territoires sont adjacents s'ils partagent un côté d'hexagone. Chaque territoire peut avoir jusqu'à six voisins.
 
 ## 12. Lobby de campagne
 
@@ -172,7 +172,7 @@ Le dashboard personnel affiche campagnes en lobby, actives, terminées/archivée
 
 ## 23. Carte interactive
 
-La carte utilise `map_width`, `map_height` et les territoires générés. Chaque case affiche le nom du territoire, le type, le propriétaire, la couleur du propriétaire et la fortification. Les batailles non résolues utilisent une couleur dédiée de territoire contesté. Le code technique de case reste en base mais n'est pas affiché sur la carte.
+La carte utilise `map_width`, `map_height`, `map_template` et les territoires générés. Chaque hexagone affiche le nom du territoire, le type, le propriétaire, la couleur du propriétaire et la fortification. Les batailles non résolues utilisent une couleur dédiée de territoire contesté. Le code technique de territoire reste en base mais n'est pas affiché sur la carte.
 
 ## 24. Historique simple
 

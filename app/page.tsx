@@ -138,7 +138,7 @@ export default function Home() {
             <Button type="button" variant="ghost">
               Saison 1 — Tour X
             </Button>
-            <Badge variant="neutral">Carte 3x3 à 6x4 selon les joueurs</Badge>
+            <Badge variant="neutral">Carte hex 5x4 à 9x6 selon les joueurs</Badge>
             <Badge variant="success">Ordres révélés simultanément</Badge>
           </div>
         </div>

@@ -52,6 +52,7 @@ type CampaignCommandCenterProps = {
   campaignId: string;
   mapWidth: number;
   mapHeight: number;
+  mapTemplate: string;
   players: CommandPlayer[];
   territories: CommandTerritory[];
   adjacencies: CommandAdjacency[];
@@ -66,6 +67,10 @@ const neutralTerritoryColor = "#c8bca7";
 const neutralTerritoryFill = "#f2eee5";
 const contestedTerritoryColor = "#9f2f45";
 const contestedTerritoryFill = "#f7d7df";
+const hexClipPath = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
+const hexTileWidth = 136;
+const hexTileGap = 8;
+const hexRowOffset = 72;
 
 const territoryTypeMarks: Record<string, string> = {
   capital: "CA",
@@ -172,6 +177,7 @@ export function CampaignCommandCenter({
   campaignId,
   mapWidth,
   mapHeight,
+  mapTemplate,
   players,
   territories,
   adjacencies,
@@ -193,6 +199,7 @@ export function CampaignCommandCenter({
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string | null>(
     initialControlledTerritoryId,
   );
+  const isHexMap = mapTemplate.startsWith("hex_");
 
   const playersById = useMemo(
     () => new Map(players.map((player) => [player.id, player])),
@@ -217,6 +224,24 @@ export function CampaignCommandCenter({
 
     return map;
   }, [adjacencies]);
+  const territoryRows = useMemo(() => {
+    const rows = new Map<number, CommandTerritory[]>();
+
+    for (const territory of territories) {
+      const row = rows.get(territory.positionY) ?? [];
+      row.push(territory);
+      rows.set(territory.positionY, row);
+    }
+
+    return [...rows.entries()]
+      .sort(([leftY], [rightY]) => leftY - rightY)
+      .map(([positionY, rowTerritories]) => [
+        positionY,
+        rowTerritories.sort(
+          (left, right) => left.positionX - right.positionX,
+        ),
+      ] as const);
+  }, [territories]);
 
   const selectedTerritory = selectedTerritoryId
     ? (territoryById.get(selectedTerritoryId) ?? territories[0] ?? null)
@@ -266,6 +291,110 @@ export function CampaignCommandCenter({
     setSelectedTerritoryId(territory.id);
   }
 
+  function renderTerritoryButton(territory: CommandTerritory, mode: "hex" | "square") {
+    const owner = territory.ownerCampaignPlayerId
+      ? playersById.get(territory.ownerCampaignPlayerId)
+      : null;
+    const isSelected = territory.id === selectedTerritory?.id;
+    const isContested = contestedTerritoryIdSet.has(territory.id);
+    const territoryColor = isContested
+      ? contestedTerritoryColor
+      : (owner?.color ?? neutralTerritoryColor);
+    const backgroundColor = isContested
+      ? contestedTerritoryFill
+      : owner?.color
+        ? `${owner.color}2b`
+        : neutralTerritoryFill;
+    const ownerLabel = isContested
+      ? "Bataille en cours"
+      : (owner?.displayName ?? "Neutre");
+
+    const content = (
+      <>
+        <span className="flex items-start justify-between gap-2">
+          <span className="line-clamp-2 min-h-10 font-semibold leading-5 text-[#302720]">
+            {territory.name}
+          </span>
+          <span className="rounded-md border border-[#d8cbb7] bg-[#fffaf0] px-1.5 py-0.5 text-[10px] font-bold text-[#5d5148]">
+            {getTerritoryTypeMark(territory.type)}
+          </span>
+        </span>
+        <span className="mt-2 flex items-center gap-2 text-xs font-medium text-[#5d5148]">
+          <span
+            className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fffdf8]"
+            style={{ backgroundColor: territoryColor }}
+            aria-hidden="true"
+          />
+          <span className="truncate">{ownerLabel}</span>
+        </span>
+        {isContested || territory.isFortified ? (
+          <span className="mt-3 flex flex-wrap gap-1">
+            {isContested ? (
+              <span className="rounded-md border border-[#9f2f45] bg-[#f7d7df] px-2 py-1 text-[11px] font-semibold text-[#64172a]">
+                Bataille
+              </span>
+            ) : null}
+            {territory.isFortified ? (
+              <span className="rounded-md border border-[#c99a3d] bg-[#f7e7bf] px-2 py-1 text-[11px] font-semibold text-[#644512]">
+                Fortifié
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </>
+    );
+
+    if (mode === "hex") {
+      return (
+        <button
+          key={territory.id}
+          type="button"
+          aria-pressed={isSelected}
+          onClick={() => selectTerritory(territory)}
+          className={cn(
+            "h-[124px] w-[136px] shrink-0 p-[2px] text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
+            isSelected && "relative z-10 shadow-sm",
+          )}
+          style={{
+            backgroundColor: territoryColor,
+            clipPath: hexClipPath,
+            boxShadow: isSelected ? "0 0 0 3px #302720" : undefined,
+          }}
+        >
+          <span
+            className="flex h-full w-full flex-col justify-center px-4 py-3"
+            style={{
+              backgroundColor,
+              clipPath: hexClipPath,
+            }}
+          >
+            {content}
+          </span>
+        </button>
+      );
+    }
+
+    return (
+      <button
+        key={territory.id}
+        type="button"
+        aria-pressed={isSelected}
+        onClick={() => selectTerritory(territory)}
+        className={cn(
+          "min-h-28 rounded-md border-2 p-3 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
+          isSelected && "shadow-sm",
+        )}
+        style={{
+          borderColor: territoryColor,
+          backgroundColor,
+          boxShadow: isSelected ? "0 0 0 2px #302720" : undefined,
+        }}
+      >
+        {content}
+      </button>
+    );
+  }
+
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_380px]">
       <Card>
@@ -274,91 +403,51 @@ export function CampaignCommandCenter({
             <div>
               <CardTitle>Carte de campagne</CardTitle>
               <CardDescription>
-                Clique sur une case : les ordres disponibles apparaissent à droite.
+                Clique sur un territoire : les ordres disponibles apparaissent à droite.
               </CardDescription>
             </div>
             <Badge variant="neutral">
-              {mapWidth} x {mapHeight} - {territories.length} territoires
+              {isHexMap ? "Hex" : "Grille"} {mapWidth} x {mapHeight} -{" "}
+              {territories.length} territoires
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto pb-2">
-            <div
-              className="grid gap-3"
-              style={{
-                gridTemplateColumns: `repeat(${mapWidth}, minmax(112px, 1fr))`,
-                minWidth: `${mapWidth * 118}px`,
-              }}
-            >
-              {territories.map((territory) => {
-                const owner = territory.ownerCampaignPlayerId
-                  ? playersById.get(territory.ownerCampaignPlayerId)
-                  : null;
-                const isSelected = territory.id === selectedTerritory?.id;
-                const isContested = contestedTerritoryIdSet.has(territory.id);
-                const territoryColor = isContested
-                  ? contestedTerritoryColor
-                  : (owner?.color ?? neutralTerritoryColor);
-                const backgroundColor = isContested
-                  ? contestedTerritoryFill
-                  : owner?.color
-                    ? `${owner.color}2b`
-                    : neutralTerritoryFill;
-                const ownerLabel = isContested
-                  ? "Bataille en cours"
-                  : (owner?.displayName ?? "Neutre");
-
-                return (
-                  <button
-                    key={territory.id}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => selectTerritory(territory)}
-                    className={cn(
-                      "min-h-28 rounded-md border-2 p-3 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#302720]",
-                      isSelected && "shadow-sm",
-                    )}
+            {isHexMap ? (
+              <div
+                className="py-3"
+                style={{
+                  minWidth: `${mapWidth * (hexTileWidth + hexTileGap) + hexRowOffset}px`,
+                }}
+              >
+                {territoryRows.map(([positionY, rowTerritories], index) => (
+                  <div
+                    key={positionY}
+                    className={cn("flex gap-2", index > 0 && "-mt-5")}
                     style={{
-                      borderColor: territoryColor,
-                      backgroundColor,
-                      boxShadow: isSelected ? "0 0 0 2px #302720" : undefined,
+                      paddingLeft: positionY % 2 === 0 ? `${hexRowOffset}px` : 0,
                     }}
                   >
-                    <span className="flex items-start justify-between gap-2">
-                      <span className="line-clamp-2 min-h-10 font-semibold leading-5 text-[#302720]">
-                        {territory.name}
-                      </span>
-                      <span className="rounded-md border border-[#d8cbb7] bg-[#fffaf0] px-1.5 py-0.5 text-[10px] font-bold text-[#5d5148]">
-                        {getTerritoryTypeMark(territory.type)}
-                      </span>
-                    </span>
-                    <span className="mt-2 flex items-center gap-2 text-xs font-medium text-[#5d5148]">
-                      <span
-                        className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fffdf8]"
-                        style={{ backgroundColor: territoryColor }}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{ownerLabel}</span>
-                    </span>
-                    {isContested || territory.isFortified ? (
-                      <span className="mt-3 flex flex-wrap gap-1">
-                        {isContested ? (
-                          <span className="rounded-md border border-[#9f2f45] bg-[#f7d7df] px-2 py-1 text-[11px] font-semibold text-[#64172a]">
-                            Bataille
-                          </span>
-                        ) : null}
-                        {territory.isFortified ? (
-                          <span className="rounded-md border border-[#c99a3d] bg-[#f7e7bf] px-2 py-1 text-[11px] font-semibold text-[#644512]">
-                            Fortifié
-                          </span>
-                        ) : null}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
+                    {rowTerritories.map((territory) =>
+                      renderTerritoryButton(territory, "hex"),
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                className="grid gap-3"
+                style={{
+                  gridTemplateColumns: `repeat(${mapWidth}, minmax(112px, 1fr))`,
+                  minWidth: `${mapWidth * 118}px`,
+                }}
+              >
+                {territories.map((territory) =>
+                  renderTerritoryButton(territory, "square"),
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

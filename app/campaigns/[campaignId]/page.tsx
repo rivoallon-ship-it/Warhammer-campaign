@@ -395,15 +395,25 @@ export default async function CampaignPage({
       <div className="campaign-fantasy-content mx-auto max-w-[1540px]">
         <header className="fantasy-panel p-4 sm:p-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div>
-              <h1 className="fantasy-panel-title text-3xl font-bold tracking-normal sm:text-4xl">
-                {campaign.name}
-              </h1>
-              <p className="fantasy-muted mt-2 text-sm">
-                Saison {campaign.season_number} - Tour{" "}
-                {campaign.current_turn_number || 1} -{" "}
-                {currentTurn?.army_base_points ?? 400} points
-              </p>
+            <div className="flex min-w-0 items-start gap-3">
+              <Link
+                href="/dashboard"
+                className="fantasy-action-button inline-grid size-10 shrink-0 place-items-center rounded-full border border-[#f3e7cd]/70 bg-[#211a16]/25 text-2xl font-bold leading-none text-[#fffaf0] transition-colors hover:bg-[#211a16]/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3e7cd]"
+                aria-label="Retour au dashboard"
+              >
+                <span aria-hidden="true">‹</span>
+              </Link>
+
+              <div className="min-w-0">
+                <h1 className="fantasy-panel-title text-3xl font-bold tracking-normal sm:text-4xl">
+                  {campaign.name}
+                </h1>
+                <p className="fantasy-muted mt-2 text-sm">
+                  Saison {campaign.season_number} - Tour{" "}
+                  {campaign.current_turn_number || 1} -{" "}
+                  {currentTurn?.army_base_points ?? 400} points
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 xl:items-end">
@@ -457,16 +467,6 @@ export default async function CampaignPage({
                     Rejoindre
                   </Link>
                 ) : null}
-                <Link
-                  href="/dashboard"
-                  className={buttonVariants({
-                    variant: "outlineDark",
-                    size: "sm",
-                    className: "fantasy-action-button",
-                  })}
-                >
-                  Dashboard
-                </Link>
               </div>
             </div>
           </div>

@@ -218,6 +218,7 @@ Commits principaux :
 - Ajout du correctif SQL `supabase/02_CORRECTIF_POINTS_ARMEE.sql` pour mettre à jour une base Supabase déjà installée.
 - Suppression des codes visibles de cases comme `A1` ou `A2` sur la carte et dans les résumés d'ordre ; ces codes restent uniquement techniques pour l'adjacence et les scripts.
 - Suppression des badges d'en-tête `Active`, `Ordres` et `Maître/Joueur` sur la page campagne pour réduire le bruit visuel.
+- Suppression de la légende permanente du bloc carte (`Départ possible`, `Cible conquérable`, `Adjacent`, `Neutre`) pour garder l'écran plus lisible.
 
 ## Fichiers importants
 

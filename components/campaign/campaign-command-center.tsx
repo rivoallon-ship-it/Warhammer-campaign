@@ -242,12 +242,6 @@ export function CampaignCommandCenter({
               <CardDescription>
                 Clique sur une case : les ordres disponibles apparaissent à droite.
               </CardDescription>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant="warning">Départ possible</Badge>
-                <Badge variant="success">Cible conquérable</Badge>
-                <Badge variant="info">Adjacent</Badge>
-                <Badge variant="neutral">Neutre</Badge>
-              </div>
             </div>
             <Badge variant="neutral">
               {mapWidth} x {mapHeight} - {territories.length} territoires

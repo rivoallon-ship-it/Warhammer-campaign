@@ -105,7 +105,7 @@ Statut : Fortifié
 
 ## 11. Légende
 
-Afficher icônes et badges : Capitale, Village, Ruines, Fort, Tour, Dragon, Géant, Sauvage, Fortifié. Sur mobile, légende repliable possible.
+Ne pas afficher de légende permanente dans le bloc carte. Les états utiles restent visibles directement dans les cases concernées : départ, cible, propriétaire, type et fortification.
 
 ## 12. Carte de campagne
 

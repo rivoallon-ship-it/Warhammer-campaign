@@ -64,6 +64,8 @@ Contraintes : `invite_code` unique, `player_count` entre 2 et 6, largeur/hauteur
 
 `current_phase` : `lobby`, `orders`, `revealed`, `resolving`, `end_turn`, `season_summary`, `finished`.
 
+Le code d'invitation ne doit pas être exploité par un `select` direct ouvert sur toutes les campagnes en `lobby`. La consultation d'un lobby par un non-membre passe par `get_join_campaign_details(invite_code)`, qui retourne seulement les informations minimales nécessaires quand le code fourni est valide.
+
 ## 5. Configuration des cartes
 
 À stocker dans `/lib/maps/map-configs.ts` :
@@ -97,6 +99,8 @@ export const MAP_CONFIGS = {
 | `updated_at` | timestamptz | Oui | Mise à jour |
 
 Contraintes : `campaign_id` référence `campaigns`, `user_id` référence `auth.users`, unique `(campaign_id, user_id)`. Règles applicatives : couleur/capitale uniques parmi joueurs actifs, pas plus de joueurs actifs que `player_count`.
+
+L'inscription d'un joueur `pending` ne doit pas être faite par un `insert` direct depuis l'application. Le chemin normal est la fonction `request_join_campaign(invite_code, ...)`, qui vérifie le code, le statut du lobby, les places restantes, la couleur et la capitale. La policy `insert` directe de `campaign_players` sert uniquement à la création de la ligne `game_master` par le propriétaire lors de la création de campagne.
 
 ## 7. `territories`
 
@@ -228,7 +232,8 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 ## 17. Fonctions métier attendues
 
 - `createCampaign` : créer campagne, code, config carte, créateur game_master actif, log.
-- `joinCampaign` : vérifier code/lobby/place/couleur/capitale puis créer joueur pending, log.
+- `getJoinCampaignDetails` : appeler la RPC `get_join_campaign_details` pour lire les informations minimales d'un lobby à partir d'un code valide, sans exposer tous les lobbys par RLS.
+- `joinCampaign` : appeler la RPC `request_join_campaign`; la base vérifie code/lobby/place/couleur/capitale puis crée joueur pending et log.
 - `approvePlayer` : maître seulement, pending -> active, log.
 - `launchCampaign` : vérifier conditions, générer carte, créer tour 1, status active, phase orders, log.
 - `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
@@ -238,6 +243,8 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 - `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
 - `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.
 - `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.
+
+Les fonctions SQL de transition `reveal_current_turn_orders`, `resolve_battle_result` et `finish_current_turn` doivent verrouiller les lignes critiques avec `for update` afin d'éviter les doubles traitements en cas de double clic ou d'appel concurrent.
 
 ## 18. SQL conceptuel
 
@@ -280,6 +287,8 @@ create table campaigns (
 Activer RLS sur toutes les tables applicatives.
 
 Règle générale : un utilisateur lit les données d’une campagne uniquement s’il est membre (`campaign_players.user_id = auth.uid()` et status `pending` ou `active`).
+
+Les campagnes en `lobby` ne sont pas lisibles globalement par tous les utilisateurs connectés. Un non-membre peut seulement fournir un code à `get_join_campaign_details`. La demande d'inscription passe par `request_join_campaign`; l'application ne doit pas contourner cette fonction par un `insert` direct dans `campaign_players`.
 
 Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier.
 

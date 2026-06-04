@@ -134,13 +134,17 @@ export function getArmyBasePoints(turnNumber: number): number {
 
 Tables attendues : `profiles`, `campaigns`, `campaign_players`, `territories`, `territory_adjacencies`, `campaign_turns`, `orders`, `battles`, `battle_participants`, `explorations`, `campaign_logs`.
 
-Activer RLS sur toutes les tables applicatives. Ne pas exposer de service role key. Côté client, utiliser seulement `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+Activer RLS sur toutes les tables applicatives. Ne pas exposer de service role key. Côté client, utiliser seulement `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ou `NEXT_PUBLIC_SUPABASE_ANON_KEY` pour compatibilité.
 
 Règles : utilisateur lit ses campagnes, joueur modifie ses infos de lobby, maître lance/révèle/résout/termine, joueur ne lit que ses ordres avant révélation, tous lisent après révélation.
 
+Invitation par code : ne pas faire de lecture globale des campagnes `lobby` côté client. Utiliser `get_join_campaign_details(invite_code)` pour afficher les informations minimales d'un lobby à partir d'un code valide, puis `request_join_campaign(invite_code, ...)` pour créer une demande d'inscription. Un joueur ne doit pas pouvoir s'inscrire par un `insert` direct dans `campaign_players`.
+
+Transitions critiques : les fonctions SQL qui révèlent les ordres, résolvent les batailles ou terminent le tour doivent verrouiller les lignes concernées avec `for update` afin d'éviter les doubles traitements concurrents.
+
 ## 8. UI / UX
 
-Interface claire, lisible, fantasy léger, adaptée adultes/enfants, responsive. Actions critiques avec confirmation : lancer campagne, révéler ordres, saisir résultat, finir tour, retirer/refuser joueur.
+Interface claire, lisible, fantasy sombre, adaptée adultes/enfants, responsive. Les actions longues ou sensibles doivent afficher un état de chargement pour éviter les doubles clics. Les confirmations navigateur ne sont pas utilisées pour `Révéler les ordres`, `Résoudre la bataille` et `Terminer le tour`.
 
 Messages d’erreur compréhensibles : capitale prise, cible non adjacente, territoire non contrôlé, tous les joueurs doivent valider.
 
@@ -179,7 +183,7 @@ Tables Supabase en `snake_case`, TypeScript en `camelCase`, composants React en 
 
 ## 12. Tests manuels clés
 
-Création compte, campagne 2 joueurs, code invitation, second joueur rejoint, maître accepte, joueurs prêts, lancement, carte 3x3, ordres secrets, révélation, conquête neutre automatique, bataille, Gloire, fin de tour.
+Création compte, campagne 2 joueurs, code invitation, second joueur rejoint, maître accepte, joueurs prêts, lancement, carte hexagonale, ordres secrets depuis la carte, révélation, conquête neutre automatique, bataille, Gloire, fin de tour.
 
 ## 13. Ce qu’il ne faut pas faire
 

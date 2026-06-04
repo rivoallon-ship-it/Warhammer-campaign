@@ -141,6 +141,8 @@ Ne jamais coder en dur une carte 4 x 4.
 
 L'écran de campagne utilise une direction graphique fantasy sombre : panneaux bordés or, carte hexagonale sombre, hexagones parchemin et badges de types colorés.
 
+La génération de carte est idempotente : si une carte existe déjà, l'application vérifie les territoires et les adjacences attendues. Pour les templates `hex_v1_*`, cette vérification utilise l'adjacence hexagonale, pas l'ancien comptage orthogonal.
+
 ### Ordres secrets
 
 Avant révélation, le joueur voit son propre ordre ; les autres joueurs voient seulement “validé” ou “en attente” ; le maître de campagne ne voit pas les détails des ordres adverses. Après révélation, tous les joueurs actifs voient tous les ordres.
@@ -250,6 +252,16 @@ Utiliser `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` pour les nouveaux projets Supaba
 
 Ne jamais exposer de clé Supabase `service_role` ou `sb_secret_*` côté client.
 
-## 15. Définition du MVP terminé
+## 15. Sécurité Supabase
+
+Le code d'invitation est vérifié côté base de données, pas seulement côté application.
+
+- `get_join_campaign_details(invite_code)` retourne les informations minimales d'un lobby uniquement si le code fourni est valide.
+- `request_join_campaign(invite_code, ...)` est le chemin normal pour rejoindre une campagne : la fonction vérifie le code, l'état du lobby, la place disponible, la couleur et la capitale avant de créer le joueur en `pending`.
+- Les policies RLS ne doivent pas permettre à un utilisateur connecté de lire tous les lobbys ou d'insérer directement un joueur `pending` sans passer par la fonction SQL.
+
+Sur une base Supabase déjà installée avant ce correctif, copier et exécuter `supabase/06_SECURITE_INVITATIONS.sql`.
+
+## 16. Définition du MVP terminé
 
 Le MVP est terminé quand un utilisateur peut créer une campagne 2 à 6 joueurs, inviter les autres, lancer la campagne, générer la carte, soumettre des ordres secrets, révéler, résoudre les conquêtes et batailles, mettre à jour territoires/Gloire et passer au tour suivant indéfiniment.

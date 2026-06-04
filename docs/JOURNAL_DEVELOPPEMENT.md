@@ -2,7 +2,7 @@
 ## Les Couronnes Brisées
 ### Suivi du travail réalisé
 
-Dernière mise à jour : 2026-06-03.
+Dernière mise à jour : 2026-06-04.
 
 Ce document résume le travail réalisé depuis le début du développement. Il complète le `README.md`, le plan d'implémentation et l'historique Git.
 
@@ -12,6 +12,7 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 
 - création de compte et connexion ;
 - création et rejoindre une campagne ;
+- invitation sécurisée côté base de données, avec vérification du code par fonction SQL ;
 - lobby avec validation des joueurs ;
 - lancement de campagne ;
 - génération automatique de carte de 2 à 6 joueurs ;
@@ -25,7 +26,8 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 - saisie du vainqueur des batailles ;
 - mise à jour des territoires, de la Gloire et des fortifications ;
 - fin de tour et passage au tour suivant sans limite automatique ;
-- historique de campagne.
+- historique de campagne ;
+- RLS renforcée sur la lecture des lobbys et les demandes d'inscription.
 
 Le Lot 21, consacré à l'ergonomie et au confort d'utilisation, est bien avancé. Les pages `map` et `orders` ont été fusionnées dans l'écran principal de campagne, la carte est passée en hexagones et l'écran de jeu a reçu une direction graphique fantasy sombre. Il reste du polish à faire sur le responsive, les états d'erreur et quelques détails visuels après tests réels.
 
@@ -258,6 +260,28 @@ Commits principaux :
 - `3a429f3` Apply fantasy campaign interface theme
 - `d390552` Refine hex territory label layout
 
+### 2026-06-04
+
+- Relecture de la code review externe et traitement du premier lot prioritaire.
+- Durcissement de l'invitation par code au niveau Supabase :
+  - ajout de `normalize_invite_code`, `get_join_campaign_details` et `request_join_campaign` ;
+  - `get_join_campaign_details` retourne seulement les informations minimales d'un lobby quand le code fourni est valide ;
+  - `request_join_campaign` vérifie le code, le statut `lobby`, la place disponible, la couleur et la capitale avant de créer un joueur `pending` ;
+  - les joueurs ne peuvent plus s'inscrire par un `insert` direct dans `campaign_players` ;
+  - les policies RLS ne donnent plus accès à tous les lobbys et à leurs joueurs simplement parce qu'une campagne est en statut `lobby`.
+- Ajout du correctif SQL `supabase/06_SECURITE_INVITATIONS.sql` pour mettre à jour une base Supabase existante.
+- Mise à jour du SQL complet et des morceaux copiables Supabase pour intégrer ces fonctions et policies.
+- Correction du contrôle d'idempotence de `generateMap` : les cartes `hex_v1_*` sont maintenant vérifiées avec le comptage d'adjacence hexagonal, pas avec l'ancien comptage orthogonal.
+- Ajout de verrous `for update` dans les fonctions SQL critiques de transition :
+  - `reveal_current_turn_orders` ;
+  - `resolve_battle_result` ;
+  - `finish_current_turn`.
+- Vérification locale de la route `/campaigns/join`, qui redirige correctement vers `/login?next=%2Fcampaigns%2Fjoin` quand l'utilisateur n'est pas connecté.
+
+Commit principal :
+
+- `4b111d1` Secure campaign joins and map checks
+
 ## Fichiers importants
 
 ### Application
@@ -295,7 +319,9 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `07_reveal_orders_function.sql`
 - `04_CORRECTIF_REVELATION_SUCCESS_AMBIGU.sql` : correctif court à copier si Supabase affiche `column reference "success" is ambiguous` pendant la révélation.
 - `05_RESET_CAMPAGNES.sql` : reset des campagnes de test sans supprimer les comptes ni les profils.
+- `06_SECURITE_INVITATIONS.sql` : correctif de sécurité pour protéger la recherche et la demande de jonction par code d'invitation sur une base déjà installée.
 - `09_resolve_battle_function.sql`
+- `09b_finish_turn_function.sql`
 - `14_logs_grants.sql`
 
 ## Vérifications réalisées

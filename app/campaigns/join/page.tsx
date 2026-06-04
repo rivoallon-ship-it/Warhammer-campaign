@@ -64,7 +64,7 @@ export default async function JoinCampaignPage({
   const defaultDisplayName =
     profile?.display_name ?? getDisplayNameFromUser(user);
   const details = inviteCode
-    ? await getJoinCampaignDetails(supabase, inviteCode, user.id)
+    ? await getJoinCampaignDetails(supabase, inviteCode)
     : null;
   const campaign = details?.campaign ?? null;
   const pageError = params?.error ?? details?.error ?? null;

@@ -52,6 +52,10 @@ grant execute on function public.is_active_campaign_member(uuid) to authenticate
 grant execute on function public.is_campaign_master(uuid) to authenticated;
 grant execute on function public.owns_campaign_player(uuid) to authenticated;
 grant execute on function public.campaign_player_keeps_identity(uuid, uuid, uuid, text, text) to authenticated;
+grant execute on function public.normalize_invite_code(text) to authenticated;
+grant execute on function public.campaign_capital_slots(int) to authenticated;
+grant execute on function public.get_join_campaign_details(text) to authenticated;
+grant execute on function public.request_join_campaign(text, text, text, text, text) to authenticated;
 grant execute on function public.get_current_turn_order_visibility(uuid) to authenticated;
 grant execute on function public.reveal_current_turn_orders(uuid) to authenticated;
 grant execute on function public.resolve_exploration_result(uuid, int) to authenticated;

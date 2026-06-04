@@ -1,75 +1,5 @@
-create or replace function public.is_active_campaign_member(target_campaign_id uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.campaign_players cp
-    where cp.campaign_id = target_campaign_id
-      and cp.user_id = auth.uid()
-      and cp.status = 'active'
-  );
-$$;
-
-create or replace function public.is_campaign_master(target_campaign_id uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.campaign_players cp
-    where cp.campaign_id = target_campaign_id
-      and cp.user_id = auth.uid()
-      and cp.role = 'game_master'
-      and cp.status = 'active'
-  );
-$$;
-
-create or replace function public.owns_campaign_player(target_campaign_player_id uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.campaign_players cp
-    where cp.id = target_campaign_player_id
-      and cp.user_id = auth.uid()
-      and cp.status in ('pending', 'active')
-  );
-$$;
-
-create or replace function public.campaign_player_keeps_identity(
-  target_campaign_player_id uuid,
-  target_campaign_id uuid,
-  target_user_id uuid,
-  target_role text,
-  target_status text
-)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.campaign_players cp
-    where cp.id = target_campaign_player_id
-      and cp.campaign_id = target_campaign_id
-      and cp.user_id = target_user_id
-      and cp.role = target_role
-      and cp.status = target_status
-  );
-$$;
+-- Correctif sécurité : le code d'invitation devient la seule porte d'entrée
+-- pour lire un lobby non rejoint et demander une inscription.
 
 create or replace function public.normalize_invite_code(raw_value text)
 returns text
@@ -375,3 +305,40 @@ begin
   return query select true, null::text, v_campaign.id;
 end;
 $$;
+
+drop policy if exists "Campaigns readable by members and lobby seekers" on public.campaigns;
+drop policy if exists "Campaigns readable by members" on public.campaigns;
+create policy "Campaigns readable by members"
+on public.campaigns for select
+to authenticated
+using (
+  owner_user_id = auth.uid()
+  or public.is_campaign_member(id)
+);
+
+drop policy if exists "Campaign players readable by campaign context" on public.campaign_players;
+drop policy if exists "Campaign players readable by campaign members" on public.campaign_players;
+create policy "Campaign players readable by campaign members"
+on public.campaign_players for select
+to authenticated
+using (
+  user_id = auth.uid()
+  or public.is_campaign_member(campaign_id)
+);
+
+drop policy if exists "Users join lobby campaigns or create their game master row" on public.campaign_players;
+drop policy if exists "Users create their game master row" on public.campaign_players;
+create policy "Users create their game master row"
+on public.campaign_players for insert
+to authenticated
+with check (
+  user_id = auth.uid()
+  and role = 'game_master'
+  and status = 'active'
+  and public.is_campaign_owner(campaign_id)
+);
+
+grant execute on function public.normalize_invite_code(text) to authenticated;
+grant execute on function public.campaign_capital_slots(int) to authenticated;
+grant execute on function public.get_join_campaign_details(text) to authenticated;
+grant execute on function public.request_join_campaign(text, text, text, text, text) to authenticated;

@@ -6,9 +6,9 @@ declare
   v_territory public.territories%rowtype; v_winner public.campaign_players%rowtype;
   v_winner_role text; v_notes text; v_participant_count int := 0; v_loser_count int := 0;
 begin
-  select * into v_battle from public.battles where id = target_battle_id;
+  select * into v_battle from public.battles where id = target_battle_id for update;
   if not found then return query select false, 'Bataille introuvable.', null::text; return; end if;
-  select * into v_campaign from public.campaigns where id = v_battle.campaign_id;
+  select * into v_campaign from public.campaigns where id = v_battle.campaign_id for update;
   if not found then return query select false, 'Campagne introuvable.', null::text; return; end if;
   if not public.is_campaign_master(v_campaign.id) then return query select false, 'Seul le maître de campagne peut résoudre une bataille.', null::text; return; end if;
   if v_campaign.status <> 'active' or v_campaign.current_phase <> 'resolving' then return query select false, 'La campagne doit être en phase de résolution.', null::text; return; end if;

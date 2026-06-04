@@ -18,7 +18,7 @@ declare
   v_next_turn_number int;
   v_next_army_base_points int;
 begin
-  select * into v_campaign from public.campaigns where id = target_campaign_id;
+  select * into v_campaign from public.campaigns where id = target_campaign_id for update;
   if not found then
     return query select false, 'Campagne introuvable.', null::int, null::int;
     return;

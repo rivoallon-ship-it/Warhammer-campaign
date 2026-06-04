@@ -7,7 +7,7 @@ declare
   v_enemy_battle_count int := 0; v_contested_battle_count int := 0;
   v_exploration_count int := 0; v_fortification_count int := 0; v_multiple_attack_count int := 0;
 begin
-  select * into v_campaign from public.campaigns where id = target_campaign_id;
+  select * into v_campaign from public.campaigns where id = target_campaign_id for update;
   if not found then return query select false, 'Campagne introuvable.', 0, 0, 0, 0; return; end if;
   if not public.is_campaign_master(v_campaign.id) then return query select false, 'Seul le maître de campagne peut révéler les ordres.', 0, 0, 0, 0; return; end if;
   if v_campaign.status <> 'active' or v_campaign.current_phase <> 'orders' then return query select false, 'Les ordres ne peuvent pas être révélés dans cette phase.', 0, 0, 0, 0; return; end if;

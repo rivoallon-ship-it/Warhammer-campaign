@@ -488,6 +488,29 @@ export type Database = {
           submitted_at: string | null;
         }[];
       };
+      get_join_campaign_details: {
+        Args: { target_invite_code: string };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          campaign: Json | null;
+          players: Json;
+        }[];
+      };
+      request_join_campaign: {
+        Args: {
+          target_invite_code: string;
+          submitted_display_name: string;
+          submitted_aos_faction: string;
+          submitted_color: string;
+          submitted_starting_capital_code: string;
+        };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          campaign_id: string | null;
+        }[];
+      };
       reveal_current_turn_orders: {
         Args: { target_campaign_id: string };
         Returns: {

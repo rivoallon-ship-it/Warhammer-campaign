@@ -298,10 +298,11 @@ async function getExistingMapResult(
     };
   }
 
-  const expectedAdjacencyCount = generateOrthogonalAdjacencies(
-    campaign.map_width,
-    campaign.map_height,
-  ).length;
+  const expectedAdjacencyCount = (
+    campaign.map_template.startsWith("hex_")
+      ? generateHexAdjacencies
+      : generateOrthogonalAdjacencies
+  )(campaign.map_width, campaign.map_height).length;
 
   if (existingAdjacencies.length !== expectedAdjacencyCount) {
     return {

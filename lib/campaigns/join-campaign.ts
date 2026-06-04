@@ -5,6 +5,35 @@ import type { Database } from "@/types/database";
 type CampaignRow = Database["public"]["Tables"]["campaigns"]["Row"];
 type CampaignPlayerRow = Database["public"]["Tables"]["campaign_players"]["Row"];
 
+type JoinCampaignCampaign = Pick<
+  CampaignRow,
+  | "id"
+  | "name"
+  | "invite_code"
+  | "status"
+  | "current_phase"
+  | "season_number"
+  | "current_turn_number"
+  | "player_count"
+  | "map_width"
+  | "map_height"
+  | "map_template"
+  | "created_at"
+  | "updated_at"
+>;
+
+type JoinCampaignPlayer = Pick<
+  CampaignPlayerRow,
+  | "id"
+  | "display_name"
+  | "aos_faction"
+  | "color"
+  | "status"
+  | "starting_capital_code"
+> & {
+  is_current_user: boolean;
+};
+
 export const PLAYER_COLOR_OPTIONS = [
   { label: "Rouge carmin", value: "#b84b35" },
   { label: "Bleu azur", value: "#2f6f9f" },
@@ -27,9 +56,9 @@ export type JoinCampaignInput = {
 
 export type JoinCampaignDetails = {
   inviteCode: string;
-  campaign: CampaignRow | null;
-  players: CampaignPlayerRow[];
-  currentPlayer: CampaignPlayerRow | null;
+  campaign: JoinCampaignCampaign | null;
+  players: JoinCampaignPlayer[];
+  currentPlayer: JoinCampaignPlayer | null;
   activePlayerCount: number;
   reservedPlayerCount: number;
   availableSeatCount: number;
@@ -56,13 +85,15 @@ function normalizeCapital(value: string) {
   return value.trim().toUpperCase();
 }
 
-function getCampaignCapitalSlots(campaign: CampaignRow) {
+function getCampaignCapitalSlots(campaign: Pick<CampaignRow, "player_count">) {
   if (!isSupportedPlayerCount(campaign.player_count)) return [];
 
   return [...getMapConfig(campaign.player_count).capitalSlots] as string[];
 }
 
-function getUnavailableColorValues(players: CampaignPlayerRow[]) {
+function getUnavailableColorValues(
+  players: Pick<CampaignPlayerRow, "color">[],
+) {
   return new Set(
     players
       .map((player) => player.color)
@@ -71,7 +102,9 @@ function getUnavailableColorValues(players: CampaignPlayerRow[]) {
   );
 }
 
-function getUnavailableCapitalValues(players: CampaignPlayerRow[]) {
+function getUnavailableCapitalValues(
+  players: Pick<CampaignPlayerRow, "starting_capital_code">[],
+) {
   return new Set(
     players
       .map((player) => player.starting_capital_code)
@@ -80,7 +113,7 @@ function getUnavailableCapitalValues(players: CampaignPlayerRow[]) {
   );
 }
 
-function splitAvailableColors(players: CampaignPlayerRow[]) {
+function splitAvailableColors(players: Pick<CampaignPlayerRow, "color">[]) {
   const unavailableColorValues = getUnavailableColorValues(players);
 
   return {
@@ -93,7 +126,10 @@ function splitAvailableColors(players: CampaignPlayerRow[]) {
   };
 }
 
-function splitAvailableCapitals(campaign: CampaignRow, players: CampaignPlayerRow[]) {
+function splitAvailableCapitals(
+  campaign: Pick<CampaignRow, "player_count">,
+  players: Pick<CampaignPlayerRow, "starting_capital_code">[],
+) {
   const unavailableCapitalValues = getUnavailableCapitalValues(players);
   const capitalSlots = getCampaignCapitalSlots(campaign);
 
@@ -128,7 +164,6 @@ export function getDisplayNameFromUser(user: User) {
 export async function getJoinCampaignDetails(
   supabase: SupabaseClient<Database>,
   rawInviteCode: string,
-  userId: string,
 ): Promise<JoinCampaignDetails> {
   const inviteCode = normalizeInviteCode(rawInviteCode);
 
@@ -151,41 +186,37 @@ export async function getJoinCampaignDetails(
     return { ...emptyDetails, error: "Saisis un code invitation." };
   }
 
-  const { data: campaign, error: campaignError } = await supabase
-    .from("campaigns")
-    .select("*")
-    .eq("invite_code", inviteCode)
-    .maybeSingle();
+  const { data, error: detailsError } = await supabase.rpc(
+    "get_join_campaign_details",
+    {
+      target_invite_code: inviteCode,
+    },
+  );
 
-  if (campaignError) {
+  if (detailsError) {
     return {
       ...emptyDetails,
-      error: "Impossible de vérifier ce code pour le moment.",
+      error:
+        "La fonction SQL d'invitation n'est pas encore installée dans Supabase.",
     };
   }
 
-  if (!campaign) {
-    return { ...emptyDetails, error: "Aucune campagne ne correspond à ce code." };
-  }
+  const result = data?.[0];
 
-  const { data: players, error: playersError } = await supabase
-    .from("campaign_players")
-    .select("*")
-    .eq("campaign_id", campaign.id)
-    .in("status", ["pending", "active"])
-    .order("created_at", { ascending: true });
-
-  if (playersError) {
+  if (!result?.success || !result.campaign) {
     return {
       ...emptyDetails,
-      campaign,
-      error: "Impossible de charger les places de cette campagne.",
+      error:
+        result?.error ?? "Aucune campagne ne correspond à ce code invitation.",
     };
   }
 
-  const currentPlayers = players ?? [];
+  const campaign = result.campaign as unknown as JoinCampaignCampaign;
+  const currentPlayers = Array.isArray(result.players)
+    ? (result.players as unknown as JoinCampaignPlayer[])
+    : [];
   const currentPlayer =
-    currentPlayers.find((player) => player.user_id === userId) ?? null;
+    currentPlayers.find((player) => player.is_current_user) ?? null;
   const activePlayerCount = currentPlayers.filter(
     (player) => player.status === "active",
   ).length;
@@ -253,7 +284,7 @@ export async function getJoinCampaignDetails(
 
 export async function joinCampaign(
   supabase: SupabaseClient<Database>,
-  user: User,
+  _user: User,
   input: JoinCampaignInput,
 ) {
   const inviteCode = normalizeInviteCode(input.inviteCode);
@@ -283,20 +314,6 @@ export async function joinCampaign(
     return { campaignId: null, error: "Choisis une capitale." };
   }
 
-  const details = await getJoinCampaignDetails(supabase, inviteCode, user.id);
-
-  if (!details.campaign) {
-    return { campaignId: null, error: details.error ?? "Campagne introuvable." };
-  }
-
-  if (details.currentPlayer) {
-    return { campaignId: details.campaign.id, error: null };
-  }
-
-  if (details.error) {
-    return { campaignId: null, error: details.error };
-  }
-
   if (
     !PLAYER_COLOR_OPTIONS.some(
       (option) => normalizeColor(option.value) === normalizedColor,
@@ -305,57 +322,33 @@ export async function joinCampaign(
     return { campaignId: null, error: "Cette couleur n'est pas disponible." };
   }
 
-  if (
-    getUnavailableColorValues(details.players).has(normalizedColor)
-  ) {
-    return { campaignId: null, error: "Cette couleur est déjà prise." };
-  }
+  const { data, error: requestError } = await supabase.rpc(
+    "request_join_campaign",
+    {
+      target_invite_code: inviteCode,
+      submitted_display_name: displayName,
+      submitted_aos_faction: aosFaction,
+      submitted_color: color,
+      submitted_starting_capital_code: startingCapitalCode,
+    },
+  );
 
-  if (!getCampaignCapitalSlots(details.campaign).includes(startingCapitalCode)) {
+  if (requestError) {
     return {
       campaignId: null,
-      error: "Cette capitale n'est pas autorisée pour cette carte.",
+      error:
+        "La fonction SQL d'invitation n'est pas encore installée dans Supabase.",
     };
   }
 
-  if (getUnavailableCapitalValues(details.players).has(startingCapitalCode)) {
-    return { campaignId: null, error: "Cette capitale est déjà prise." };
-  }
+  const result = data?.[0];
 
-  const { error: insertError } = await supabase.from("campaign_players").insert({
-    campaign_id: details.campaign.id,
-    user_id: user.id,
-    display_name: displayName,
-    aos_faction: aosFaction,
-    color,
-    role: "player",
-    status: "pending",
-    starting_capital_code: startingCapitalCode,
-    glory: 0,
-    is_ready: false,
-  });
-
-  if (insertError) {
-    if (insertError.code === "23505") {
-      return {
-        campaignId: null,
-        error: "Tu as déjà une entrée dans cette campagne.",
-      };
-    }
-
+  if (!result?.success || !result.campaign_id) {
     return {
       campaignId: null,
-      error: "Impossible d'envoyer la demande pour le moment.",
+      error: result?.error ?? "Impossible d'envoyer la demande pour le moment.",
     };
   }
 
-  await supabase.from("campaign_logs").insert({
-    campaign_id: details.campaign.id,
-    type: "player_joined",
-    title: "Demande envoyée",
-    description: `${displayName} a demandé à rejoindre la campagne.`,
-    created_by_user_id: user.id,
-  });
-
-  return { campaignId: details.campaign.id, error: null };
+  return { campaignId: result.campaign_id, error: null };
 }

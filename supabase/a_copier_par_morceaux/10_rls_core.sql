@@ -30,13 +30,13 @@ using (id = auth.uid())
 with check (id = auth.uid());
 
 drop policy if exists "Campaigns readable by members and lobby seekers" on public.campaigns;
-create policy "Campaigns readable by members and lobby seekers"
+drop policy if exists "Campaigns readable by members" on public.campaigns;
+create policy "Campaigns readable by members"
 on public.campaigns for select
 to authenticated
 using (
   owner_user_id = auth.uid()
   or public.is_campaign_member(id)
-  or status = 'lobby'
 );
 
 drop policy if exists "Users create owned campaigns" on public.campaigns;

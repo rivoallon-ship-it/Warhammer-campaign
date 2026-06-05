@@ -188,10 +188,10 @@ Règles :
 - cliquer sur une cible conquérable affiche directement l'action `Conquérir` ;
 - un ordre soumis peut être annulé ou remplacé tant que la phase est `orders` et que les ordres n'ont pas été révélés ;
 - conquérir un territoire ennemi crée une bataille ;
-- conquérir seul un territoire neutre lance automatiquement un D6 : 3+ avec 1 territoire adjacent contrôlé, 2+ avec 2 territoires adjacents contrôlés, automatique avec 3 territoires adjacents contrôlés ou plus ;
+- conquérir seul un territoire neutre lance automatiquement un D6 : 3+ avec 1 territoire adjacent contrôlé, 2+ avec 2 territoires adjacents contrôlés, automatique avec 3 territoires adjacents contrôlés ou plus ; Dragon et Géant passent à 4+ avec 1 soutien et donnent +3 Gloire si la conquête réussit ;
 - si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;
 - fortifier cible un territoire contrôlé par le joueur, non fortifié et qui n’est pas une forteresse ;
-- les tags ont des effets : CA +5 Gloire si capturée, VI +100 points d’armée max +200, GE +1 Gloire en fin de tour, FO +200 points au défenseur, RU +1 Gloire à la première conquête, SA sans bonus ;
+- les tags ont des effets : CA +5 Gloire si capturée, VI +100 points d’armée max +200, GE +1 Gloire en fin de tour, FO +200 points au défenseur, TO magicien niveau 1 pour le défenseur, RU +1 Gloire à la première conquête, DR/GI +3 Gloire si conquis, SA sans bonus ;
 - en fin de tour, chaque joueur gagne aussi 1 Gloire par tranche de 3 territoires contrôlés.
 
 ## 10. Progression des armées

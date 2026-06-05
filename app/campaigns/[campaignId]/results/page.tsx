@@ -20,6 +20,7 @@ import {
   DEFENSIVE_ARMY_BONUS,
   getPlayerTerritoryRuleStats,
   getVillageArmyBonus,
+  hasDefensiveArmyPointsBonus,
   type PlayerTerritoryRuleStats,
 } from "@/lib/campaigns/territory-rules";
 import { createClient } from "@/lib/supabase/server";
@@ -372,7 +373,7 @@ export default async function ResultsPage({
                                 villageCount: 0,
                                 mineCount: 0,
                               },
-                              Boolean(battle.defender_bonus),
+                              hasDefensiveArmyPointsBonus(battle.defender_bonus),
                             );
 
                             return (

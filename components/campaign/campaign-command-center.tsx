@@ -6,7 +6,10 @@ import {
   cancelOrderAction,
   submitOrderAction,
 } from "@/app/campaigns/[campaignId]/orders/actions";
-import { getTerritoryTypeEffectLabel } from "@/lib/campaigns/territory-rules";
+import {
+  getNeutralConquestDifficultyLabel,
+  getTerritoryTypeEffectLabel,
+} from "@/lib/campaigns/territory-rules";
 import {
   Badge,
   Button,
@@ -207,18 +210,6 @@ function getOrderSummary(
   return `${getOrderActionLabel(existingOrder.actionType)} ${
     target?.name ?? source?.name ?? "un territoire"
   }`;
-}
-
-function getNeutralConquestDifficultyLabel(adjacentControlledCount: number) {
-  if (adjacentControlledCount >= 3) {
-    return "Conquête automatique : tu contrôles 3 territoires adjacents ou plus.";
-  }
-
-  if (adjacentControlledCount >= 2) {
-    return "Conquête sur 2+ : tu contrôles 2 territoires adjacents.";
-  }
-
-  return "Conquête sur 3+ : tu contrôles 1 territoire adjacent.";
 }
 
 function ColorSwatch({ color }: { color: string }) {
@@ -763,6 +754,7 @@ export function CampaignCommandCenter({
                       {selectedTerritory.ownerCampaignPlayerId
                         ? "Ce territoire appartient à un adversaire : l'ordre créera une bataille."
                         : getNeutralConquestDifficultyLabel(
+                            selectedTerritory.type,
                             adjacentControlledCountForSelectedTarget,
                           )}
                     </p>

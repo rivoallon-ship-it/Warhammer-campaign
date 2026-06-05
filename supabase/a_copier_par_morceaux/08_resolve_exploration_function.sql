@@ -105,6 +105,7 @@ begin
 
   v_conquest_threshold := case
     when v_adjacent_support_count >= 2 then 2
+    when v_territory.type in ('dragon', 'giant') then 4
     else 3
   end;
 
@@ -126,7 +127,10 @@ begin
   where id = v_exploration.id;
 
   update public.campaign_players
-  set glory = glory + 1 + v_ruins_glory_bonus,
+  set glory = glory + 1 + v_ruins_glory_bonus + case
+        when v_success and v_territory.type in ('dragon', 'giant') then 3
+        else 0
+      end,
       updated_at = now()
   where id = v_exploration.campaign_player_id;
 
@@ -170,6 +174,11 @@ begin
       || '. +1 Gloire'
       || case
         when v_ruins_glory_bonus > 0 then ', +1 Gloire de ruines'
+        else ''
+      end
+      || case
+        when v_success and v_territory.type = 'dragon' then ', +3 Gloire de Dragon'
+        when v_success and v_territory.type = 'giant' then ', +3 Gloire de Géant'
         else ''
       end
       || '.',

@@ -1028,11 +1028,22 @@ begin
       o.campaign_player_id,
       target.owner_campaign_player_id,
       v_turn.army_base_points,
-      case
-        when target.type = 'fort' then 'Forteresse : défenseur +200 points d''armée.'
-        when target.is_fortified then 'Fortification : défenseur +200 points d''armée.'
-        else null
-      end
+      nullif(
+        concat_ws(
+          ' ',
+          case
+            when target.type = 'fort' then 'Forteresse : défenseur +200 points d''armée.'
+            when target.is_fortified then 'Fortification : défenseur +200 points d''armée.'
+            else null
+          end,
+          case
+            when target.type = 'magic_tower'
+              then 'Tour magique : défenseur dispose d''un magicien niveau 1 (santé 8, sauvegarde 4+).'
+            else null
+          end
+        ),
+        ''
+      )
     from public.orders o
     join public.territories target on target.id = o.target_territory_id
     where o.campaign_id = v_campaign.id
@@ -1201,11 +1212,13 @@ begin
       support.adjacent_support_count,
       case
         when support.adjacent_support_count >= 2 then 2
+        when target.type in ('dragon', 'giant') then 4
         else 3
       end as conquest_threshold,
       support.adjacent_support_count >= 3
         or roll.dice_result >= case
           when support.adjacent_support_count >= 2 then 2
+          when target.type in ('dragon', 'giant') then 4
           else 3
         end as exploration_success
     from public.orders o
@@ -1284,7 +1297,11 @@ begin
             where ie.exploration_success
               and so.territory_type = 'ruins'
               and so.special_reward_available
-          ))::int as glory_gain
+          ))::int
+          + ((count(*) filter (
+            where ie.exploration_success
+              and so.territory_type in ('dragon', 'giant')
+          ))::int * 3) as glory_gain
       from inserted_explorations ie
       join single_orders so on so.order_id = ie.order_id
       group by ie.campaign_player_id
@@ -1338,6 +1355,15 @@ begin
           and so.territory_type = 'ruins'
           and so.special_reward_available
           then ', +1 Gloire de ruines'
+        else ''
+      end
+      || case
+        when ie.exploration_success
+          and so.territory_type = 'dragon'
+          then ', +3 Gloire de Dragon'
+        when ie.exploration_success
+          and so.territory_type = 'giant'
+          then ', +3 Gloire de Géant'
         else ''
       end
       || '.',
@@ -1631,6 +1657,7 @@ begin
 
   v_conquest_threshold := case
     when v_adjacent_support_count >= 2 then 2
+    when v_territory.type in ('dragon', 'giant') then 4
     else 3
   end;
 
@@ -1652,7 +1679,10 @@ begin
   where id = v_exploration.id;
 
   update public.campaign_players
-  set glory = glory + 1 + v_ruins_glory_bonus,
+  set glory = glory + 1 + v_ruins_glory_bonus + case
+        when v_success and v_territory.type in ('dragon', 'giant') then 3
+        else 0
+      end,
       updated_at = now()
   where id = v_exploration.campaign_player_id;
 
@@ -1698,6 +1728,11 @@ begin
         when v_ruins_glory_bonus > 0 then ', +1 Gloire de ruines'
         else ''
       end
+      || case
+        when v_success and v_territory.type = 'dragon' then ', +3 Gloire de Dragon'
+        when v_success and v_territory.type = 'giant' then ', +3 Gloire de Géant'
+        else ''
+      end
       || '.',
     auth.uid()
   );
@@ -1733,6 +1768,7 @@ declare
   v_loser_count int := 0;
   v_capital_glory_bonus int := 0;
   v_ruins_glory_bonus int := 0;
+  v_legendary_glory_bonus int := 0;
   v_winner_glory_bonus int := 0;
 begin
   select *
@@ -1845,10 +1881,17 @@ begin
       then 1
     else 0
   end;
+  v_legendary_glory_bonus := case
+    when v_territory.type in ('dragon', 'giant')
+      and v_territory.owner_campaign_player_id is null
+      and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id
+      then 3
+    else 0
+  end;
   v_winner_glory_bonus := case
     when v_winner_role = 'defender' then 2
     else 3
-  end + v_capital_glory_bonus + v_ruins_glory_bonus;
+  end + v_capital_glory_bonus + v_ruins_glory_bonus + v_legendary_glory_bonus;
 
   update public.battles
   set status = 'played',
@@ -1919,6 +1962,13 @@ begin
       end
       || case
         when v_ruins_glory_bonus > 0 then ' dont +1 pour ruines'
+        else ''
+      end
+      || case
+        when v_legendary_glory_bonus > 0 and v_territory.type = 'dragon'
+          then ' dont +3 pour Dragon'
+        when v_legendary_glory_bonus > 0 and v_territory.type = 'giant'
+          then ' dont +3 pour Géant'
         else ''
       end
       || case

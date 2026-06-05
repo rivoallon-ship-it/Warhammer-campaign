@@ -1,6 +1,7 @@
 export const VILLAGE_ARMY_BONUS = 100;
 export const MAX_VILLAGE_ARMY_BONUS = 200;
 export const DEFENSIVE_ARMY_BONUS = 200;
+export const LEGENDARY_CONQUEST_GLORY_BONUS = 3;
 
 export type TerritoryRuleSource = {
   type: string;
@@ -12,6 +13,10 @@ export type PlayerTerritoryRuleStats = {
   villageCount: number;
   mineCount: number;
 };
+
+export function isLegendaryTerritory(type: string) {
+  return type === "dragon" || type === "giant";
+}
 
 export function getVillageArmyBonus(villageCount: number) {
   return Math.min(
@@ -26,6 +31,42 @@ export function getTerritoryControlGloryIncome(controlledCount: number) {
 
 export function getEndTurnGloryIncome(stats: PlayerTerritoryRuleStats) {
   return getTerritoryControlGloryIncome(stats.controlledCount) + stats.mineCount;
+}
+
+export function getNeutralConquestThreshold(
+  territoryType: string,
+  adjacentControlledCount: number,
+) {
+  if (adjacentControlledCount >= 3) return null;
+  if (adjacentControlledCount >= 2) return 2;
+  if (isLegendaryTerritory(territoryType)) return 4;
+
+  return 3;
+}
+
+export function getNeutralConquestDifficultyLabel(
+  territoryType: string,
+  adjacentControlledCount: number,
+) {
+  const threshold = getNeutralConquestThreshold(
+    territoryType,
+    adjacentControlledCount,
+  );
+  const legendarySuffix = isLegendaryTerritory(territoryType)
+    ? ` En cas de réussite : +${LEGENDARY_CONQUEST_GLORY_BONUS} Gloire.`
+    : "";
+
+  if (threshold === null) {
+    return `Conquête automatique : tu contrôles 3 territoires adjacents ou plus.${legendarySuffix}`;
+  }
+
+  return `Conquête sur ${threshold}+ : tu contrôles ${adjacentControlledCount} territoire${
+    adjacentControlledCount > 1 ? "s" : ""
+  } adjacent${adjacentControlledCount > 1 ? "s" : ""}.${legendarySuffix}`;
+}
+
+export function hasDefensiveArmyPointsBonus(defenderBonus?: string | null) {
+  return Boolean(defenderBonus?.includes("+200 points"));
 }
 
 export function getPlayerTerritoryRuleStats(
@@ -76,7 +117,7 @@ export function getTerritoryTypeEffectLabel(type: string) {
   }
 
   if (type === "magic_tower") {
-    return "Tour magique : magicien niveau 1 pour le défenseur.";
+    return "Tour magique : magicien niveau 1 pour le défenseur (santé 8, sauvegarde 4+).";
   }
 
   if (type === "ruins") {
@@ -84,11 +125,11 @@ export function getTerritoryTypeEffectLabel(type: string) {
   }
 
   if (type === "dragon") {
-    return "Dragon : règle de recrutement à venir.";
+    return "Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.";
   }
 
   if (type === "giant") {
-    return "Géant : règle de recrutement à venir.";
+    return "Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.";
   }
 
   return "Sauvage : aucun bonus particulier.";

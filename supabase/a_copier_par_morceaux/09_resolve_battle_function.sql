@@ -5,7 +5,7 @@ declare
   v_battle public.battles%rowtype; v_campaign public.campaigns%rowtype; v_turn public.campaign_turns%rowtype;
   v_territory public.territories%rowtype; v_winner public.campaign_players%rowtype;
   v_winner_role text; v_notes text; v_participant_count int := 0; v_loser_count int := 0;
-  v_capital_glory_bonus int := 0; v_ruins_glory_bonus int := 0; v_winner_glory_bonus int := 0;
+  v_capital_glory_bonus int := 0; v_ruins_glory_bonus int := 0; v_legendary_glory_bonus int := 0; v_winner_glory_bonus int := 0;
 begin
   select * into v_battle from public.battles where id = target_battle_id for update;
   if not found then return query select false, 'Bataille introuvable.', null::text; return; end if;
@@ -32,7 +32,8 @@ begin
   v_notes := nullif(trim(coalesce(submitted_result_notes, '')), '');
   v_capital_glory_bonus := case when v_territory.type = 'capital' and v_territory.owner_campaign_player_id is not null and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id and v_winner_role <> 'defender' then 5 else 0 end;
   v_ruins_glory_bonus := case when v_territory.type = 'ruins' and v_territory.special_reward_claimed_at is null and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id then 1 else 0 end;
-  v_winner_glory_bonus := case when v_winner_role = 'defender' then 2 else 3 end + v_capital_glory_bonus + v_ruins_glory_bonus;
+  v_legendary_glory_bonus := case when v_territory.type in ('dragon', 'giant') and v_territory.owner_campaign_player_id is null and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id then 3 else 0 end;
+  v_winner_glory_bonus := case when v_winner_role = 'defender' then 2 else 3 end + v_capital_glory_bonus + v_ruins_glory_bonus + v_legendary_glory_bonus;
   update public.battles set status = 'played', winner_campaign_player_id = submitted_winner_campaign_player_id, result_notes = v_notes, resolved_at = now() where id = v_battle.id;
   if exists (select 1 from public.battle_participants where battle_id = v_battle.id) then
     update public.campaign_players cp set glory = glory + case when cp.id = submitted_winner_campaign_player_id then v_winner_glory_bonus else 1 end, updated_at = now()
@@ -44,7 +45,7 @@ begin
   update public.territories set owner_campaign_player_id = submitted_winner_campaign_player_id, is_fortified = case when v_territory.is_fortified then false else is_fortified end, special_reward_claimed_at = case when v_ruins_glory_bonus > 0 then now() else special_reward_claimed_at end, updated_at = now() where id = v_battle.territory_id;
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
   values (v_battle.campaign_id, v_battle.turn_id, 'battle_result', 'Bataille résolue',
-    v_winner.display_name || ' remporte la bataille pour ' || v_territory.code || ' - ' || v_territory.name || '. +' || v_winner_glory_bonus || ' Gloire vainqueur' || case when v_capital_glory_bonus > 0 then ' dont +5 pour capitale capturée' else '' end || case when v_ruins_glory_bonus > 0 then ' dont +1 pour ruines' else '' end || case when v_loser_count > 0 then ', +1 Gloire pour chaque autre participant.' else '.' end
+    v_winner.display_name || ' remporte la bataille pour ' || v_territory.code || ' - ' || v_territory.name || '. +' || v_winner_glory_bonus || ' Gloire vainqueur' || case when v_capital_glory_bonus > 0 then ' dont +5 pour capitale capturée' else '' end || case when v_ruins_glory_bonus > 0 then ' dont +1 pour ruines' else '' end || case when v_legendary_glory_bonus > 0 and v_territory.type = 'dragon' then ' dont +3 pour Dragon' when v_legendary_glory_bonus > 0 and v_territory.type = 'giant' then ' dont +3 pour Géant' else '' end || case when v_loser_count > 0 then ', +1 Gloire pour chaque autre participant.' else '.' end
     || case when v_territory.is_fortified then ' La fortification est retirée.' else '' end
     || case when v_notes is not null then ' Notes : ' || v_notes else '' end, auth.uid());
   return query select true, null::text, v_winner_role;

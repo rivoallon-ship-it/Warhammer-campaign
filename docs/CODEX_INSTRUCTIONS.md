@@ -110,7 +110,7 @@ Actions internes stockées dans `orders.action_type` : `conquer`, `fortify`.
 
 ### Conquête neutre non contestée
 
-D6 automatique à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent à la cible = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur.
+D6 automatique à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent à la cible = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 soutien, réussite sur 4+ ; avec 2 soutiens, réussite sur 2+ ; avec 3 soutiens ou plus, conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
 
 ### Conquête neutre contestée
 
@@ -122,9 +122,11 @@ Conquête d'un territoire ennemi : bataille entre attaquant et défenseur. Attaq
 
 Bataille multi-joueurs : le vainqueur gagne le territoire et +3 Gloire, chaque autre participant gagne +1 Gloire.
 
-Bonus de territoire : capitale capturée par attaquant = +5 Gloire supplémentaire ; première conquête d'une ruine = +1 Gloire supplémentaire.
+Bonus de territoire : capitale capturée par attaquant = +5 Gloire supplémentaire ; première conquête d'une ruine = +1 Gloire supplémentaire ; Dragon/Géant neutre conquis = +3 Gloire supplémentaire.
 
 Fortification ou forteresse : défenseur +200 points d'armée. Retirer seulement la fortification manuelle après bataille ; la forteresse garde son bonus naturel.
+
+Tour magique : le défenseur dispose d'un magicien niveau 1 pour la bataille (santé 8, sauvegarde 4+). Ce bonus ne donne pas +200 points d'armée.
 
 ### Points d’armée
 

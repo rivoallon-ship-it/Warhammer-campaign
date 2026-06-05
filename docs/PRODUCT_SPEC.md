@@ -95,10 +95,13 @@ Bonus actifs :
 - Village : +100 points d’armée pour le joueur, plafonné à +200.
 - Gisement : +1 Gloire à chaque fin de tour.
 - Forteresse : défense automatique, +200 points d’armée pour le défenseur.
+- Tour magique : magicien niveau 1 pour le défenseur en bataille (santé 8, sauvegarde 4+).
 - Ruines : +1 Gloire supplémentaire à la première conquête du territoire.
+- Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.
+- Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.
 - Sauvage : aucun bonus.
 
-Bonus en attente : Tour magique, Dragon, Géant.
+Bonus en attente : recrutement Dragon/Géant contre Gloire.
 
 ## 11. Carte et adjacence
 
@@ -157,13 +160,15 @@ Si le territoire était fortifié : défenseur +200 points d’armée, bonus aff
 
 Si le territoire est une forteresse : défenseur +200 points d’armée. Ce bonus est permanent et ne se cumule pas avec une fortification manuelle.
 
+Si le territoire est une tour magique : le défenseur dispose d’un magicien niveau 1 pour la bataille (santé 8, sauvegarde 4+).
+
 En bataille multi-joueurs sur territoire neutre, le vainqueur gagne le territoire et +3 Gloire. Chaque autre participant gagne +1 Gloire.
 
-Si l’attaquant capture une capitale, il gagne +5 Gloire supplémentaire. Si une ruine est conquise pour la première fois, le vainqueur gagne +1 Gloire supplémentaire.
+Si l’attaquant capture une capitale, il gagne +5 Gloire supplémentaire. Si une ruine est conquise pour la première fois, le vainqueur gagne +1 Gloire supplémentaire. Si une bataille multi-joueurs permet de conquérir un Dragon ou un Géant neutre, le vainqueur gagne +3 Gloire supplémentaire.
 
 ## 18. Conquêtes neutres automatiques
 
-Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. La difficulté dépend du nombre de territoires contrôlés par ce joueur qui sont adjacents à la cible : 1 territoire adjacent = réussite sur 3+, 2 territoires adjacents = réussite sur 2+, 3 territoires adjacents ou plus = conquête automatique. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur.
+Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. La difficulté dépend du nombre de territoires contrôlés par ce joueur qui sont adjacents à la cible : 1 territoire adjacent = réussite sur 3+, 2 territoires adjacents = réussite sur 2+, 3 territoires adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 territoire adjacent, réussite sur 4+ ; avec 2 territoires adjacents, réussite sur 2+ ; avec 3 territoires adjacents ou plus, conquête automatique. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
 
 Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 
@@ -173,7 +178,7 @@ Un territoire peut être fortifié ou non. Un territoire déjà fortifié ne gag
 
 ## 20. Gloire
 
-Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défenseur victorieux +2, autre participant/perdant d’une bataille +1, capitale capturée +5, première conquête d’une ruine +1.
+Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défenseur victorieux +2, autre participant/perdant d’une bataille +1, capitale capturée +5, première conquête d’une ruine +1, Dragon/Géant neutre conquis +3.
 
 ## 21. Fin de tour
 

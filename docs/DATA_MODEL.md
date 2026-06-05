@@ -237,14 +237,14 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 - `approvePlayer` : maître seulement, pending -> active, log.
 - `launchCampaign` : vérifier conditions, générer carte, créer tour 1, status active, phase orders, log.
 - `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
-- `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale.
+- `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale ; après enregistrement, tenter la révélation automatique si tous les joueurs actifs ont soumis leur ordre.
 - `cancelOrder` : vérifier joueur actif, phase orders, ordre non révélé, puis repasser l'ordre en draft.
-- `revealOrders` : maître, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, phase resolving, log.
+- `revealOrders` : joueur actif, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, phase resolving, log. Cette fonction est appelée automatiquement après la soumission du dernier ordre.
 - `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
 - `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.
 - `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.
 
-Les fonctions SQL de transition `reveal_current_turn_orders`, `resolve_battle_result` et `finish_current_turn` doivent verrouiller les lignes critiques avec `for update` afin d'éviter les doubles traitements en cas de double clic ou d'appel concurrent.
+Les fonctions SQL de transition `reveal_current_turn_orders`, `resolve_battle_result` et `finish_current_turn` doivent verrouiller les lignes critiques avec `for update` afin d'éviter les doubles traitements en cas de double clic ou d'appel concurrent. `reveal_current_turn_orders` accepte un joueur actif, mais refuse tant que tous les ordres actifs ne sont pas soumis.
 
 ## 18. SQL conceptuel
 
@@ -298,4 +298,4 @@ Statut d’ordre, classement et joueur le plus faible peuvent être calculés de
 
 ## 21. Points d’attention Codex
 
-Ne pas supposer 4 joueurs, ne pas coder une carte 4x4 fixe, ne pas bloquer au tour 6, ne pas révéler les ordres avant l’action du maître, ne pas coder héros/mercenaires/détachements dans le MVP.
+Ne pas supposer 4 joueurs, ne pas coder une carte 4x4 fixe, ne pas bloquer au tour 6, ne pas révéler les ordres avant que tous les joueurs actifs aient soumis leur ordre, ne pas coder héros/mercenaires/détachements dans le MVP.

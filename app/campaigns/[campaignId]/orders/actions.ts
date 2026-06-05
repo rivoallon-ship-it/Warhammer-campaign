@@ -42,17 +42,38 @@ export async function submitOrderAction(formData: FormData) {
     redirect(`/login?next=${getReturnPath(campaignId, formData)}`);
   }
 
-  const { error } = await submitOrder(supabase, user, campaignId, {
-    actionType,
-    sourceTerritoryId,
-    targetTerritoryId,
-  });
+  const { error, revealResult, revealWarning } = await submitOrder(
+    supabase,
+    user,
+    campaignId,
+    {
+      actionType,
+      sourceTerritoryId,
+      targetTerritoryId,
+    },
+  );
 
   if (error) {
     redirectAfterSubmit(campaignId, formData, { error });
   }
 
-  redirectAfterSubmit(campaignId, formData, { submitted: "1" });
+  if (revealResult) {
+    redirectAfterSubmit(campaignId, formData, {
+      revealed: "1",
+      battles: String(revealResult.battle_count),
+      explorations: String(revealResult.exploration_count),
+      fortifications: String(revealResult.fortification_count),
+      multi: String(revealResult.multiple_attack_count),
+    });
+  }
+
+  redirectAfterSubmit(
+    campaignId,
+    formData,
+    revealWarning
+      ? { submitted: "1", error: revealWarning }
+      : { submitted: "1" },
+  );
 }
 
 export async function cancelOrderAction(formData: FormData) {

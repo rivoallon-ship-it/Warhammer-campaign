@@ -868,8 +868,8 @@ begin
     return;
   end if;
 
-  if not public.is_campaign_master(v_campaign.id) then
-    return query select false, 'Seul le maître de campagne peut révéler les ordres.', 0, 0, 0, 0;
+  if not public.is_active_campaign_member(v_campaign.id) then
+    return query select false, 'Tu dois être joueur actif pour révéler les ordres.', 0, 0, 0, 0;
     return;
   end if;
 

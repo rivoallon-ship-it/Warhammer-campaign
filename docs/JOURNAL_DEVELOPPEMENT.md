@@ -2,7 +2,7 @@
 ## Les Couronnes Brisées
 ### Suivi du travail réalisé
 
-Dernière mise à jour : 2026-06-04.
+Dernière mise à jour : 2026-06-05.
 
 Ce document résume le travail réalisé depuis le début du développement. Il complète le `README.md`, le plan d'implémentation et l'historique Git.
 
@@ -19,7 +19,7 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 - page campagne centrale avec carte interactive ;
 - ordres secrets directement depuis la carte ;
 - annulation ou remplacement d'un ordre tant que les ordres ne sont pas révélés ;
-- révélation par le maître de campagne ;
+- révélation automatique dès que tous les joueurs actifs ont validé leur ordre ;
 - génération des batailles ;
 - conquêtes neutres résolues automatiquement ;
 - batailles multi-joueurs quand plusieurs joueurs visent le même territoire neutre ;
@@ -38,7 +38,7 @@ La page centrale est maintenant `/campaigns/[campaignId]`.
 Elle regroupe :
 
 - l'en-tête de campagne : statut, phase, rôle, saison, tour, points d'armée, taille de carte, nombre de territoires, neutres et ordres soumis ;
-- les actions de phase : lobby, révélation, résultats, fin de tour, rejoindre, dashboard ;
+- les actions de phase : lobby, résultats, fin de tour, rejoindre, dashboard ;
 - les messages de retour : campagne lancée, tour terminé, ordre enregistré, ordre annulé, erreur ;
 - la carte interactive ;
 - le panneau de commandement du territoire sélectionné ;
@@ -281,6 +281,16 @@ Commits principaux :
 Commit principal :
 
 - `4b111d1` Secure campaign joins and map checks
+
+### 2026-06-05
+
+- Suppression de la validation manuelle du maître pour passer de la phase `Ordres` à la révélation.
+- La soumission d'un ordre tente maintenant d'appeler automatiquement `reveal_current_turn_orders`.
+- Si l'ordre soumis est le dernier ordre actif du tour, les ordres passent directement en `revealed`, les conquêtes automatiques, batailles et fortifications sont générées, puis la campagne passe en phase `resolving`.
+- La progression du tour n'affiche plus de bouton `Révéler les ordres`; l'étape `Révélation` indique que le passage est automatique.
+- La page `/campaigns/[campaignId]/reveal` devient une page de suivi/compatibilité pour les anciens liens, sans action maître obligatoire.
+- La fonction SQL `reveal_current_turn_orders` accepte maintenant tout joueur actif de la campagne, mais garde le blocage si tous les ordres actifs ne sont pas soumis.
+- Les scripts Supabase mis à jour sont `supabase/schema.sql`, `supabase/SQL_A_COPIER_DANS_SUPABASE.sql`, `supabase/a_copier_par_morceaux/07_reveal_orders_function.sql` et les anciens correctifs de révélation.
 
 ## Fichiers importants
 

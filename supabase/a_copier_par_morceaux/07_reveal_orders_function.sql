@@ -9,7 +9,7 @@ declare
 begin
   select * into v_campaign from public.campaigns where id = target_campaign_id for update;
   if not found then return query select false, 'Campagne introuvable.', 0, 0, 0, 0; return; end if;
-  if not public.is_campaign_master(v_campaign.id) then return query select false, 'Seul le maître de campagne peut révéler les ordres.', 0, 0, 0, 0; return; end if;
+  if not public.is_active_campaign_member(v_campaign.id) then return query select false, 'Tu dois être joueur actif pour révéler les ordres.', 0, 0, 0, 0; return; end if;
   if v_campaign.status <> 'active' or v_campaign.current_phase <> 'orders' then return query select false, 'Les ordres ne peuvent pas être révélés dans cette phase.', 0, 0, 0, 0; return; end if;
   select * into v_turn from public.campaign_turns where campaign_id = v_campaign.id and turn_number = v_campaign.current_turn_number order by started_at desc limit 1;
   if not found or v_turn.phase <> 'orders' then return query select false, 'Le tour courant n''est pas en phase ordres.', 0, 0, 0, 0; return; end if;

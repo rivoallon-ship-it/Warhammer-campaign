@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { RevealOrdersForm } from "@/components/orders/reveal-orders-form";
 import {
   Badge,
   Card,
@@ -152,7 +151,7 @@ export default async function RevealPage({
       <div className="campaign-fantasy-content mx-auto max-w-5xl">
         <PageHeader
           eyebrow="Révélation"
-          title="Révéler les ordres"
+          title="Révélation des ordres"
           description={`${campaign.name} - saison ${campaign.season_number}, tour ${
             campaign.current_turn_number || 1
           }.`}
@@ -217,14 +216,23 @@ export default async function RevealPage({
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Action maître</CardTitle>
+                <CardTitle>Révélation automatique</CardTitle>
                 <CardDescription>
-                  La révélation ouvre la phase de résolution du tour.
+                  La phase de résolution s&apos;ouvre dès que tous les joueurs actifs
+                  ont validé leur ordre.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {readiness.canReveal ? (
-                  <RevealOrdersForm campaignId={campaign.id} />
+                  <div className="fantasy-alert fantasy-alert-info p-4">
+                    <p className="text-sm font-semibold text-[#f3ead7]">
+                      Tous les ordres sont prêts.
+                    </p>
+                    <p className="fantasy-muted mt-2 text-sm">
+                      Retourne à la campagne : la révélation se déclenche
+                      automatiquement après la dernière validation d&apos;ordre.
+                    </p>
+                  </div>
                 ) : (
                   <div className="fantasy-alert p-4">
                     <p className="text-sm font-semibold text-[#f3ead7]">

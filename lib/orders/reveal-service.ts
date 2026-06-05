@@ -5,12 +5,15 @@ import {
 } from "@/lib/campaigns/campaign-dashboard-service";
 import type { Database } from "@/types/database";
 
-type RevealRpcResult =
+export type RevealRpcResult =
   Database["public"]["Functions"]["reveal_current_turn_orders"]["Returns"][number];
 
 export type RevealPageData = CampaignDashboardData;
 
-function getRevealRpcErrorMessage(rpcError: { code?: string; message?: string }) {
+export function getRevealRpcErrorMessage(rpcError: {
+  code?: string;
+  message?: string;
+}) {
   const message = rpcError.message ?? "";
 
   if (
@@ -29,6 +32,7 @@ export function getRevealReadiness(revealData: RevealPageData) {
     revealData;
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
+  const isActiveMember = currentPlayer?.status === "active";
   const submittedOrders = orderVisibility.filter((order) =>
     ["submitted", "revealed", "resolved"].includes(order.order_status),
   );
@@ -43,8 +47,8 @@ export function getRevealReadiness(revealData: RevealPageData) {
   });
   const blockers: string[] = [];
 
-  if (!isGameMaster) {
-    blockers.push("Seul le maître de campagne peut révéler les ordres.");
+  if (!isActiveMember) {
+    blockers.push("Tu dois être joueur actif pour révéler les ordres.");
   }
 
   if (campaign.status !== "active" || campaign.current_phase !== "orders") {

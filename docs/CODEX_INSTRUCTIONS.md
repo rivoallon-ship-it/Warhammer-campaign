@@ -91,7 +91,7 @@ Les nouvelles campagnes utilisent une carte hexagonale `hex_v1_*`. Chaque territ
 
 ### Ordres secrets
 
-Avant révélation : propriétaire voit son ordre, autres voient seulement statut, maître ne voit pas les détails. Après révélation : tous les joueurs actifs voient tous les ordres.
+Avant révélation : propriétaire voit son ordre, autres voient seulement statut, maître ne voit pas les détails. Après révélation : tous les joueurs actifs voient tous les ordres. La révélation se déclenche automatiquement à la soumission du dernier ordre actif ; ne pas réintroduire de bouton de validation maître pour passer en résolution.
 
 ### Actions MVP
 
@@ -136,15 +136,15 @@ Tables attendues : `profiles`, `campaigns`, `campaign_players`, `territories`, `
 
 Activer RLS sur toutes les tables applicatives. Ne pas exposer de service role key. Côté client, utiliser seulement `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ou `NEXT_PUBLIC_SUPABASE_ANON_KEY` pour compatibilité.
 
-Règles : utilisateur lit ses campagnes, joueur modifie ses infos de lobby, maître lance/révèle/résout/termine, joueur ne lit que ses ordres avant révélation, tous lisent après révélation.
+Règles : utilisateur lit ses campagnes, joueur modifie ses infos de lobby, maître lance/résout/termine, joueur ne lit que ses ordres avant révélation, tous lisent après révélation. La RPC de révélation peut être appelée par un joueur actif, mais elle doit refuser tant que tous les ordres actifs ne sont pas soumis.
 
 Invitation par code : ne pas faire de lecture globale des campagnes `lobby` côté client. Utiliser `get_join_campaign_details(invite_code)` pour afficher les informations minimales d'un lobby à partir d'un code valide, puis `request_join_campaign(invite_code, ...)` pour créer une demande d'inscription. Un joueur ne doit pas pouvoir s'inscrire par un `insert` direct dans `campaign_players`.
 
-Transitions critiques : les fonctions SQL qui révèlent les ordres, résolvent les batailles ou terminent le tour doivent verrouiller les lignes concernées avec `for update` afin d'éviter les doubles traitements concurrents.
+Transitions critiques : les fonctions SQL qui révèlent automatiquement les ordres, résolvent les batailles ou terminent le tour doivent verrouiller les lignes concernées avec `for update` afin d'éviter les doubles traitements concurrents.
 
 ## 8. UI / UX
 
-Interface claire, lisible, fantasy sombre, adaptée adultes/enfants, responsive. Les actions longues ou sensibles doivent afficher un état de chargement pour éviter les doubles clics. Les confirmations navigateur ne sont pas utilisées pour `Révéler les ordres`, `Résoudre la bataille` et `Terminer le tour`.
+Interface claire, lisible, fantasy sombre, adaptée adultes/enfants, responsive. Les actions longues ou sensibles doivent afficher un état de chargement pour éviter les doubles clics. Les confirmations navigateur ne sont pas utilisées pour `Résoudre la bataille` et `Terminer le tour`; la révélation des ordres est automatique.
 
 Messages d’erreur compréhensibles : capitale prise, cible non adjacente, territoire non contrôlé, tous les joueurs doivent valider.
 
@@ -187,7 +187,7 @@ Création compte, campagne 2 joueurs, code invitation, second joueur rejoint, ma
 
 ## 13. Ce qu’il ne faut pas faire
 
-Ne pas coder carte 4x4 fixe, supposer 4 joueurs, bloquer au tour 6, révéler trop tôt, exposer ordres secrets, tout mettre dans React, ignorer RLS, ajouter fonctionnalités hors MVP ou exposer secrets.
+Ne pas coder carte 4x4 fixe, supposer 4 joueurs, bloquer au tour 6, révéler trop tôt, réintroduire une validation manuelle du maître pour la révélation, exposer ordres secrets, tout mettre dans React, ignorer RLS, ajouter fonctionnalités hors MVP ou exposer secrets.
 
 ## 14. Définition de terminé
 

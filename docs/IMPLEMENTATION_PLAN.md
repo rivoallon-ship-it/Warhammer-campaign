@@ -156,7 +156,7 @@ Composant `CampaignLog`. Afficher campagne créée, joueur rejoint/accepté, lan
 
 ## Lot 21 — Qualité UX et responsive
 
-Navigation, loading/error/empty states, confirmations, responsive, lisibilité carte, badges, icônes, erreurs Supabase. Confirmations pour lancer, révéler, saisir résultat, finir tour, retirer/refuser joueur.
+Navigation, loading/error/empty states, confirmations, responsive, lisibilité carte, badges, icônes, erreurs Supabase. Confirmations pour lancer, saisir résultat, finir tour, retirer/refuser joueur. La révélation des ordres se déclenche automatiquement après le dernier ordre validé.
 
 État partiel déjà livré : écran campagne compact, carte et ordres fusionnés, routes legacy redirigées, ordre annulable, action de conquête affichée uniquement quand une cible conquérable est sélectionnée.
 

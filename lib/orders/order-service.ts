@@ -1,4 +1,8 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import {
+  getRevealRpcErrorMessage,
+  type RevealRpcResult,
+} from "@/lib/orders/reveal-service";
 import type { OrderAction } from "@/types/campaign";
 import type { Database } from "@/types/database";
 
@@ -15,6 +19,19 @@ export type SubmitOrderInput = {
   sourceTerritoryId: string;
   targetTerritoryId: string;
 };
+
+type AutoRevealResult = {
+  revealResult: RevealRpcResult | null;
+  revealWarning: string | null;
+};
+
+type SubmitOrderResult = AutoRevealResult & {
+  error: string | null;
+};
+
+function submitOrderError(error: string): SubmitOrderResult {
+  return { error, revealResult: null, revealWarning: null };
+}
 
 export type OrdersPageData = {
   campaign: CampaignRow;
@@ -154,6 +171,73 @@ function validateSubmittedOrder(
   };
 }
 
+async function revealOrdersIfReady(
+  supabase: SupabaseClient<Database>,
+  campaignId: string,
+): Promise<AutoRevealResult> {
+  const { data: orderVisibility, error: visibilityError } = await supabase.rpc(
+    "get_current_turn_order_visibility",
+    {
+      target_campaign_id: campaignId,
+    },
+  );
+
+  if (visibilityError) {
+    return { revealResult: null, revealWarning: null };
+  }
+
+  const activePlayerCount = orderVisibility?.length ?? 0;
+  const submittedOrderCount =
+    orderVisibility?.filter((order) =>
+      ["submitted", "revealed", "resolved"].includes(order.order_status),
+    ).length ?? 0;
+
+  if (activePlayerCount === 0 || submittedOrderCount !== activePlayerCount) {
+    return { revealResult: null, revealWarning: null };
+  }
+
+  const { data, error } = await supabase.rpc("reveal_current_turn_orders", {
+    target_campaign_id: campaignId,
+  });
+
+  if (error) {
+    return {
+      revealResult: null,
+      revealWarning: `Ordre enregistré, mais la révélation automatique a échoué : ${getRevealRpcErrorMessage(
+        error,
+      )}`,
+    };
+  }
+
+  const result = data?.[0] as RevealRpcResult | undefined;
+
+  if (!result) {
+    return {
+      revealResult: null,
+      revealWarning:
+        "Ordre enregistré, mais la révélation automatique n'a pas renvoyé de résultat.",
+    };
+  }
+
+  if (result.success) {
+    return { revealResult: result, revealWarning: null };
+  }
+
+  const message = result.error ?? "Révélation automatique impossible.";
+
+  if (
+    message.includes("ne peuvent pas être révélés dans cette phase") ||
+    message.includes("n'est pas en phase ordres")
+  ) {
+    return { revealResult: null, revealWarning: null };
+  }
+
+  return {
+    revealResult: null,
+    revealWarning: `Ordre enregistré, mais la révélation automatique a échoué : ${message}`,
+  };
+}
+
 export async function getOrdersPageData(
   supabase: SupabaseClient<Database>,
   campaignId: string,
@@ -238,7 +322,7 @@ export async function submitOrder(
   user: User,
   campaignId: string,
   input: SubmitOrderInput,
-) {
+): Promise<SubmitOrderResult> {
   const { ordersData, error } = await getOrdersPageData(
     supabase,
     campaignId,
@@ -246,7 +330,7 @@ export async function submitOrder(
   );
 
   if (error || !ordersData) {
-    return { error: error ?? "Campagne introuvable." };
+    return submitOrderError(error ?? "Campagne introuvable.");
   }
 
   const { order, error: validationError } = validateSubmittedOrder(
@@ -255,11 +339,11 @@ export async function submitOrder(
   );
 
   if (validationError || !order) {
-    return { error: validationError ?? "Ordre invalide." };
+    return submitOrderError(validationError ?? "Ordre invalide.");
   }
 
   if (!ordersData.currentPlayer || !ordersData.currentTurn) {
-    return { error: "Tour ou joueur introuvable." };
+    return submitOrderError("Tour ou joueur introuvable.");
   }
 
   const orderRow = {
@@ -277,10 +361,12 @@ export async function submitOrder(
       .eq("id", ordersData.existingOrder.id);
 
     if (updateError) {
-      return { error: "Impossible de modifier ton ordre." };
+      return submitOrderError("Impossible de modifier ton ordre.");
     }
 
-    return { error: null };
+    const autoReveal = await revealOrdersIfReady(supabase, campaignId);
+
+    return { error: null, ...autoReveal };
   }
 
   const { error: insertError } = await supabase.from("orders").insert({
@@ -292,13 +378,15 @@ export async function submitOrder(
 
   if (insertError) {
     if (insertError.code === "23505") {
-      return { error: "Tu as déjà donné un ordre pour ce tour." };
+      return submitOrderError("Tu as déjà donné un ordre pour ce tour.");
     }
 
-    return { error: "Impossible d'enregistrer ton ordre." };
+    return submitOrderError("Impossible d'enregistrer ton ordre.");
   }
 
-  return { error: null };
+  const autoReveal = await revealOrdersIfReady(supabase, campaignId);
+
+  return { error: null, ...autoReveal };
 }
 
 export async function cancelOrder(

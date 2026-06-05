@@ -4,7 +4,6 @@ import { notFound, redirect } from "next/navigation";
 import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
-import { RevealOrdersForm } from "@/components/orders/reveal-orders-form";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
 import { Badge, Card, CardContent, buttonVariants } from "@/components/ui";
 import {
@@ -223,9 +222,13 @@ function TurnProgress({
       ? "current"
       : "waiting";
   const resultsState: StepState = isResultsPhase ? "current" : "waiting";
-  const canRevealOrders = isGameMaster && isOrdersPhase && allOrdersSubmitted;
   const canOpenResults = isGameMaster && isResultsPhase && pendingBattleCount > 0;
   const canFinishTurn = isGameMaster && isResultsPhase && pendingBattleCount === 0;
+  const revealDetail = isResultsPhase
+    ? "Ordres révélés automatiquement."
+    : allOrdersSubmitted
+      ? "Révélation automatique en cours."
+      : "Automatique dès que tous les joueurs ont validé.";
   const battleDetail = isResultsPhase
     ? battleCount > 0
       ? `${resolvedBattleCount} / ${battleCount} bataille${
@@ -255,21 +258,9 @@ function TurnProgress({
           index={1}
           isLast={false}
           title="Révélation"
-          detail={
-            allOrdersSubmitted
-              ? "Tous les ordres sont prêts."
-              : "Disponible quand tous les joueurs ont validé."
-          }
+          detail={revealDetail}
           state={revealState}
-        >
-          {canRevealOrders ? (
-            <RevealOrdersForm campaignId={campaignId} returnTo="campaign" />
-          ) : allOrdersSubmitted && !isGameMaster && isOrdersPhase ? (
-            <p className="fantasy-muted text-xs">
-              En attente du maître de campagne.
-            </p>
-          ) : null}
-        </TurnProgressStep>
+        />
 
         <TurnProgressStep
           index={2}

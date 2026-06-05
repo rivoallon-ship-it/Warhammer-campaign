@@ -2,7 +2,7 @@
 
 Application web de gestion de campagne narrative pour **Warhammer Age of Sigmar**.
 
-Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une partie avec un code d’invitation, visualiser une carte de territoires, donner des ordres secrets, révéler les ordres, résoudre les conquêtes et batailles, puis continuer la campagne tour après tour.
+Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une partie avec un code d’invitation, visualiser une carte de territoires, donner des ordres secrets, révéler automatiquement les ordres dès que tous les joueurs ont validé, résoudre les conquêtes et batailles, puis continuer la campagne tour après tour.
 
 ## 1. Objectif du projet
 
@@ -28,7 +28,7 @@ Le MVP doit permettre :
 - page de campagne centrale avec carte interactive ;
 - ordres secrets directement depuis la carte ;
 - annulation ou remplacement d'un ordre tant que la phase d'ordres est ouverte ;
-- révélation simultanée des ordres ;
+- révélation automatique et simultanée des ordres dès que tous les joueurs actifs ont validé ;
 - génération des batailles et conquêtes automatiques ;
 - résolution automatique des conquêtes neutres non contestées ;
 - saisie des résultats de bataille ;
@@ -147,6 +147,8 @@ La génération de carte est idempotente : si une carte existe déjà, l'applica
 
 Avant révélation, le joueur voit son propre ordre ; les autres joueurs voient seulement “validé” ou “en attente” ; le maître de campagne ne voit pas les détails des ordres adverses. Après révélation, tous les joueurs actifs voient tous les ordres.
 
+La révélation ne demande pas de validation manuelle du maître de campagne : l'enregistrement du dernier ordre valide déclenche automatiquement la phase de résolution.
+
 ## 8. Configuration des cartes
 
 La configuration des cartes doit être placée dans `/lib/maps/map-configs.ts`.
@@ -264,4 +266,4 @@ Sur une base Supabase déjà installée avant ce correctif, copier et exécuter 
 
 ## 16. Définition du MVP terminé
 
-Le MVP est terminé quand un utilisateur peut créer une campagne 2 à 6 joueurs, inviter les autres, lancer la campagne, générer la carte, soumettre des ordres secrets, révéler, résoudre les conquêtes et batailles, mettre à jour territoires/Gloire et passer au tour suivant indéfiniment.
+Le MVP est terminé quand un utilisateur peut créer une campagne 2 à 6 joueurs, inviter les autres, lancer la campagne, générer la carte, soumettre des ordres secrets, déclencher automatiquement la révélation, résoudre les conquêtes et batailles, mettre à jour territoires/Gloire et passer au tour suivant indéfiniment.

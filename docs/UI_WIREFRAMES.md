@@ -107,9 +107,9 @@ Afficher : nom, Saison 1 — Tour X, phase, points d’armée, carte interactive
 
 Actions joueur : sélectionner un territoire, fortifier un territoire contrôlé, cliquer une cible conquérable, valider `Conquérir`, annuler un ordre soumis tant que la phase d'ordres est ouverte, voir les batailles/résultats selon la phase.
 
-Actions maître selon phase : Révéler les ordres, Résultats, Finir le tour.
+Actions maître selon phase : Résultats, Finir le tour.
 
-Bloc progression : trois étapes visibles `Ordres`, `Révélation`, `Résultats`. Le bouton `Révéler les ordres` apparaît au maître quand tous les ordres sont validés. Le bloc résultats affiche l'avancement des batailles et propose la saisie des résultats ou la fin de tour.
+Bloc progression : trois étapes visibles `Ordres`, `Révélation`, `Résultats`. L'étape `Révélation` devient active automatiquement quand tous les ordres sont validés. Le bloc résultats affiche l'avancement des batailles et propose la saisie des résultats ou la fin de tour.
 
 ## 12. Carte interactive `/campaigns/[campaignId]/map`
 
@@ -141,9 +141,9 @@ N’afficher que les sources contrôlées et cibles valides. Si ordre validé : 
 
 ## 14. Révélation `/campaigns/[campaignId]/reveal`
 
-Avant révélation : liste statuts joueurs. Bouton révéler désactivé si tous pas validés.
+Avant révélation : liste statuts joueurs. Dès que tous les joueurs actifs ont validé, la révélation se déclenche automatiquement.
 
-Quand tous validés : bouton Révéler les ordres + confirmation.
+Quand tous validés : passage automatique en révélation, puis en résolution.
 
 Après révélation : tableau joueur/action/source/cible + bouton voir résultats à résoudre.
 

@@ -158,6 +158,8 @@ Invitation par code : ne pas faire de lecture globale des campagnes `lobby` côt
 
 Transitions critiques : les fonctions SQL qui révèlent automatiquement les ordres, résolvent les batailles ou terminent le tour doivent verrouiller les lignes concernées avec `for update` afin d'éviter les doubles traitements concurrents.
 
+Fichiers à copier dans Supabase : garder chaque morceau sous 100 lignes. Si une migration dépasse cette limite, la découper en plusieurs fichiers numérotés pour éviter les collages tronqués dans le SQL Editor.
+
 ## 8. UI / UX
 
 Interface claire, lisible, fantasy sombre, adaptée adultes/enfants, responsive. Les actions longues ou sensibles doivent afficher un état de chargement pour éviter les doubles clics. Les confirmations navigateur ne sont pas utilisées pour `Résoudre la bataille` et `Terminer le tour`; la révélation des ordres est automatique.

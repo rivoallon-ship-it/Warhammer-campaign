@@ -23,6 +23,7 @@ import {
   hasDefensiveArmyPointsBonus,
   type PlayerTerritoryRuleStats,
 } from "@/lib/campaigns/territory-rules";
+import { getLegendaryRecruitsSummary } from "@/lib/campaigns/recruitment-rules";
 import { createClient } from "@/lib/supabase/server";
 
 type ResultsPageProps = {
@@ -78,6 +79,8 @@ type BattleParticipantSummary = {
   advantage_rank: number | null;
   player: {
     display_name: string;
+    dragon_recruits: number;
+    giant_recruits: number;
   } | null;
 };
 
@@ -375,6 +378,12 @@ export default async function ResultsPage({
                               },
                               hasDefensiveArmyPointsBonus(battle.defender_bonus),
                             );
+                            const legendaryRecruitsSummary = participant.player
+                              ? getLegendaryRecruitsSummary(
+                                  participant.player.dragon_recruits,
+                                  participant.player.giant_recruits,
+                                )
+                              : null;
 
                             return (
                               <li
@@ -401,6 +410,11 @@ export default async function ResultsPage({
                                 {participant.dice_result ? (
                                   <Badge variant="info">
                                     D6 {participant.dice_result}
+                                  </Badge>
+                                ) : null}
+                                {legendaryRecruitsSummary ? (
+                                  <Badge variant="warning">
+                                    Renforts : {legendaryRecruitsSummary}
                                   </Badge>
                                 ) : null}
                               </li>

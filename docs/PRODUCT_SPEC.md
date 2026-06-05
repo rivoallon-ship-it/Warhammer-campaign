@@ -174,7 +174,7 @@ Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à
 
 Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 10 Gloire. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
 
-Dans cette version, le recrutement est suivi comme ressource de campagne. Son utilisation exacte dans les batailles reste à préciser.
+Dans cette version, le recrutement est suivi comme ressource de campagne et affiché sur les participants pendant la résolution des batailles. Son utilisation exacte dans les batailles reste à préciser.
 
 Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 

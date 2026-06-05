@@ -14,6 +14,7 @@ import {
   getTerritoryStats,
 } from "@/lib/campaigns/campaign-dashboard-service";
 import { getColorLabel } from "@/lib/campaigns/join-campaign";
+import { getLegendaryRecruitsSummary } from "@/lib/campaigns/recruitment-rules";
 import {
   getEndTurnGloryIncome,
   getPlayerTerritoryRuleStats,
@@ -658,6 +659,10 @@ export default async function CampaignPage({
                   const effectiveArmyPoints = armyBasePoints + villageArmyBonus;
                   const endTurnGloryIncome =
                     getEndTurnGloryIncome(playerRuleStats);
+                  const legendaryRecruitsSummary = getLegendaryRecruitsSummary(
+                    player.dragon_recruits,
+                    player.giant_recruits,
+                  );
                   const order = orderVisibilityByPlayerId.get(player.id);
                   const displayedStatus = order?.can_view_details
                     ? order.order_status
@@ -698,12 +703,9 @@ export default async function CampaignPage({
                         <p className="fantasy-muted mt-1 text-sm">
                           Revenu fin de tour : +{endTurnGloryIncome} Gloire
                         </p>
-                        {player.dragon_recruits > 0 || player.giant_recruits > 0 ? (
+                        {legendaryRecruitsSummary ? (
                           <p className="fantasy-muted mt-1 text-sm">
-                            Renforts : {player.dragon_recruits} Dragon
-                            {player.dragon_recruits > 1 ? "s" : ""},{" "}
-                            {player.giant_recruits} Géant
-                            {player.giant_recruits > 1 ? "s" : ""}
+                            Renforts : {legendaryRecruitsSummary}
                           </p>
                         ) : null}
                       </div>

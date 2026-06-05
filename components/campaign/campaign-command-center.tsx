@@ -6,6 +6,7 @@ import {
   cancelOrderAction,
   submitOrderAction,
 } from "@/app/campaigns/[campaignId]/orders/actions";
+import { LegendaryRecruitmentCard } from "@/components/campaign/legendary-recruitment-card";
 import {
   getNeutralConquestDifficultyLabel,
   getTerritoryTypeEffectLabel,
@@ -52,6 +53,15 @@ type ExistingOrder = {
   status: string;
 };
 
+type RecruitmentState = {
+  glory: number;
+  dragonTerritoryCount: number;
+  giantTerritoryCount: number;
+  dragonRecruits: number;
+  giantRecruits: number;
+  canRecruit: boolean;
+};
+
 type CampaignCommandCenterProps = {
   campaignId: string;
   mapWidth: number;
@@ -65,6 +75,7 @@ type CampaignCommandCenterProps = {
   canSubmitOrders: boolean;
   unavailableMessage: string | null;
   existingOrder: ExistingOrder | null;
+  recruitment: RecruitmentState;
 };
 
 const neutralTerritoryColor = "#c8bca7";
@@ -260,6 +271,7 @@ export function CampaignCommandCenter({
   canSubmitOrders,
   unavailableMessage,
   existingOrder,
+  recruitment,
 }: CampaignCommandCenterProps) {
   const initialControlledTerritoryId =
     (currentPlayerId
@@ -785,6 +797,15 @@ export function CampaignCommandCenter({
             ) : null}
           </CardContent>
         </Card>
+        <LegendaryRecruitmentCard
+          campaignId={campaignId}
+          glory={recruitment.glory}
+          dragonTerritoryCount={recruitment.dragonTerritoryCount}
+          giantTerritoryCount={recruitment.giantTerritoryCount}
+          dragonRecruits={recruitment.dragonRecruits}
+          giantRecruits={recruitment.giantRecruits}
+          canRecruit={recruitment.canRecruit}
+        />
       </div>
     </div>
   );

@@ -321,6 +321,7 @@ Commit principal :
   - remplacement de l'ancien `05_auth_helpers_2.sql` par `05a`, `05b`, `05c` ;
   - compactage de `08_resolve_exploration_function.sql` et `09b_finish_turn_function.sql` ;
   - mise à jour de `00_LIRE_AVANT_DE_COPIER.md`.
+- Déplacement du bloc `Recrutements` dans la colonne droite de la carte, sous les informations du territoire sélectionné.
 
 ## Fichiers importants
 

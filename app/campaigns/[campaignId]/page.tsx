@@ -4,7 +4,6 @@ import { notFound, redirect } from "next/navigation";
 import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
-import { LegendaryRecruitmentCard } from "@/components/campaign/legendary-recruitment-card";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
 import { Badge, Card, CardContent, buttonVariants } from "@/components/ui";
 import {
@@ -604,6 +603,14 @@ export default async function CampaignPage({
                     }
                   : null
               }
+              recruitment={{
+                glory: currentPlayer?.glory ?? 0,
+                dragonTerritoryCount,
+                giantTerritoryCount,
+                dragonRecruits: currentPlayer?.dragon_recruits ?? 0,
+                giantRecruits: currentPlayer?.giant_recruits ?? 0,
+                canRecruit: canRecruitLegendaryUnits,
+              }}
             />
           ) : (
             <Card className="fantasy-panel">
@@ -732,15 +739,6 @@ export default async function CampaignPage({
           </Card>
 
           <div className="space-y-4">
-            <LegendaryRecruitmentCard
-              campaignId={campaign.id}
-              glory={currentPlayer?.glory ?? 0}
-              dragonTerritoryCount={dragonTerritoryCount}
-              giantTerritoryCount={giantTerritoryCount}
-              dragonRecruits={currentPlayer?.dragon_recruits ?? 0}
-              giantRecruits={currentPlayer?.giant_recruits ?? 0}
-              canRecruit={canRecruitLegendaryUnits}
-            />
             <CampaignLog logs={logs} />
           </div>
         </section>

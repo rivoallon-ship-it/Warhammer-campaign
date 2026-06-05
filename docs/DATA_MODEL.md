@@ -1,5 +1,5 @@
 # DATA_MODEL.md
-## Les Couronnes Brisées
+## HexRealm
 ### Modèle de données Supabase — MVP en ligne
 
 ## 1. Objectif du modèle

@@ -64,9 +64,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <header className="mb-10 flex flex-col justify-between gap-4 border-b border-[#c89a53]/45 pb-6 sm:flex-row sm:items-center">
           <Link href="/" className="flex items-center gap-3 font-semibold">
             <span className="grid size-10 place-items-center rounded-md border border-[#d5a653]/70 bg-[#211a16] text-sm text-[#f4ce73]">
-              LC
+              HR
             </span>
-            <span>Les Couronnes Brisées</span>
+            <span>HexRealm</span>
           </Link>
           <form action={signOutAction}>
             <Button type="submit" variant="outline">

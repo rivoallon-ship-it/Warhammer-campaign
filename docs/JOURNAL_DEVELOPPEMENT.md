@@ -1,5 +1,5 @@
 # JOURNAL_DEVELOPPEMENT.md
-## Les Couronnes Brisées
+## HexRealm
 ### Suivi du travail réalisé
 
 Dernière mise à jour : 2026-06-05.

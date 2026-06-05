@@ -1,4 +1,4 @@
-# Les Couronnes Brisées
+# HexRealm
 
 Application web de gestion de campagne narrative pour **Warhammer Age of Sigmar**.
 
@@ -6,7 +6,7 @@ Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une p
 
 ## 1. Objectif du projet
 
-**Les Couronnes Brisées** est un gestionnaire de campagne en ligne.
+**HexRealm** est un gestionnaire de campagne en ligne.
 
 Il ne remplace pas les règles de Warhammer Age of Sigmar. Il gère uniquement la couche campagne : joueurs, cartes, territoires, ordres, conquêtes, batailles, Gloire et tours de campagne.
 
@@ -213,7 +213,7 @@ Le suivi réel du développement est documenté dans `docs/JOURNAL_DEVELOPPEMENT
 ## 12. Premier prompt Codex recommandé
 
 ```text
-Tu vas développer l’application Les Couronnes Brisées.
+Tu vas développer l’application HexRealm.
 
 Lis les fichiers :
 - docs/PRODUCT_SPEC.md

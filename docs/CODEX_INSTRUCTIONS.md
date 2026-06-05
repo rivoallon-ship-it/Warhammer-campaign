@@ -1,10 +1,10 @@
 # CODEX_INSTRUCTIONS.md
 ## Instructions de développement pour Codex
-### Projet : Les Couronnes Brisées
+### Projet : HexRealm
 
 ## 1. Rôle de Codex
 
-Développer une application web appelée **Les Couronnes Brisées**, gestionnaire en ligne de campagne pour Warhammer Age of Sigmar.
+Développer une application web appelée **HexRealm**, gestionnaire en ligne de campagne pour Warhammer Age of Sigmar.
 
 L’application doit permettre : comptes, profils, campagnes 2 à 6 joueurs, cartes dynamiques, lobby, ordres secrets, révélation, conquêtes, batailles, résultats, Gloire et tours ouverts.
 

@@ -69,9 +69,9 @@ export default function Home() {
           <header className="mb-20 flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3 font-semibold">
               <span className="grid size-10 place-items-center rounded-md border border-[#e9d7a5]/60 bg-[#211a16]/50 text-lg">
-                LC
+                HR
               </span>
-              <span>Les Couronnes Brisées</span>
+              <span>HexRealm</span>
             </Link>
             <Link
               href="/login"
@@ -84,7 +84,7 @@ export default function Home() {
           <div className="max-w-3xl">
             <Badge variant="warning">Campagnes ouvertes 2 à 6 joueurs</Badge>
             <h1 className="mt-6 max-w-2xl text-5xl font-bold leading-[1.05] sm:text-6xl">
-              Les Couronnes Brisées
+              HexRealm
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#f3e7cd] sm:text-xl">
               Gestionnaire de campagne Age of Sigmar pour créer une partie,

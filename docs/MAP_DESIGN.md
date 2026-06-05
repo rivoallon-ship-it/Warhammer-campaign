@@ -1,5 +1,5 @@
 # MAP_DESIGN.md
-## Les Couronnes Brisées
+## HexRealm
 ### Design fonctionnel de la carte dynamique
 
 ## 1. Objectif

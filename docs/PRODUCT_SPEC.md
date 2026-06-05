@@ -1,10 +1,10 @@
 # PRODUCT_SPEC.md
-## Les Couronnes Brisées
+## HexRealm
 ### Gestionnaire de campagne en ligne pour Warhammer Age of Sigmar
 
 ## 1. Vision produit
 
-**Les Couronnes Brisées** est une application web permettant de gérer une campagne narrative de conquête pour **Warhammer Age of Sigmar**.
+**HexRealm** est une application web permettant de gérer une campagne narrative de conquête pour **Warhammer Age of Sigmar**.
 
 L’application aide les joueurs à créer une campagne en ligne, inviter d’autres joueurs, rejoindre une partie avec un code, visualiser une carte de territoires, donner des ordres secrets, révéler automatiquement les ordres en même temps dès que tous les joueurs ont validé, générer les batailles à jouer, résoudre automatiquement les conquêtes neutres non contestées, saisir les résultats, mettre à jour automatiquement les territoires, la Gloire et le tour de campagne.
 

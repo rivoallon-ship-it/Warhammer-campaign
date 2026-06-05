@@ -91,7 +91,7 @@ export default async function NewCampaignPage({
               <Input
                 label="Nom de campagne"
                 name="name"
-                placeholder="Ex. Les Couronnes Brisées"
+                placeholder="Ex. La Marche d'HexRealm"
                 required
               />
               <Select

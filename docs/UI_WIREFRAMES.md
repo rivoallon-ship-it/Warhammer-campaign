@@ -1,5 +1,5 @@
 # UI_WIREFRAMES.md
-## Les Couronnes Brisées
+## HexRealm
 ### Wireframes fonctionnels du MVP
 
 ## 1. Objectif
@@ -36,10 +36,10 @@ Objectif : présenter l’application et orienter.
 Wireframe :
 
 ```text
-Header : Logo / Les Couronnes Brisées / Connexion
+Header : Logo / HexRealm / Connexion
 
 Hero :
-Les Couronnes Brisées
+HexRealm
 Gestionnaire de campagne Age of Sigmar
 Crée une campagne, invite tes joueurs, donne tes ordres en secret et conquiers la carte.
 [Créer un compte] [Se connecter] [Rejoindre une campagne]

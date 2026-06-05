@@ -25,9 +25,9 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
       <div className="campaign-fantasy-content mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col justify-center">
         <Link href="/" className="mb-8 inline-flex items-center gap-3 font-semibold">
           <span className="grid size-10 place-items-center rounded-md border border-[#d5a653]/70 bg-[#211a16] text-sm text-[#f4ce73]">
-            LC
+            HR
           </span>
-          <span>Les Couronnes Brisées</span>
+          <span>HexRealm</span>
         </Link>
 
         <Card>

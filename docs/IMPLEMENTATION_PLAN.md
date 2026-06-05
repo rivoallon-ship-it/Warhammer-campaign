@@ -1,5 +1,5 @@
 # IMPLEMENTATION_PLAN.md
-## Les Couronnes Brisées
+## HexRealm
 ### Plan de développement du MVP en ligne
 
 ## 1. Objectif
@@ -169,7 +169,7 @@ V2 héros ; V3 Dragons/Géants/mercenaires ; V4 détachements ; V5 diplomatie ; 
 ### Prompt 1
 
 ```text
-Tu vas développer l’application Les Couronnes Brisées.
+Tu vas développer l’application HexRealm.
 
 Lis les fichiers :
 - docs/PRODUCT_SPEC.md

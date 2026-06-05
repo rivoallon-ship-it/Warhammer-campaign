@@ -35,3 +35,8 @@ Dans Supabase SQL Editor :
 6. Passe au fichier suivant.
 
 Ne mélange pas plusieurs morceaux dans la même requête.
+
+Correctifs ponctuels :
+
+- `17_hotfix_special_reward_claimed_at.sql` : à lancer si Supabase affiche
+  `column t.special_reward_claimed_at does not exist` pendant la révélation.

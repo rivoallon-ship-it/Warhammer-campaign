@@ -33,6 +33,7 @@ create table if not exists public.campaign_logs (
       'battle_result',
       'exploration_result',
       'territory_fortified',
+      'legendary_recruitment',
       'turn_finished',
       'season_finished',
       'campaign_archived'
@@ -91,4 +92,3 @@ drop trigger if exists orders_set_updated_at on public.orders;
 create trigger orders_set_updated_at
 before update on public.orders
 for each row execute function public.set_updated_at();
-

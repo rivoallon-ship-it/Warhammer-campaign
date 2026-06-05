@@ -22,6 +22,7 @@ const logTypeLabels: Record<string, string> = {
   battle_result: "Bataille",
   exploration_result: "Exploration",
   territory_fortified: "Fortification",
+  legendary_recruitment: "Recrutement",
   turn_finished: "Tour",
   season_finished: "Saison",
   campaign_archived: "Archive",
@@ -33,6 +34,7 @@ function getLogVariant(type: string) {
   }
 
   if (type === "exploration_result") return "success" as const;
+  if (type === "legendary_recruitment") return "warning" as const;
   if (type === "territory_fortified") return "warning" as const;
   if (type === "orders_revealed" || type === "turn_finished") {
     return "info" as const;

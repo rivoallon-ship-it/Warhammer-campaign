@@ -192,6 +192,7 @@ Règles :
 - si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;
 - fortifier cible un territoire contrôlé par le joueur, non fortifié et qui n’est pas une forteresse ;
 - les tags ont des effets : CA +5 Gloire si capturée, VI +100 points d’armée max +200, GE +1 Gloire en fin de tour, FO +200 points au défenseur, TO magicien niveau 1 pour le défenseur, RU +1 Gloire à la première conquête, DR/GI +3 Gloire si conquis, SA sans bonus ;
+- contrôler un territoire DR ou GI débloque le recrutement correspondant pour 10 Gloire, avec compteur joueur et historique ;
 - en fin de tour, chaque joueur gagne aussi 1 Gloire par tranche de 3 territoires contrôlés.
 
 ## 10. Progression des armées

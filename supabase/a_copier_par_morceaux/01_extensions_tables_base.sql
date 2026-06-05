@@ -52,6 +52,8 @@ create table if not exists public.campaign_players (
   status text not null default 'pending',
   starting_capital_code text,
   glory int not null default 0 check (glory >= 0),
+  dragon_recruits int not null default 0 check (dragon_recruits >= 0),
+  giant_recruits int not null default 0 check (giant_recruits >= 0),
   is_ready boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
+import { LegendaryRecruitmentCard } from "@/components/campaign/legendary-recruitment-card";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
 import { Badge, Card, CardContent, buttonVariants } from "@/components/ui";
 import {
@@ -37,6 +38,7 @@ type CampaignPageProps = {
     autoAdvanced?: string;
     submitted?: string;
     cancelled?: string;
+    recruited?: string;
     error?: string;
   }>;
 };
@@ -376,6 +378,22 @@ export default async function CampaignPage({
       existingPlayerOrder &&
         ["draft", "submitted"].includes(existingPlayerOrder.status),
     );
+  const currentPlayerLegendaryTerritories = currentPlayer
+    ? territories.filter(
+        (territory) => territory.owner_campaign_player_id === currentPlayer.id,
+      )
+    : [];
+  const dragonTerritoryCount = currentPlayerLegendaryTerritories.filter(
+    (territory) => territory.type === "dragon",
+  ).length;
+  const giantTerritoryCount = currentPlayerLegendaryTerritories.filter(
+    (territory) => territory.type === "giant",
+  ).length;
+  const canRecruitLegendaryUnits = Boolean(
+    currentPlayer &&
+      currentPlayer.status === "active" &&
+      campaign.status === "active",
+  );
 
   return (
     <main className="campaign-fantasy-shell min-h-screen px-4 py-8 text-[#f3ead7] sm:px-6 lg:py-10">
@@ -533,6 +551,11 @@ export default async function CampaignPage({
             Ordre annulé. Tu peux en choisir un nouveau pour ce tour.
           </p>
         ) : null}
+        {query?.recruited ? (
+          <p className="fantasy-alert fantasy-alert-success mt-4 p-3 text-sm">
+            {query.recruited} recruté. 10 Gloire ont été dépensés.
+          </p>
+        ) : null}
         {query?.error ? (
           <p className="fantasy-alert fantasy-alert-danger mt-4 p-3 text-sm">
             {query.error}
@@ -668,6 +691,14 @@ export default async function CampaignPage({
                         <p className="fantasy-muted mt-1 text-sm">
                           Revenu fin de tour : +{endTurnGloryIncome} Gloire
                         </p>
+                        {player.dragon_recruits > 0 || player.giant_recruits > 0 ? (
+                          <p className="fantasy-muted mt-1 text-sm">
+                            Renforts : {player.dragon_recruits} Dragon
+                            {player.dragon_recruits > 1 ? "s" : ""},{" "}
+                            {player.giant_recruits} Géant
+                            {player.giant_recruits > 1 ? "s" : ""}
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="flex flex-col gap-3 text-sm lg:items-end lg:text-right">
@@ -700,7 +731,18 @@ export default async function CampaignPage({
             </CardContent>
           </Card>
 
-          <CampaignLog logs={logs} />
+          <div className="space-y-4">
+            <LegendaryRecruitmentCard
+              campaignId={campaign.id}
+              glory={currentPlayer?.glory ?? 0}
+              dragonTerritoryCount={dragonTerritoryCount}
+              giantTerritoryCount={giantTerritoryCount}
+              dragonRecruits={currentPlayer?.dragon_recruits ?? 0}
+              giantRecruits={currentPlayer?.giant_recruits ?? 0}
+              canRecruit={canRecruitLegendaryUnits}
+            />
+            <CampaignLog logs={logs} />
+          </div>
         </section>
       </div>
     </main>

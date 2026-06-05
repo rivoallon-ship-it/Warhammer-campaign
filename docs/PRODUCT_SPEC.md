@@ -97,11 +97,11 @@ Bonus actifs :
 - Forteresse : défense automatique, +200 points d’armée pour le défenseur.
 - Tour magique : magicien niveau 1 pour le défenseur en bataille (santé 8, sauvegarde 4+).
 - Ruines : +1 Gloire supplémentaire à la première conquête du territoire.
-- Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.
-- Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.
+- Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Dragon pour 10 Gloire si le joueur contrôle au moins un territoire Dragon.
+- Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Géant pour 10 Gloire si le joueur contrôle au moins un territoire Géant.
 - Sauvage : aucun bonus.
 
-Bonus en attente : recrutement Dragon/Géant contre Gloire.
+Bonus en attente : consommation/utilisation détaillée des recrutements Dragon/Géant en bataille.
 
 ## 11. Carte et adjacence
 
@@ -169,6 +169,12 @@ Si l’attaquant capture une capitale, il gagne +5 Gloire supplémentaire. Si un
 ## 18. Conquêtes neutres automatiques
 
 Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. La difficulté dépend du nombre de territoires contrôlés par ce joueur qui sont adjacents à la cible : 1 territoire adjacent = réussite sur 3+, 2 territoires adjacents = réussite sur 2+, 3 territoires adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 territoire adjacent, réussite sur 4+ ; avec 2 territoires adjacents, réussite sur 2+ ; avec 3 territoires adjacents ou plus, conquête automatique. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
+
+## 18b. Recrutements légendaires
+
+Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 10 Gloire. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
+
+Dans cette version, le recrutement est suivi comme ressource de campagne. Son utilisation exacte dans les batailles reste à préciser.
 
 Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 

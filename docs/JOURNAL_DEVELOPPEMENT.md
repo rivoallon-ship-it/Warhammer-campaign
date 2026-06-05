@@ -307,10 +307,16 @@ Commit principal :
 - Le type technique `mine` a été ajouté pour les Gisements. Les Géants utilisent maintenant le tag `GI`.
 - La fin de tour applique aussi `floor(territoires contrôlés / 3)` Gloire par joueur.
 - L'interface affiche les effets des tags, les points d'armée effectifs et les revenus de fin de tour attendus.
-- Ajout des effets restants sans système de recrutement :
+- Ajout des effets de conquête et de bataille restants :
   - `TO` Tour magique : le défenseur dispose d'un magicien niveau 1 en bataille (santé 8, sauvegarde 4+) ;
   - `DR` Dragon et `GI` Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquis ;
   - en bataille multi-joueurs pour un Dragon/Géant neutre, le vainqueur reçoit aussi le +3 Gloire.
+- Ajout du recrutement légendaire :
+  - colonnes `dragon_recruits` et `giant_recruits` sur les joueurs ;
+  - RPC `recruit_legendary_unit(campaign_id, unit_type)` ;
+  - coût fixe de 10 Gloire ;
+  - prérequis : contrôler au moins un territoire du type recruté ;
+  - carte de recrutement sur l'écran campagne et log `legendary_recruitment`.
 
 ## Fichiers importants
 

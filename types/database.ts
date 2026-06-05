@@ -99,6 +99,8 @@ export type Database = {
           status: string;
           starting_capital_code: string | null;
           glory: number;
+          dragon_recruits: number;
+          giant_recruits: number;
           is_ready: boolean;
           created_at: string;
           updated_at: string;
@@ -114,6 +116,8 @@ export type Database = {
           status?: string;
           starting_capital_code?: string | null;
           glory?: number;
+          dragon_recruits?: number;
+          giant_recruits?: number;
           is_ready?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -129,6 +133,8 @@ export type Database = {
           status?: string;
           starting_capital_code?: string | null;
           glory?: number;
+          dragon_recruits?: number;
+          giant_recruits?: number;
           is_ready?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -555,6 +561,20 @@ export type Database = {
           error: string | null;
           next_turn_number: number | null;
           next_army_base_points: number | null;
+        }[];
+      };
+      recruit_legendary_unit: {
+        Args: {
+          target_campaign_id: string;
+          requested_unit_type: string;
+        };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          unit_type: string | null;
+          remaining_glory: number | null;
+          dragon_recruits: number | null;
+          giant_recruits: number | null;
         }[];
       };
       owns_campaign_player: {

@@ -128,6 +128,10 @@ Fortification ou forteresse : défenseur +200 points d'armée. Retirer seulement
 
 Tour magique : le défenseur dispose d'un magicien niveau 1 pour la bataille (santé 8, sauvegarde 4+). Ce bonus ne donne pas +200 points d'armée.
 
+### Recrutements légendaires
+
+Un joueur actif peut recruter un Dragon pour 10 Gloire s'il contrôle au moins un territoire `dragon`, ou un Géant pour 10 Gloire s'il contrôle au moins un territoire `giant`. Le recrutement déduit la Gloire, incrémente `campaign_players.dragon_recruits` ou `campaign_players.giant_recruits`, et écrit un log `legendary_recruitment`. Ne pas encore consommer automatiquement ces compteurs en bataille tant que la règle d'utilisation n'est pas définie.
+
 ### Points d’armée
 
 ```ts

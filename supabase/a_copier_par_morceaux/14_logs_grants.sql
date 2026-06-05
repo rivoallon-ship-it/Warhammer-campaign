@@ -61,3 +61,4 @@ grant execute on function public.reveal_current_turn_orders(uuid) to authenticat
 grant execute on function public.resolve_exploration_result(uuid, int) to authenticated;
 grant execute on function public.resolve_battle_result(uuid, uuid, text) to authenticated;
 grant execute on function public.finish_current_turn(uuid) to authenticated;
+grant execute on function public.recruit_legendary_unit(uuid, text) to authenticated;

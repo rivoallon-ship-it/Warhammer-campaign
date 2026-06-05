@@ -6,6 +6,7 @@ import {
   cancelOrderAction,
   submitOrderAction,
 } from "@/app/campaigns/[campaignId]/orders/actions";
+import { getTerritoryTypeEffectLabel } from "@/lib/campaigns/territory-rules";
 import {
   Badge,
   Button,
@@ -76,11 +77,12 @@ const hexVerticalOverlap = hexTileHeight / 4;
 const territoryTypeMarks: Record<string, string> = {
   capital: "CA",
   village: "VI",
+  mine: "GE",
   ruins: "RU",
   fort: "FO",
   magic_tower: "TO",
   dragon: "DR",
-  giant: "GE",
+  giant: "GI",
   wild: "SA",
 };
 
@@ -95,6 +97,10 @@ const territoryTypeBadgeStyles: Record<
   village: {
     background: "linear-gradient(180deg, #315c8c, #142b45)",
     borderColor: "#9dc4ee",
+  },
+  mine: {
+    background: "linear-gradient(180deg, #476d28, #1f3511)",
+    borderColor: "#b8df82",
   },
   ruins: {
     background: "linear-gradient(180deg, #77756b, #363633)",
@@ -113,8 +119,8 @@ const territoryTypeBadgeStyles: Record<
     borderColor: "#caa3ef",
   },
   giant: {
-    background: "linear-gradient(180deg, #567b2c, #263a13)",
-    borderColor: "#b8df82",
+    background: "linear-gradient(180deg, #6d5e4f, #33291f)",
+    borderColor: "#d8c0a2",
   },
   wild: {
     background: "linear-gradient(180deg, #8b793d, #433816)",
@@ -125,6 +131,7 @@ const territoryTypeBadgeStyles: Record<
 const territoryTypeLegend = [
   { type: "capital", label: "Capitale" },
   { type: "village", label: "Village" },
+  { type: "mine", label: "Gisement" },
   { type: "ruins", label: "Ruines" },
   { type: "fort", label: "Forteresse" },
   { type: "magic_tower", label: "Tour arcanique" },
@@ -596,11 +603,16 @@ export function CampaignCommandCenter({
               {territoryTypeLegend.map((item) => (
                 <div
                   key={item.type}
-                  className="fantasy-stat inline-flex items-center gap-2 px-2.5 py-2 text-xs"
+                  className="fantasy-stat inline-flex max-w-[260px] items-start gap-2 px-2.5 py-2 text-xs"
                 >
                   <TerritoryTypeBadge type={item.type} />
-                  <span className="font-semibold text-[#f3ead7]">
-                    {item.label}
+                  <span>
+                    <span className="block font-semibold text-[#f3ead7]">
+                      {item.label}
+                    </span>
+                    <span className="mt-1 block leading-4 text-[#cbbda6]">
+                      {getTerritoryTypeEffectLabel(item.type)}
+                    </span>
                   </span>
                 </div>
               ))}
@@ -674,6 +686,12 @@ export function CampaignCommandCenter({
                     ) : null}
                   </dd>
                 </div>
+                <div className="fantasy-stat p-3">
+                  <dt className="font-semibold text-[#f3ead7]">Effet</dt>
+                  <dd className="fantasy-muted mt-1">
+                    {getTerritoryTypeEffectLabel(selectedTerritory.type)}
+                  </dd>
+                </div>
               </dl>
             ) : null}
 
@@ -687,24 +705,35 @@ export function CampaignCommandCenter({
               <div className="space-y-3">
                 {isSelectedControlled ? (
                   <>
-                    <form action={submitOrderAction}>
-                      <input type="hidden" name="returnTo" value="campaign" />
-                      <input type="hidden" name="campaignId" value={campaignId} />
-                      <input type="hidden" name="actionType" value="fortify" />
-                      <input type="hidden" name="sourceTerritoryId" value="" />
-                      <input
-                        type="hidden"
-                        name="targetTerritoryId"
-                        value={selectedTerritory.id}
-                      />
-                      <Button
-                        type="submit"
-                        variant="outlineDark"
-                        className="fantasy-action-button w-full border-[#2f5f91] bg-[#17456d] text-[#f4e6c8] hover:bg-[#1f5786]"
-                      >
-                        Fortifier
-                      </Button>
-                    </form>
+                    {selectedTerritory.type === "fort" ? (
+                      <p className="fantasy-alert fantasy-alert-info p-3 text-sm">
+                        Cette forteresse donne déjà le bonus défensif de +200
+                        points. Elle ne peut pas être fortifiée davantage.
+                      </p>
+                    ) : selectedTerritory.isFortified ? (
+                      <p className="fantasy-alert fantasy-alert-info p-3 text-sm">
+                        Ce territoire est déjà fortifié.
+                      </p>
+                    ) : (
+                      <form action={submitOrderAction}>
+                        <input type="hidden" name="returnTo" value="campaign" />
+                        <input type="hidden" name="campaignId" value={campaignId} />
+                        <input type="hidden" name="actionType" value="fortify" />
+                        <input type="hidden" name="sourceTerritoryId" value="" />
+                        <input
+                          type="hidden"
+                          name="targetTerritoryId"
+                          value={selectedTerritory.id}
+                        />
+                        <Button
+                          type="submit"
+                          variant="outlineDark"
+                          className="fantasy-action-button w-full border-[#2f5f91] bg-[#17456d] text-[#f4e6c8] hover:bg-[#1f5786]"
+                        >
+                          Fortifier
+                        </Button>
+                      </form>
+                    )}
 
                     {selectedValidConquestTargets.length ? (
                       <div className="fantasy-alert fantasy-alert-info p-3 text-sm">

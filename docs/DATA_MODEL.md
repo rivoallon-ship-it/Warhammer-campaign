@@ -117,22 +117,23 @@ L'inscription d'un joueur `pending` ne doit pas être faite par un `insert` dire
 | `is_fortified` | boolean | Oui | Fortifié |
 | `has_garrison` | boolean | Oui | Réservé futures versions |
 | `local_faction` | text | Non | `dragon`, `giant` ou null |
+| `special_reward_claimed_at` | timestamptz | Non | Date de consommation d'une récompense unique, actuellement utilisée pour les ruines |
 | `created_at` | timestamptz | Oui | Création |
 | `updated_at` | timestamptz | Oui | Mise à jour |
 
-Types : `capital`, `village`, `ruins`, `fort`, `magic_tower`, `dragon`, `giant`, `wild`.
+Types : `capital`, `village`, `mine`, `ruins`, `fort`, `magic_tower`, `dragon`, `giant`, `wild`.
 
 Contraintes : unique `(campaign_id, code)`, positions > 0.
 
 ## 8. Répartition des territoires
 
-| Joueurs | capital | dragon | giant | village | ruins | fort | magic_tower | wild |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2 | 2 | 1 | 1 | 1 | 1 | 1 | 0 | 2 |
-| 3 | 3 | 1 | 1 | 2 | 2 | 1 | 0 | 2 |
-| 4 | 4 | 2 | 2 | 2 | 2 | 1 | 1 | 2 |
-| 5 | 5 | 2 | 2 | 3 | 3 | 2 | 1 | 2 |
-| 6 | 6 | 3 | 3 | 3 | 3 | 2 | 2 | 2 |
+| Joueurs | capital | dragon | giant | mine | village | ruins | fort | magic_tower | wild |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 2 | 2 | 2 | 2 | 3 | 3 | 2 | 2 | 2 |
+| 3 | 3 | 3 | 3 | 3 | 5 | 4 | 3 | 3 | 3 |
+| 4 | 4 | 4 | 4 | 4 | 6 | 5 | 4 | 3 | 1 |
+| 5 | 5 | 5 | 5 | 5 | 8 | 8 | 5 | 5 | 2 |
+| 6 | 6 | 6 | 6 | 6 | 9 | 8 | 6 | 5 | 2 |
 
 ## 9. Banque de noms
 
@@ -141,6 +142,8 @@ Capitales : Bastion du Nord, Citadelle de l’Est, Forteresse de l’Ouest, Port
 Dragons : Nid des Dragons, Pic des Cendres, Caverne du Vieux Wyrm, Crête des Écailles, Sanctuaire des Ailes.
 
 Géants : Camp des Géants, Plaine des Titans, Taverne des Ossements, Gorge du Colosse, Marteau des Terres Brisées.
+
+Gisements : Carrière de Fer, Filon des Braises, Mine des Anciens, Gisement de Pierre-Sang, Fosse d’Or Noir.
 
 Villages : Village Brûlé, Hameau des Brumes, Marché des Exilés, Refuge des Pêcheurs, Poste des Cendres.
 

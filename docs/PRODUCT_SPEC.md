@@ -85,9 +85,20 @@ Capitales centrales fortifiées : 5 joueurs = C4 ; 6 joueurs = C4, D6.
 
 ## 10. Types de territoires
 
-Types MVP : `capital`, `village`, `ruins`, `fort`, `magic_tower`, `dragon`, `giant`, `wild`.
+Types MVP : `capital`, `village`, `mine`, `ruins`, `fort`, `magic_tower`, `dragon`, `giant`, `wild`.
 
-Dans le MVP, les types donnent surtout de l’identité à la carte. Les bonus détaillés viendront plus tard.
+Tags affichés : `CA` Capitale, `VI` Village, `GE` Gisement, `FO` Forteresse, `TO` Tour magique, `RU` Ruines, `DR` Dragon, `GI` Géant, `SA` Sauvage.
+
+Bonus actifs :
+
+- Capitale capturée : +5 Gloire pour l’attaquant.
+- Village : +100 points d’armée pour le joueur, plafonné à +200.
+- Gisement : +1 Gloire à chaque fin de tour.
+- Forteresse : défense automatique, +200 points d’armée pour le défenseur.
+- Ruines : +1 Gloire supplémentaire à la première conquête du territoire.
+- Sauvage : aucun bonus.
+
+Bonus en attente : Tour magique, Dragon, Géant.
 
 ## 11. Carte et adjacence
 
@@ -128,7 +139,7 @@ Actions internes :
 ## 15. Validation des ordres
 
 - `conquer` : source au joueur, cible adjacente, cible neutre ou ennemie, cible non contrôlée par le joueur.
-- `fortify` : cible contrôlée par le joueur.
+- `fortify` : cible contrôlée par le joueur, non fortifiée et qui n’est pas une forteresse.
 
 ## 16. Révélation des ordres
 
@@ -142,9 +153,13 @@ Si l’attaquant gagne contre un défenseur : territoire à l’attaquant, attaq
 
 Si le défenseur gagne : territoire inchangé, défenseur +2 Gloire, attaquant +1 Gloire.
 
-Si le territoire était fortifié : bonus affiché puis fortification retirée après la bataille. Bonus MVP : défenseur commence avec +1 point de commandement au round 1.
+Si le territoire était fortifié : défenseur +200 points d’armée, bonus affiché puis fortification retirée après la bataille.
+
+Si le territoire est une forteresse : défenseur +200 points d’armée. Ce bonus est permanent et ne se cumule pas avec une fortification manuelle.
 
 En bataille multi-joueurs sur territoire neutre, le vainqueur gagne le territoire et +3 Gloire. Chaque autre participant gagne +1 Gloire.
+
+Si l’attaquant capture une capitale, il gagne +5 Gloire supplémentaire. Si une ruine est conquise pour la première fois, le vainqueur gagne +1 Gloire supplémentaire.
 
 ## 18. Conquêtes neutres automatiques
 
@@ -154,15 +169,17 @@ Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquêt
 
 ## 19. Fortifications
 
-Un territoire peut être fortifié ou non. Un territoire déjà fortifié ne gagne pas de niveau supplémentaire. Une fortification utilisée lors d’une bataille est retirée après la bataille.
+Un territoire peut être fortifié ou non. Un territoire déjà fortifié ne gagne pas de niveau supplémentaire. Une fortification utilisée lors d’une bataille est retirée après la bataille. Une forteresse ne peut pas être fortifiée, car elle possède déjà son bonus défensif.
 
 ## 20. Gloire
 
-Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défenseur victorieux +2, autre participant/perdant d’une bataille +1.
+Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défenseur victorieux +2, autre participant/perdant d’une bataille +1, capitale capturée +5, première conquête d’une ruine +1.
 
 ## 21. Fin de tour
 
-Le maître termine le tour quand toutes les conquêtes automatiques et batailles sont résolues. Un nouveau tour est créé, la taille d’armée recalculée, et les joueurs peuvent soumettre de nouveaux ordres.
+Le maître termine le tour quand toutes les conquêtes automatiques et batailles sont résolues. Un nouveau tour est créé, la taille d’armée de base est recalculée, les revenus de Gloire sont appliqués, et les joueurs peuvent soumettre de nouveaux ordres.
+
+Revenus de fin de tour : chaque joueur gagne `floor(territoires contrôlés / 3)` Gloire, plus +1 Gloire par gisement contrôlé.
 
 La page campagne affiche une progression de tour en trois étapes : ordres, révélation, résultats. Elle sert à montrer l'état courant, les compteurs utiles et les actions disponibles au bon moment. Le passage `Ordres` -> `Révélation` est automatique ; si la révélation ne génère aucune bataille, la page affiche un message et le tour suivant est ouvert directement.
 
@@ -182,7 +199,7 @@ Enregistrer : campagne créée, joueur rejoint, joueur accepté, campagne lancé
 
 ## 25. Messages d’erreur clés
 
-Messages simples : campagne inexistante, campagne plus en lobby, couleur/capitale prise, territoire non contrôlé, cible non adjacente, conquête impossible contre son propre territoire, fortification seulement sur territoire contrôlé, tous les joueurs doivent valider, toutes les batailles doivent être résolues.
+Messages simples : campagne inexistante, campagne plus en lobby, couleur/capitale prise, territoire non contrôlé, cible non adjacente, conquête impossible contre son propre territoire, fortification seulement sur territoire contrôlé éligible, tous les joueurs doivent valider, toutes les batailles doivent être résolues.
 
 ## 26. Priorités MVP
 

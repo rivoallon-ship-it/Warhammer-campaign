@@ -16,6 +16,12 @@ import {
   getResultsPageData,
   getResultsReadiness,
 } from "@/lib/resolution/results-service";
+import {
+  DEFENSIVE_ARMY_BONUS,
+  getPlayerTerritoryRuleStats,
+  getVillageArmyBonus,
+  type PlayerTerritoryRuleStats,
+} from "@/lib/campaigns/territory-rules";
 import { createClient } from "@/lib/supabase/server";
 
 type ResultsPageProps = {
@@ -113,6 +119,23 @@ function getBestDiceLabel(participants: BattleParticipantSummary[]) {
   return `${getParticipantName(bestParticipant)} a l'avantage sur D6 ${bestParticipant.dice_result}.`;
 }
 
+function getParticipantArmyPoints(
+  battleArmyBasePoints: number,
+  participant: BattleParticipantSummary,
+  stats: PlayerTerritoryRuleStats,
+  hasDefenderBonus: boolean,
+) {
+  const villageBonus = getVillageArmyBonus(stats.villageCount);
+  const defenderBonus =
+    hasDefenderBonus && participant.role === "defender" ? DEFENSIVE_ARMY_BONUS : 0;
+
+  return {
+    total: battleArmyBasePoints + villageBonus + defenderBonus,
+    villageBonus,
+    defenderBonus,
+  };
+}
+
 function getFeedbackMessage(query?: Awaited<ResultsPageProps["searchParams"]>) {
   if (!query) return null;
 
@@ -166,6 +189,9 @@ export default async function ResultsPage({
 
   const { campaign, currentTurn, explorations, battles } = resultsData;
   const readiness = getResultsReadiness(resultsData);
+  const playerTerritoryRuleStats = getPlayerTerritoryRuleStats(
+    resultsData.territories,
+  );
 
   return (
     <main className="campaign-fantasy-shell min-h-screen px-6 py-10 text-[#f3ead7]">
@@ -335,18 +361,50 @@ export default async function ResultsPage({
                       ) : null}
                       <ul className="fantasy-muted mt-3 space-y-2 text-sm">
                         {battle.participants.map((participant) => (
-                          <li
-                            key={participant.id}
-                            className="flex flex-wrap items-center gap-2"
-                          >
-                            <Badge variant="neutral">
-                              {getParticipantRoleLabel(participant.role)}
-                            </Badge>
-                            <span>{getParticipantName(participant)}</span>
-                            {participant.dice_result ? (
-                              <Badge variant="info">D6 {participant.dice_result}</Badge>
-                            ) : null}
-                          </li>
+                          (() => {
+                            const armyPoints = getParticipantArmyPoints(
+                              battle.army_base_points,
+                              participant,
+                              playerTerritoryRuleStats.get(
+                                participant.campaign_player_id,
+                              ) ?? {
+                                controlledCount: 0,
+                                villageCount: 0,
+                                mineCount: 0,
+                              },
+                              Boolean(battle.defender_bonus),
+                            );
+
+                            return (
+                              <li
+                                key={participant.id}
+                                className="flex flex-wrap items-center gap-2"
+                              >
+                                <Badge variant="neutral">
+                                  {getParticipantRoleLabel(participant.role)}
+                                </Badge>
+                                <span>{getParticipantName(participant)}</span>
+                                <Badge variant="info">
+                                  Armée {armyPoints.total} pts
+                                </Badge>
+                                {armyPoints.villageBonus > 0 ? (
+                                  <Badge variant="neutral">
+                                    +{armyPoints.villageBonus} villages
+                                  </Badge>
+                                ) : null}
+                                {armyPoints.defenderBonus > 0 ? (
+                                  <Badge variant="warning">
+                                    +{armyPoints.defenderBonus} défense
+                                  </Badge>
+                                ) : null}
+                                {participant.dice_result ? (
+                                  <Badge variant="info">
+                                    D6 {participant.dice_result}
+                                  </Badge>
+                                ) : null}
+                              </li>
+                            );
+                          })()
                         ))}
                       </ul>
                       {battle.defender_bonus ? (

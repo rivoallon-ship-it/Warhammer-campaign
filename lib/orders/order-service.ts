@@ -129,6 +129,17 @@ function validateSubmittedOrder(
       return { order: null, error: "Tu ne contrôles pas ce territoire." };
     }
 
+    if (target.type === "fort") {
+      return {
+        order: null,
+        error: "Une forteresse fournit déjà son bonus défensif automatiquement.",
+      };
+    }
+
+    if (target.is_fortified) {
+      return { order: null, error: "Ce territoire est déjà fortifié." };
+    }
+
     return {
       order: {
         actionType,

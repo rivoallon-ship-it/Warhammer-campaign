@@ -190,7 +190,9 @@ Règles :
 - conquérir un territoire ennemi crée une bataille ;
 - conquérir seul un territoire neutre lance automatiquement un D6 : 3+ avec 1 territoire adjacent contrôlé, 2+ avec 2 territoires adjacents contrôlés, automatique avec 3 territoires adjacents contrôlés ou plus ;
 - si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;
-- fortifier cible un territoire contrôlé par le joueur.
+- fortifier cible un territoire contrôlé par le joueur, non fortifié et qui n’est pas une forteresse ;
+- les tags ont des effets : CA +5 Gloire si capturée, VI +100 points d’armée max +200, GE +1 Gloire en fin de tour, FO +200 points au défenseur, RU +1 Gloire à la première conquête, SA sans bonus ;
+- en fin de tour, chaque joueur gagne aussi 1 Gloire par tranche de 3 territoires contrôlés.
 
 ## 10. Progression des armées
 

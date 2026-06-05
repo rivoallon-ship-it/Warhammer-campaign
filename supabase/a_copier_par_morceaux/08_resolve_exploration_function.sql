@@ -21,6 +21,7 @@ declare
   v_success boolean;
   v_adjacent_support_count int := 0;
   v_conquest_threshold int := 3;
+  v_ruins_glory_bonus int := 0;
 begin
   if submitted_dice_result < 1 or submitted_dice_result > 6 then
     return query select false, 'Le résultat doit être un D6 entre 1 et 6.', null::boolean;
@@ -109,6 +110,13 @@ begin
 
   v_success := v_adjacent_support_count >= 3
     or submitted_dice_result >= v_conquest_threshold;
+  v_ruins_glory_bonus := case
+    when v_success
+      and v_territory.type = 'ruins'
+      and v_territory.special_reward_claimed_at is null
+      then 1
+    else 0
+  end;
 
   update public.explorations
   set dice_result = submitted_dice_result,
@@ -118,13 +126,17 @@ begin
   where id = v_exploration.id;
 
   update public.campaign_players
-  set glory = glory + 1,
+  set glory = glory + 1 + v_ruins_glory_bonus,
       updated_at = now()
   where id = v_exploration.campaign_player_id;
 
   if v_success then
     update public.territories
     set owner_campaign_player_id = v_exploration.campaign_player_id,
+        special_reward_claimed_at = case
+          when v_ruins_glory_bonus > 0 then now()
+          else special_reward_claimed_at
+        end,
         updated_at = now()
     where id = v_exploration.territory_id;
   end if;
@@ -155,7 +167,12 @@ begin
           || ' (réussite sur ' || v_conquest_threshold
           || '+, soutien adjacent : ' || v_adjacent_support_count || ')'
       end
-      || '. +1 Gloire.',
+      || '. +1 Gloire'
+      || case
+        when v_ruins_glory_bonus > 0 then ', +1 Gloire de ruines'
+        else ''
+      end
+      || '.',
     auth.uid()
   );
 

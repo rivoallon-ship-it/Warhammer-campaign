@@ -78,6 +78,7 @@ Exemple :
 |---|---|---|
 | `capital` | 🏰 | Capitale |
 | `village` | 🏘️ | Village |
+| `mine` | ⛏️ | Gisement |
 | `ruins` | 🗿 | Ruines |
 | `fort` | 🛡️ | Fort |
 | `magic_tower` | ✨ | Tour |

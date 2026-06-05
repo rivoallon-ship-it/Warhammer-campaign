@@ -23,6 +23,7 @@ export type OrderAction = "conquer" | "fortify";
 export type TerritoryType =
   | "capital"
   | "village"
+  | "mine"
   | "ruins"
   | "fort"
   | "magic_tower"

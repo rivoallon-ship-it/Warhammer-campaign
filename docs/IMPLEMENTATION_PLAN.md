@@ -136,19 +136,19 @@ Page `/campaigns/[campaignId]/reveal`. Page de suivi/compatibilité. La révéla
 
 ## Lot 16 — Génération batailles/conquêtes
 
-`conquer` vers territoire ennemi -> `battles`. `conquer` vers territoire neutre seul -> D6 automatique et ligne `explorations` résolue. `conquer` vers territoire neutre ciblé par plusieurs joueurs -> bataille multi-joueurs avec participants et D6 d'avantage. `fortify` -> `territories.is_fortified=true` + log.
+`conquer` vers territoire ennemi -> `battles`. `conquer` vers territoire neutre seul -> D6 automatique et ligne `explorations` résolue. `conquer` vers territoire neutre ciblé par plusieurs joueurs -> bataille multi-joueurs avec participants et D6 d'avantage. `fortify` -> `territories.is_fortified=true` + log, sauf forteresse ou territoire déjà fortifié.
 
 ## Lot 17 — Résolution des conquêtes automatiques
 
-Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées sont déjà résolues automatiquement à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur. Status resolved, log.
+Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées sont déjà résolues automatiquement à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. +1 Gloire dans tous les cas, +1 supplémentaire si une ruine est conquise pour la première fois. Succès = territoire au joueur. Status resolved, log.
 
 ## Lot 18 — Résolution des batailles
 
-Maître saisit vainqueur + notes. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire inchangé, +2/+1. Retirer fortification. Status played, log.
+Maître saisit vainqueur + notes. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire inchangé, +2/+1. Capitale capturée : +5 Gloire attaquant. Ruine conquise pour la première fois : +1 Gloire. Fortification/forteresse : +200 points défenseur. Retirer seulement la fortification manuelle. Status played, log.
 
 ## Lot 19 — Fin de tour
 
-Maître finit si toutes conquêtes automatiques sont resolved et batailles played/cancelled. Clôturer tour, créer suivant, incrémenter, recalculer points, phase orders, log. Ne jamais bloquer au tour 6.
+Maître finit si toutes conquêtes automatiques sont resolved et batailles played/cancelled. Appliquer les revenus de Gloire (`floor(territoires / 3)` + gisements), clôturer tour, créer suivant, incrémenter, recalculer points, phase orders, log. Ne jamais bloquer au tour 6.
 
 ## Lot 20 — Historique simple
 

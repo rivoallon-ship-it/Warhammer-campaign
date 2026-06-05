@@ -73,13 +73,39 @@ create table if not exists public.territories (
   is_fortified boolean not null default false,
   has_garrison boolean not null default false,
   local_faction text,
+  special_reward_claimed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (campaign_id, code),
   unique (campaign_id, position_x, position_y),
-  check (type in ('capital', 'village', 'ruins', 'fort', 'magic_tower', 'dragon', 'giant', 'wild')),
+  check (type in ('capital', 'village', 'mine', 'ruins', 'fort', 'magic_tower', 'dragon', 'giant', 'wild')),
   check (local_faction is null or local_faction in ('dragon', 'giant'))
 );
+
+alter table public.territories
+  add column if not exists special_reward_claimed_at timestamptz;
+
+do $$
+declare
+  v_constraint_name text;
+begin
+  select conname
+  into v_constraint_name
+  from pg_constraint
+  where conrelid = 'public.territories'::regclass
+    and contype = 'c'
+    and pg_get_constraintdef(oid) like '%type%'
+  limit 1;
+
+  if v_constraint_name is not null then
+    execute format('alter table public.territories drop constraint %I', v_constraint_name);
+  end if;
+
+  alter table public.territories
+    add constraint territories_type_check
+    check (type in ('capital', 'village', 'mine', 'ruins', 'fort', 'magic_tower', 'dragon', 'giant', 'wild'));
+end;
+$$;
 
 create table if not exists public.territory_adjacencies (
   id uuid primary key default gen_random_uuid(),
@@ -858,6 +884,8 @@ declare
   v_multiple_attack_count int := 0;
   v_next_turn_number int;
   v_next_army_base_points int;
+  v_income_player_count int := 0;
+  v_income_glory_total int := 0;
 begin
   select *
   into v_campaign
@@ -941,6 +969,8 @@ begin
           and (
             target.id is null
             or target.owner_campaign_player_id is distinct from o.campaign_player_id
+            or target.type = 'fort'
+            or target.is_fortified
           )
         )
       )
@@ -999,7 +1029,8 @@ begin
       target.owner_campaign_player_id,
       v_turn.army_base_points,
       case
-        when target.is_fortified then 'Fortification : défenseur +1 point de commandement au round 1.'
+        when target.type = 'fort' then 'Forteresse : défenseur +200 points d''armée.'
+        when target.is_fortified then 'Fortification : défenseur +200 points d''armée.'
         else null
       end
     from public.orders o
@@ -1161,6 +1192,8 @@ begin
       target.id as territory_id,
       target.code as territory_code,
       target.name as territory_name,
+      target.type as territory_type,
+      target.special_reward_claimed_at is null as special_reward_available,
       case
         when support.adjacent_support_count >= 3 then 6
         else roll.dice_result
@@ -1241,17 +1274,35 @@ begin
   ),
   glory_updates as (
     update public.campaign_players cp
-    set glory = glory + 1,
+    set glory = glory + bonus.glory_gain,
         updated_at = now()
-    from inserted_explorations ie
-    where cp.id = ie.campaign_player_id
+    from (
+      select
+        ie.campaign_player_id,
+        count(*)::int
+          + (count(*) filter (
+            where ie.exploration_success
+              and so.territory_type = 'ruins'
+              and so.special_reward_available
+          ))::int as glory_gain
+      from inserted_explorations ie
+      join single_orders so on so.order_id = ie.order_id
+      group by ie.campaign_player_id
+    ) bonus
+    where cp.id = bonus.campaign_player_id
     returning cp.id
   ),
   territory_updates as (
     update public.territories target
     set owner_campaign_player_id = ie.campaign_player_id,
+        special_reward_claimed_at = case
+          when so.territory_type = 'ruins' and so.special_reward_available
+            then now()
+          else target.special_reward_claimed_at
+        end,
         updated_at = now()
     from inserted_explorations ie
+    join single_orders so on so.order_id = ie.order_id
     where target.id = ie.territory_id
       and ie.exploration_success
     returning target.id
@@ -1281,7 +1332,15 @@ begin
           || ' (réussite sur ' || so.conquest_threshold
           || '+, soutien adjacent : ' || so.adjacent_support_count || ')'
       end
-      || '. +1 Gloire.',
+      || '. +1 Gloire'
+      || case
+        when ie.exploration_success
+          and so.territory_type = 'ruins'
+          and so.special_reward_available
+          then ', +1 Gloire de ruines'
+        else ''
+      end
+      || '.',
     auth.uid()
   from inserted_explorations ie
   join single_orders so on so.order_id = ie.order_id
@@ -1298,7 +1357,9 @@ begin
     and o.campaign_id = v_campaign.id
     and o.turn_id = v_turn.id
     and o.status = 'submitted'
-    and o.action_type = 'fortify';
+    and o.action_type = 'fortify'
+    and target.type <> 'fort'
+    and not target.is_fortified;
 
   get diagnostics v_fortification_count = row_count;
 
@@ -1360,6 +1421,32 @@ begin
     v_next_turn_number := v_campaign.current_turn_number + 1;
     v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
+    with income as (
+      select
+        cp.id as campaign_player_id,
+        floor(count(t.id)::numeric / 3)::int as territory_glory,
+        (count(t.id) filter (where t.type = 'mine'))::int as mine_glory
+      from public.campaign_players cp
+      left join public.territories t
+        on t.owner_campaign_player_id = cp.id
+        and t.campaign_id = cp.campaign_id
+      where cp.campaign_id = v_campaign.id
+        and cp.status = 'active'
+      group by cp.id
+    ),
+    awarded as (
+      update public.campaign_players cp
+      set glory = glory + income.territory_glory + income.mine_glory,
+          updated_at = now()
+      from income
+      where cp.id = income.campaign_player_id
+        and income.territory_glory + income.mine_glory > 0
+      returning income.territory_glory + income.mine_glory as glory_gain
+    )
+    select count(*)::int, coalesce(sum(glory_gain), 0)::int
+    into v_income_player_count, v_income_glory_total
+    from awarded;
+
     update public.orders
     set status = 'resolved'
     where campaign_id = v_campaign.id
@@ -1412,7 +1499,14 @@ begin
       'Aucune bataille à résoudre. Le tour ' || v_campaign.current_turn_number
         || ' est terminé automatiquement. Le tour '
         || v_next_turn_number || ' commence avec '
-        || v_next_army_base_points || ' points d''armée.',
+        || v_next_army_base_points || ' points d''armée.'
+        || case
+          when v_income_glory_total > 0
+            then ' Revenus de fin de tour : '
+              || v_income_glory_total || ' Gloire attribuée à '
+              || v_income_player_count || ' joueur(s).'
+          else ''
+        end,
       auth.uid()
     );
   else
@@ -1453,6 +1547,7 @@ declare
   v_success boolean;
   v_adjacent_support_count int := 0;
   v_conquest_threshold int := 3;
+  v_ruins_glory_bonus int := 0;
 begin
   if submitted_dice_result < 1 or submitted_dice_result > 6 then
     return query select false, 'Le résultat doit être un D6 entre 1 et 6.', null::boolean;
@@ -1541,6 +1636,13 @@ begin
 
   v_success := v_adjacent_support_count >= 3
     or submitted_dice_result >= v_conquest_threshold;
+  v_ruins_glory_bonus := case
+    when v_success
+      and v_territory.type = 'ruins'
+      and v_territory.special_reward_claimed_at is null
+      then 1
+    else 0
+  end;
 
   update public.explorations
   set dice_result = submitted_dice_result,
@@ -1550,13 +1652,17 @@ begin
   where id = v_exploration.id;
 
   update public.campaign_players
-  set glory = glory + 1,
+  set glory = glory + 1 + v_ruins_glory_bonus,
       updated_at = now()
   where id = v_exploration.campaign_player_id;
 
   if v_success then
     update public.territories
     set owner_campaign_player_id = v_exploration.campaign_player_id,
+        special_reward_claimed_at = case
+          when v_ruins_glory_bonus > 0 then now()
+          else special_reward_claimed_at
+        end,
         updated_at = now()
     where id = v_exploration.territory_id;
   end if;
@@ -1587,7 +1693,12 @@ begin
           || ' (réussite sur ' || v_conquest_threshold
           || '+, soutien adjacent : ' || v_adjacent_support_count || ')'
       end
-      || '. +1 Gloire.',
+      || '. +1 Gloire'
+      || case
+        when v_ruins_glory_bonus > 0 then ', +1 Gloire de ruines'
+        else ''
+      end
+      || '.',
     auth.uid()
   );
 
@@ -1620,6 +1731,9 @@ declare
   v_notes text;
   v_participant_count int := 0;
   v_loser_count int := 0;
+  v_capital_glory_bonus int := 0;
+  v_ruins_glory_bonus int := 0;
+  v_winner_glory_bonus int := 0;
 begin
   select *
   into v_battle
@@ -1716,6 +1830,25 @@ begin
 
   v_loser_count := greatest(v_participant_count - 1, 0);
   v_notes := nullif(trim(coalesce(submitted_result_notes, '')), '');
+  v_capital_glory_bonus := case
+    when v_territory.type = 'capital'
+      and v_territory.owner_campaign_player_id is not null
+      and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id
+      and v_winner_role <> 'defender'
+      then 5
+    else 0
+  end;
+  v_ruins_glory_bonus := case
+    when v_territory.type = 'ruins'
+      and v_territory.special_reward_claimed_at is null
+      and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id
+      then 1
+    else 0
+  end;
+  v_winner_glory_bonus := case
+    when v_winner_role = 'defender' then 2
+    else 3
+  end + v_capital_glory_bonus + v_ruins_glory_bonus;
 
   update public.battles
   set status = 'played',
@@ -1727,8 +1860,7 @@ begin
   if exists (select 1 from public.battle_participants where battle_id = v_battle.id) then
     update public.campaign_players cp
     set glory = glory + case
-          when cp.id = submitted_winner_campaign_player_id and v_winner_role = 'defender' then 2
-          when cp.id = submitted_winner_campaign_player_id then 3
+          when cp.id = submitted_winner_campaign_player_id then v_winner_glory_bonus
           else 1
         end,
         updated_at = now()
@@ -1741,8 +1873,7 @@ begin
   else
     update public.campaign_players
     set glory = glory + case
-          when id = submitted_winner_campaign_player_id and v_winner_role = 'defender' then 2
-          when id = submitted_winner_campaign_player_id then 3
+          when id = submitted_winner_campaign_player_id then v_winner_glory_bonus
           else 1
         end,
         updated_at = now()
@@ -1755,8 +1886,12 @@ begin
   update public.territories
   set owner_campaign_player_id = submitted_winner_campaign_player_id,
       is_fortified = case
-        when v_battle.defender_bonus is not null then false
+        when v_territory.is_fortified then false
         else is_fortified
+      end,
+      special_reward_claimed_at = case
+        when v_ruins_glory_bonus > 0 then now()
+        else special_reward_claimed_at
       end,
       updated_at = now()
   where id = v_battle.territory_id;
@@ -1776,14 +1911,22 @@ begin
     'Bataille résolue',
     v_winner.display_name || ' remporte la bataille pour '
       || v_territory.code || ' - ' || v_territory.name || '. +'
-      || case when v_winner_role = 'defender' then 2 else 3 end
+      || v_winner_glory_bonus
       || ' Gloire vainqueur'
+      || case
+        when v_capital_glory_bonus > 0 then ' dont +5 pour capitale capturée'
+        else ''
+      end
+      || case
+        when v_ruins_glory_bonus > 0 then ' dont +1 pour ruines'
+        else ''
+      end
       || case
         when v_loser_count > 0 then ', +1 Gloire pour chaque autre participant.'
         else '.'
       end
     || case
-      when v_battle.defender_bonus is not null then ' La fortification est retirée.'
+      when v_territory.is_fortified then ' La fortification est retirée.'
       else ''
     end
     || case
@@ -1818,6 +1961,8 @@ declare
   v_unresolved_battles int := 0;
   v_next_turn_number int;
   v_next_army_base_points int;
+  v_income_player_count int := 0;
+  v_income_glory_total int := 0;
 begin
   select *
   into v_campaign
@@ -1875,6 +2020,32 @@ begin
   v_next_turn_number := v_campaign.current_turn_number + 1;
   v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
+  with income as (
+    select
+      cp.id as campaign_player_id,
+      floor(count(t.id)::numeric / 3)::int as territory_glory,
+      (count(t.id) filter (where t.type = 'mine'))::int as mine_glory
+    from public.campaign_players cp
+    left join public.territories t
+      on t.owner_campaign_player_id = cp.id
+      and t.campaign_id = cp.campaign_id
+    where cp.campaign_id = v_campaign.id
+      and cp.status = 'active'
+    group by cp.id
+  ),
+  awarded as (
+    update public.campaign_players cp
+    set glory = glory + income.territory_glory + income.mine_glory,
+        updated_at = now()
+    from income
+    where cp.id = income.campaign_player_id
+      and income.territory_glory + income.mine_glory > 0
+    returning income.territory_glory + income.mine_glory as glory_gain
+  )
+  select count(*)::int, coalesce(sum(glory_gain), 0)::int
+  into v_income_player_count, v_income_glory_total
+  from awarded;
+
   update public.orders
   set status = 'resolved'
   where campaign_id = v_campaign.id
@@ -1926,7 +2097,14 @@ begin
     'Tour terminé',
     'Le tour ' || v_campaign.current_turn_number || ' est terminé. Le tour '
       || v_next_turn_number || ' commence avec '
-      || v_next_army_base_points || ' points d''armée.',
+      || v_next_army_base_points || ' points d''armée.'
+      || case
+        when v_income_glory_total > 0
+          then ' Revenus de fin de tour : '
+            || v_income_glory_total || ' Gloire attribuée à '
+            || v_income_player_count || ' joueur(s).'
+        else ''
+      end,
     auth.uid()
   );
 

@@ -148,6 +148,7 @@ export type Database = {
           is_fortified: boolean;
           has_garrison: boolean;
           local_faction: string | null;
+          special_reward_claimed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -163,6 +164,7 @@ export type Database = {
           is_fortified?: boolean;
           has_garrison?: boolean;
           local_faction?: string | null;
+          special_reward_claimed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -178,6 +180,7 @@ export type Database = {
           is_fortified?: boolean;
           has_garrison?: boolean;
           local_faction?: string | null;
+          special_reward_claimed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

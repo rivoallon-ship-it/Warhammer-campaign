@@ -23,6 +23,13 @@ export const TERRITORY_NAMES: Record<TerritoryType, string[]> = {
     "Gorge du Colosse",
     "Marteau des Terres Brisees",
   ],
+  mine: [
+    "Carriere de Fer",
+    "Filon des Braises",
+    "Mine des Anciens",
+    "Gisement de Pierre-Sang",
+    "Fosse d'Or Noir",
+  ],
   village: [
     "Village Brule",
     "Hameau des Brumes",

@@ -73,11 +73,11 @@ create table if not exists public.territories (
   is_fortified boolean not null default false,
   has_garrison boolean not null default false,
   local_faction text,
+  special_reward_claimed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (campaign_id, code),
   unique (campaign_id, position_x, position_y),
-  check (type in ('capital', 'village', 'ruins', 'fort', 'magic_tower', 'dragon', 'giant', 'wild')),
+  check (type in ('capital', 'village', 'mine', 'ruins', 'fort', 'magic_tower', 'dragon', 'giant', 'wild')),
   check (local_faction is null or local_faction in ('dragon', 'giant'))
 );
-

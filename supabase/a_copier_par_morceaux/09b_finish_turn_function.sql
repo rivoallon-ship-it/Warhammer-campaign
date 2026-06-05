@@ -17,6 +17,8 @@ declare
   v_unresolved_battles int := 0;
   v_next_turn_number int;
   v_next_army_base_points int;
+  v_income_player_count int := 0;
+  v_income_glory_total int := 0;
 begin
   select * into v_campaign from public.campaigns where id = target_campaign_id for update;
   if not found then
@@ -61,6 +63,32 @@ begin
   v_next_turn_number := v_campaign.current_turn_number + 1;
   v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
+  with income as (
+    select
+      cp.id as campaign_player_id,
+      floor(count(t.id)::numeric / 3)::int as territory_glory,
+      (count(t.id) filter (where t.type = 'mine'))::int as mine_glory
+    from public.campaign_players cp
+    left join public.territories t
+      on t.owner_campaign_player_id = cp.id
+      and t.campaign_id = cp.campaign_id
+    where cp.campaign_id = v_campaign.id
+      and cp.status = 'active'
+    group by cp.id
+  ),
+  awarded as (
+    update public.campaign_players cp
+    set glory = glory + income.territory_glory + income.mine_glory,
+        updated_at = now()
+    from income
+    where cp.id = income.campaign_player_id
+      and income.territory_glory + income.mine_glory > 0
+    returning income.territory_glory + income.mine_glory as glory_gain
+  )
+  select count(*)::int, coalesce(sum(glory_gain), 0)::int
+  into v_income_player_count, v_income_glory_total
+  from awarded;
+
   update public.orders set status = 'resolved'
   where campaign_id = v_campaign.id and turn_id = v_turn.id and status = 'revealed';
 
@@ -77,7 +105,7 @@ begin
   where id = v_campaign.id;
 
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
-  values (v_campaign.id, v_turn.id, 'turn_finished', 'Tour terminé', 'Le tour ' || v_campaign.current_turn_number || ' est terminé. Le tour ' || v_next_turn_number || ' commence avec ' || v_next_army_base_points || ' points d''armée.', auth.uid());
+  values (v_campaign.id, v_turn.id, 'turn_finished', 'Tour terminé', 'Le tour ' || v_campaign.current_turn_number || ' est terminé. Le tour ' || v_next_turn_number || ' commence avec ' || v_next_army_base_points || ' points d''armée.' || case when v_income_glory_total > 0 then ' Revenus de fin de tour : ' || v_income_glory_total || ' Gloire attribuée à ' || v_income_player_count || ' joueur(s).' else '' end, auth.uid());
 
   return query select true, null::text, v_next_turn_number, v_next_army_base_points;
 end;

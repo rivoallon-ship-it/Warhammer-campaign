@@ -14,6 +14,11 @@ import {
   getTerritoryStats,
 } from "@/lib/campaigns/campaign-dashboard-service";
 import { getColorLabel } from "@/lib/campaigns/join-campaign";
+import {
+  getEndTurnGloryIncome,
+  getPlayerTerritoryRuleStats,
+  getVillageArmyBonus,
+} from "@/lib/campaigns/territory-rules";
 import { createClient } from "@/lib/supabase/server";
 
 type CampaignPageProps = {
@@ -323,6 +328,8 @@ export default async function CampaignPage({
   } = dashboard;
   const rankedPlayers = getRankedPlayers(activePlayers);
   const territoryStats = getTerritoryStats(territories);
+  const playerTerritoryRuleStats = getPlayerTerritoryRuleStats(territories);
+  const armyBasePoints = currentTurn?.army_base_points ?? 400;
   const territoryNameById = new Map(
     territories.map((territory) => [territory.id, territory.name]),
   );
@@ -339,18 +346,6 @@ export default async function CampaignPage({
   const submittedOrderCount = orderVisibility.filter((order) =>
     ["submitted", "revealed", "resolved"].includes(order.order_status),
   ).length;
-  const controlledTerritoryCountByPlayerId = new Map<string, number>();
-
-  for (const territory of territories) {
-    if (!territory.owner_campaign_player_id) continue;
-
-    controlledTerritoryCountByPlayerId.set(
-      territory.owner_campaign_player_id,
-      (controlledTerritoryCountByPlayerId.get(territory.owner_campaign_player_id) ??
-        0) + 1,
-    );
-  }
-
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
   const existingPlayerOrder =
@@ -403,7 +398,7 @@ export default async function CampaignPage({
                 <p className="fantasy-muted mt-2 text-sm">
                   Saison {campaign.season_number} - Tour{" "}
                   {campaign.current_turn_number || 1} -{" "}
-                  {currentTurn?.army_base_points ?? 400} points
+                  {armyBasePoints} points de base
                 </p>
               </div>
             </div>
@@ -621,8 +616,18 @@ export default async function CampaignPage({
 
               <div className="mt-4 space-y-3">
                 {rankedPlayers.map((player, index) => {
-                  const controlledTerritories =
-                    controlledTerritoryCountByPlayerId.get(player.id) ?? 0;
+                  const playerRuleStats = playerTerritoryRuleStats.get(player.id) ?? {
+                    controlledCount: 0,
+                    villageCount: 0,
+                    mineCount: 0,
+                  };
+                  const controlledTerritories = playerRuleStats.controlledCount;
+                  const villageArmyBonus = getVillageArmyBonus(
+                    playerRuleStats.villageCount,
+                  );
+                  const effectiveArmyPoints = armyBasePoints + villageArmyBonus;
+                  const endTurnGloryIncome =
+                    getEndTurnGloryIncome(playerRuleStats);
                   const order = orderVisibilityByPlayerId.get(player.id);
                   const displayedStatus = order?.can_view_details
                     ? order.order_status
@@ -653,6 +658,15 @@ export default async function CampaignPage({
                           {controlledTerritories} territoire
                           {controlledTerritories > 1 ? "s" : ""} contrôlé
                           {controlledTerritories > 1 ? "s" : ""}
+                        </p>
+                        <p className="fantasy-muted mt-1 text-sm">
+                          Armée : {effectiveArmyPoints} pts
+                          {villageArmyBonus > 0
+                            ? ` (${armyBasePoints} + ${villageArmyBonus} villages)`
+                            : ""}
+                        </p>
+                        <p className="fantasy-muted mt-1 text-sm">
+                          Revenu fin de tour : +{endTurnGloryIncome} Gloire
                         </p>
                       </div>
 

@@ -106,7 +106,7 @@ Actions internes stockées dans `orders.action_type` : `conquer`, `fortify`.
 ### Validation
 
 - `conquer` : source contrôlée par joueur, cible adjacente, cible neutre ou ennemie, jamais un territoire déjà contrôlé par le joueur.
-- `fortify` : cible contrôlée par joueur.
+- `fortify` : cible contrôlée par joueur, non fortifiée et qui n'est pas une forteresse.
 
 ### Conquête neutre non contestée
 
@@ -122,7 +122,9 @@ Conquête d'un territoire ennemi : bataille entre attaquant et défenseur. Attaq
 
 Bataille multi-joueurs : le vainqueur gagne le territoire et +3 Gloire, chaque autre participant gagne +1 Gloire.
 
-Retirer la fortification après bataille si elle a fourni le bonus défensif.
+Bonus de territoire : capitale capturée par attaquant = +5 Gloire supplémentaire ; première conquête d'une ruine = +1 Gloire supplémentaire.
+
+Fortification ou forteresse : défenseur +200 points d'armée. Retirer seulement la fortification manuelle après bataille ; la forteresse garde son bonus naturel.
 
 ### Points d’armée
 
@@ -131,6 +133,12 @@ export function getArmyBasePoints(turnNumber: number): number {
   return Math.min(400 + Math.max(turnNumber - 1, 0) * 200, 2000);
 }
 ```
+
+Les villages ajoutent +100 points d'armée au joueur, plafonné à +200. Ce bonus s'ajoute aux points de base du tour.
+
+### Revenus de fin de tour
+
+À chaque fin de tour, chaque joueur actif gagne `floor(territoires contrôlés / 3)` Gloire, plus +1 Gloire par gisement contrôlé.
 
 ## 7. Supabase
 

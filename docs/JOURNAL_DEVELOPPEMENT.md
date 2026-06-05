@@ -297,6 +297,16 @@ Commit principal :
   - le tour courant passe en `finished` ;
   - le tour suivant est créé en phase `orders` ;
   - l'interface affiche un message indiquant qu'aucune bataille n'était à résoudre.
+- Ajout des premières règles de territoires :
+  - `CA` Capitale : +5 Gloire pour l'attaquant qui la capture ;
+  - `VI` Village : +100 points d'armée, plafonné à +200 ;
+  - `GE` Gisement : +1 Gloire à chaque fin de tour ;
+  - `FO` Forteresse : défense automatique, +200 points au défenseur ;
+  - `RU` Ruines : +1 Gloire supplémentaire à la première conquête ;
+  - `SA` Sauvage : aucun bonus.
+- Le type technique `mine` a été ajouté pour les Gisements. Les Géants utilisent maintenant le tag `GI`.
+- La fin de tour applique aussi `floor(territoires contrôlés / 3)` Gloire par joueur.
+- L'interface affiche les effets des tags, les points d'armée effectifs et les revenus de fin de tour attendus.
 
 ## Fichiers importants
 
@@ -338,6 +348,7 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `06_SECURITE_INVITATIONS.sql` : correctif de sécurité pour protéger la recherche et la demande de jonction par code d'invitation sur une base déjà installée.
 - `09_resolve_battle_function.sql`
 - `09b_finish_turn_function.sql`
+- `15_territory_rules_schema.sql`
 - `14_logs_grants.sql`
 
 ## Vérifications réalisées

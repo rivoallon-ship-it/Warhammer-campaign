@@ -206,8 +206,9 @@ export default async function ResultsPage({
               </div>
               <CardTitle>Conquêtes automatiques</CardTitle>
               <CardDescription>
-                Les D6 sont lancés automatiquement à la révélation. Un résultat
-                de 1-2 échoue, 3-6 réussit. Le joueur gagne toujours 1 Gloire.
+                Les D6 sont lancés automatiquement à la révélation. La difficulté
+                descend à 2+ avec deux soutiens adjacents, puis devient automatique
+                avec trois soutiens ou plus. Le joueur gagne toujours 1 Gloire.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

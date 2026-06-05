@@ -1161,10 +1161,32 @@ begin
       target.id as territory_id,
       target.code as territory_code,
       target.name as territory_name,
-      roll.dice_result,
-      roll.dice_result >= 3 as exploration_success
+      case
+        when support.adjacent_support_count >= 3 then 6
+        else roll.dice_result
+      end as dice_result,
+      support.adjacent_support_count,
+      case
+        when support.adjacent_support_count >= 2 then 2
+        else 3
+      end as conquest_threshold,
+      support.adjacent_support_count >= 3
+        or roll.dice_result >= case
+          when support.adjacent_support_count >= 2 then 2
+          else 3
+        end as exploration_success
     from public.orders o
     join public.territories target on target.id = o.target_territory_id
+    cross join lateral (
+      select count(distinct owned.id)::int as adjacent_support_count
+      from public.territory_adjacencies adjacency
+      join public.territories owned
+        on owned.campaign_id = o.campaign_id
+        and owned.code = adjacency.adjacent_territory_code
+        and owned.owner_campaign_player_id = o.campaign_player_id
+      where adjacency.campaign_id = o.campaign_id
+        and adjacency.territory_code = target.code
+    ) support
     cross join lateral (
       select (floor(random() * 6)::int + 1) as dice_result
       where o.id is not null
@@ -1211,6 +1233,7 @@ begin
     returning
       inserted_exploration.campaign_id,
       inserted_exploration.turn_id,
+      inserted_exploration.order_id,
       inserted_exploration.campaign_player_id,
       inserted_exploration.territory_id,
       inserted_exploration.dice_result,
@@ -1249,9 +1272,19 @@ begin
     cp.display_name || ' tente de conquérir ' || target.code || ' - '
       || target.name || ' : '
       || case when ie.exploration_success then 'réussite' else 'échec' end
-      || ' sur un D6 automatique de ' || ie.dice_result || '. +1 Gloire.',
+      || case
+        when so.adjacent_support_count >= 3
+          then ' automatique grâce à '
+            || so.adjacent_support_count
+            || ' territoires adjacents contrôlés'
+        else ' sur un D6 automatique de ' || ie.dice_result
+          || ' (réussite sur ' || so.conquest_threshold
+          || '+, soutien adjacent : ' || so.adjacent_support_count || ')'
+      end
+      || '. +1 Gloire.',
     auth.uid()
   from inserted_explorations ie
+  join single_orders so on so.order_id = ie.order_id
   join public.campaign_players cp on cp.id = ie.campaign_player_id
   join public.territories target on target.id = ie.territory_id;
 
@@ -1418,6 +1451,8 @@ declare
   v_player public.campaign_players%rowtype;
   v_territory public.territories%rowtype;
   v_success boolean;
+  v_adjacent_support_count int := 0;
+  v_conquest_threshold int := 3;
 begin
   if submitted_dice_result < 1 or submitted_dice_result > 6 then
     return query select false, 'Le résultat doit être un D6 entre 1 et 6.', null::boolean;
@@ -1489,7 +1524,23 @@ begin
     return;
   end if;
 
-  v_success := submitted_dice_result >= 3;
+  select count(distinct owned.id)::int
+  into v_adjacent_support_count
+  from public.territory_adjacencies adjacency
+  join public.territories owned
+    on owned.campaign_id = v_exploration.campaign_id
+    and owned.code = adjacency.adjacent_territory_code
+    and owned.owner_campaign_player_id = v_exploration.campaign_player_id
+  where adjacency.campaign_id = v_exploration.campaign_id
+    and adjacency.territory_code = v_territory.code;
+
+  v_conquest_threshold := case
+    when v_adjacent_support_count >= 2 then 2
+    else 3
+  end;
+
+  v_success := v_adjacent_support_count >= 3
+    or submitted_dice_result >= v_conquest_threshold;
 
   update public.explorations
   set dice_result = submitted_dice_result,
@@ -1529,7 +1580,14 @@ begin
         when v_success then 'réussite'
         else 'échec'
       end
-      || ' sur un D6 de ' || submitted_dice_result || '. +1 Gloire.',
+      || case
+        when v_adjacent_support_count >= 3
+          then ' automatique grâce à ' || v_adjacent_support_count || ' territoires adjacents contrôlés'
+        else ' sur un D6 de ' || submitted_dice_result
+          || ' (réussite sur ' || v_conquest_threshold
+          || '+, soutien adjacent : ' || v_adjacent_support_count || ')'
+      end
+      || '. +1 Gloire.',
     auth.uid()
   );
 

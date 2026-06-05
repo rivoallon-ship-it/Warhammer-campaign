@@ -110,7 +110,7 @@ Actions internes stockées dans `orders.action_type` : `conquer`, `fortify`.
 
 ### Conquête neutre non contestée
 
-D6 automatique à la révélation. 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur.
+D6 automatique à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent à la cible = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur.
 
 ### Conquête neutre contestée
 

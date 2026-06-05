@@ -202,6 +202,18 @@ function getOrderSummary(
   }`;
 }
 
+function getNeutralConquestDifficultyLabel(adjacentControlledCount: number) {
+  if (adjacentControlledCount >= 3) {
+    return "Conquête automatique : tu contrôles 3 territoires adjacents ou plus.";
+  }
+
+  if (adjacentControlledCount >= 2) {
+    return "Conquête sur 2+ : tu contrôles 2 territoires adjacents.";
+  }
+
+  return "Conquête sur 3+ : tu contrôles 1 territoire adjacent.";
+}
+
 function ColorSwatch({ color }: { color: string }) {
   return (
     <span
@@ -343,6 +355,8 @@ export function CampaignCommandCenter({
             ?.has(selectedTerritory.code),
         )
       : [];
+  const adjacentControlledCountForSelectedTarget =
+    conquestSourcesForSelectedTarget.length;
   const conquestSourceForSelectedTarget =
     conquestSourcesForSelectedTarget[0] ?? null;
   const canConquerSelectedTerritory =
@@ -715,22 +729,31 @@ export function CampaignCommandCenter({
                     )}
                   </>
                 ) : canConquerSelectedTerritory && conquestSourceForSelectedTarget ? (
-                  <form action={submitOrderAction}>
-                    <input type="hidden" name="returnTo" value="campaign" />
-                    <input type="hidden" name="campaignId" value={campaignId} />
-                    <input type="hidden" name="actionType" value="conquer" />
-                    <input
-                      type="hidden"
-                      name="sourceTerritoryId"
-                      value={conquestSourceForSelectedTarget.id}
-                    />
-                    <input
-                      type="hidden"
-                      name="targetTerritoryId"
-                      value={selectedTerritory.id}
-                    />
-                    <ConquestSubmitButton />
-                  </form>
+                  <>
+                    <p className="fantasy-alert fantasy-alert-info p-3 text-sm">
+                      {selectedTerritory.ownerCampaignPlayerId
+                        ? "Ce territoire appartient à un adversaire : l'ordre créera une bataille."
+                        : getNeutralConquestDifficultyLabel(
+                            adjacentControlledCountForSelectedTarget,
+                          )}
+                    </p>
+                    <form action={submitOrderAction}>
+                      <input type="hidden" name="returnTo" value="campaign" />
+                      <input type="hidden" name="campaignId" value={campaignId} />
+                      <input type="hidden" name="actionType" value="conquer" />
+                      <input
+                        type="hidden"
+                        name="sourceTerritoryId"
+                        value={conquestSourceForSelectedTarget.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="targetTerritoryId"
+                        value={selectedTerritory.id}
+                      />
+                      <ConquestSubmitButton />
+                    </form>
+                  </>
                 ) : (
                   <p className="fantasy-alert p-3 text-sm">
                     Cette zone ne peut pas être conquise depuis tes territoires

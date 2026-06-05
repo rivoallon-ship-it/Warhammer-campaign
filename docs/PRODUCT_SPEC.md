@@ -148,7 +148,7 @@ En bataille multi-joueurs sur territoire neutre, le vainqueur gagne le territoir
 
 ## 18. Conquêtes neutres automatiques
 
-Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. 1-2 échec, 3-6 succès. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur.
+Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. La difficulté dépend du nombre de territoires contrôlés par ce joueur qui sont adjacents à la cible : 1 territoire adjacent = réussite sur 3+, 2 territoires adjacents = réussite sur 2+, 3 territoires adjacents ou plus = conquête automatique. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur.
 
 Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 

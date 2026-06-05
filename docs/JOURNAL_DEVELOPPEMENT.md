@@ -99,8 +99,9 @@ Les anciens termes `attack` et `explore` ne sont plus utilisés pour les nouveau
 Si un seul joueur vise un territoire neutre :
 
 - le D6 est lancé automatiquement par la base de données au moment de la révélation ;
-- 1-2 : échec ;
-- 3-6 : succès ;
+- 1 territoire contrôlé adjacent à la cible : réussite sur 3+ ;
+- 2 territoires contrôlés adjacents à la cible : réussite sur 2+ ;
+- 3 territoires contrôlés adjacents ou plus : conquête automatique ;
 - le joueur gagne +1 Gloire dans tous les cas ;
 - en cas de succès, le territoire devient contrôlé par ce joueur.
 

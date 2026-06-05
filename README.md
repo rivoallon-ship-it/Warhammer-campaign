@@ -188,7 +188,7 @@ Règles :
 - cliquer sur une cible conquérable affiche directement l'action `Conquérir` ;
 - un ordre soumis peut être annulé ou remplacé tant que la phase est `orders` et que les ordres n'ont pas été révélés ;
 - conquérir un territoire ennemi crée une bataille ;
-- conquérir seul un territoire neutre lance automatiquement un D6 ;
+- conquérir seul un territoire neutre lance automatiquement un D6 : 3+ avec 1 territoire adjacent contrôlé, 2+ avec 2 territoires adjacents contrôlés, automatique avec 3 territoires adjacents contrôlés ou plus ;
 - si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;
 - fortifier cible un territoire contrôlé par le joueur.
 

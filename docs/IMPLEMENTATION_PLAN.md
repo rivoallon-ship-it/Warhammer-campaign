@@ -140,7 +140,7 @@ Page `/campaigns/[campaignId]/reveal`. Page de suivi/compatibilité. La révéla
 
 ## Lot 17 — Résolution des conquêtes automatiques
 
-Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées sont déjà résolues automatiquement à la révélation. D6 1-2 échec, 3-6 succès. +1 Gloire dans tous les cas. Succès = territoire au joueur. Status resolved, log.
+Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées sont déjà résolues automatiquement à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur. Status resolved, log.
 
 ## Lot 18 — Résolution des batailles
 

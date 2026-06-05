@@ -239,7 +239,7 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 - `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
 - `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale ; après enregistrement, tenter la révélation automatique si tous les joueurs actifs ont soumis leur ordre.
 - `cancelOrder` : vérifier joueur actif, phase orders, ordre non révélé, puis repasser l'ordre en draft.
-- `revealOrders` : joueur actif, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, phase resolving, log. Cette fonction est appelée automatiquement après la soumission du dernier ordre.
+- `revealOrders` : joueur actif, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, log. Cette fonction est appelée automatiquement après la soumission du dernier ordre. Si elle crée au moins une bataille, la campagne passe en phase `resolving`; si elle ne crée aucune bataille, elle clôture le tour courant, crée le tour suivant et repasse la campagne en phase `orders`.
 - `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
 - `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.
 - `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.

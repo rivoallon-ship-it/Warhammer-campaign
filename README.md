@@ -29,6 +29,7 @@ Le MVP doit permettre :
 - ordres secrets directement depuis la carte ;
 - annulation ou remplacement d'un ordre tant que la phase d'ordres est ouverte ;
 - révélation automatique et simultanée des ordres dès que tous les joueurs actifs ont validé ;
+- passage automatique au tour suivant quand la révélation ne génère aucune bataille ;
 - génération des batailles et conquêtes automatiques ;
 - résolution automatique des conquêtes neutres non contestées ;
 - saisie des résultats de bataille ;

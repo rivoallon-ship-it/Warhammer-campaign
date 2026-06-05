@@ -93,6 +93,8 @@ Les nouvelles campagnes utilisent une carte hexagonale `hex_v1_*`. Chaque territ
 
 Avant révélation : propriétaire voit son ordre, autres voient seulement statut, maître ne voit pas les détails. Après révélation : tous les joueurs actifs voient tous les ordres. La révélation se déclenche automatiquement à la soumission du dernier ordre actif ; ne pas réintroduire de bouton de validation maître pour passer en résolution.
 
+Si la révélation ne crée aucune bataille, le tour doit être terminé automatiquement : les conquêtes automatiques et fortifications sont appliquées, les ordres passent en `resolved`, le tour courant passe en `finished`, le tour suivant est créé en phase `orders`, et un message informe l'utilisateur.
+
 ### Actions MVP
 
 Actions affichées : `Conquérir`, `Fortifier`.

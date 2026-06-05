@@ -26,6 +26,7 @@ type RevealPageProps = {
     explorations?: string;
     fortifications?: string;
     multi?: string;
+    autoAdvanced?: string;
     error?: string;
   }>;
 };
@@ -106,6 +107,13 @@ function getFeedbackMessage(query?: Awaited<RevealPageProps["searchParams"]>) {
   if (query.error) return { variant: "error" as const, text: query.error };
 
   if (query.revealed) {
+    if (query.autoAdvanced) {
+      return {
+        variant: "success" as const,
+        text: "Ordres révélés : aucune bataille à résoudre. Les effets du tour ont été appliqués et le tour suivant est ouvert.",
+      };
+    }
+
     return {
       variant: "success" as const,
       text: `Ordres révélés : ${query.battles ?? "0"} bataille(s), ${

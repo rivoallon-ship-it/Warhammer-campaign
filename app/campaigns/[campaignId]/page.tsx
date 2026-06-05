@@ -29,6 +29,7 @@ type CampaignPageProps = {
     explorations?: string;
     fortifications?: string;
     multi?: string;
+    autoAdvanced?: string;
     submitted?: string;
     cancelled?: string;
     error?: string;
@@ -489,16 +490,26 @@ export default async function CampaignPage({
         ) : null}
         {query?.revealed ? (
           <p className="fantasy-alert fantasy-alert-success mt-4 p-3 text-sm">
-            Ordres révélés : {query.battles ?? "0"} bataille
-            {Number(query.battles ?? 0) > 1 ? "s" : ""},{" "}
-            {query.explorations ?? "0"} conquête
-            {Number(query.explorations ?? 0) > 1 ? "s" : ""} automatique
-            {Number(query.explorations ?? 0) > 1 ? "s" : ""},{" "}
-            {query.fortifications ?? "0"} fortification
-            {Number(query.fortifications ?? 0) > 1 ? "s" : ""}.
-            {Number(query.multi ?? 0) > 0
-              ? ` ${query.multi} territoire(s) déclenchent un conflit multiple.`
-              : ""}
+            {query.autoAdvanced ? (
+              <>
+                Ordres révélés : aucune bataille à résoudre. Les effets du tour
+                ont été appliqués et le tour {campaign.current_turn_number} est
+                ouvert.
+              </>
+            ) : (
+              <>
+                Ordres révélés : {query.battles ?? "0"} bataille
+                {Number(query.battles ?? 0) > 1 ? "s" : ""},{" "}
+                {query.explorations ?? "0"} conquête
+                {Number(query.explorations ?? 0) > 1 ? "s" : ""} automatique
+                {Number(query.explorations ?? 0) > 1 ? "s" : ""},{" "}
+                {query.fortifications ?? "0"} fortification
+                {Number(query.fortifications ?? 0) > 1 ? "s" : ""}.
+                {Number(query.multi ?? 0) > 0
+                  ? ` ${query.multi} territoire(s) déclenchent un conflit multiple.`
+                  : ""}
+              </>
+            )}
           </p>
         ) : null}
         {query?.submitted ? (

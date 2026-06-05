@@ -132,7 +132,7 @@ Avant révélation : propriétaire seulement pour les détails, autres = statut.
 
 ## Lot 15 — Révélation
 
-Page `/campaigns/[campaignId]/reveal`. Maître, phase orders, tous submitted. Effets : ordres revealed, batailles, conquêtes automatiques, fortifications, phase resolving, log.
+Page `/campaigns/[campaignId]/reveal`. Page de suivi/compatibilité. La révélation est automatique après le dernier ordre validé. Effets : ordres revealed, batailles, conquêtes automatiques, fortifications, log. Si aucune bataille n'est créée, le tour suivant s'ouvre automatiquement.
 
 ## Lot 16 — Génération batailles/conquêtes
 

@@ -291,6 +291,11 @@ Commit principal :
 - La page `/campaigns/[campaignId]/reveal` devient une page de suivi/compatibilité pour les anciens liens, sans action maître obligatoire.
 - La fonction SQL `reveal_current_turn_orders` accepte maintenant tout joueur actif de la campagne, mais garde le blocage si tous les ordres actifs ne sont pas soumis.
 - Les scripts Supabase mis à jour sont `supabase/schema.sql`, `supabase/SQL_A_COPIER_DANS_SUPABASE.sql`, `supabase/a_copier_par_morceaux/07_reveal_orders_function.sql` et les anciens correctifs de révélation.
+- Ajout du passage automatique au tour suivant quand la révélation ne crée aucune bataille :
+  - les ordres révélés passent en `resolved` ;
+  - le tour courant passe en `finished` ;
+  - le tour suivant est créé en phase `orders` ;
+  - l'interface affiche un message indiquant qu'aucune bataille n'était à résoudre.
 
 ## Fichiers importants
 

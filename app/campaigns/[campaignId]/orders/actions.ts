@@ -64,6 +64,7 @@ export async function submitOrderAction(formData: FormData) {
       explorations: String(revealResult.exploration_count),
       fortifications: String(revealResult.fortification_count),
       multi: String(revealResult.multiple_attack_count),
+      ...(revealResult.battle_count === 0 ? { autoAdvanced: "1" } : {}),
     });
   }
 

@@ -6,6 +6,7 @@ declare
   v_active_count int := 0; v_submitted_count int := 0; v_battle_count int := 0;
   v_enemy_battle_count int := 0; v_contested_battle_count int := 0;
   v_exploration_count int := 0; v_fortification_count int := 0; v_multiple_attack_count int := 0;
+  v_next_turn_number int; v_next_army_base_points int;
 begin
   select * into v_campaign from public.campaigns where id = target_campaign_id for update;
   if not found then return query select false, 'Campagne introuvable.', 0, 0, 0, 0; return; end if;
@@ -51,10 +52,23 @@ begin
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
   select o.campaign_id, o.turn_id, 'territory_fortified', 'Territoire fortifié', cp.display_name || ' fortifie ' || target.code || ' - ' || target.name || '.', auth.uid() from public.orders o join public.campaign_players cp on cp.id = o.campaign_player_id join public.territories target on target.id = o.target_territory_id where o.campaign_id = v_campaign.id and o.turn_id = v_turn.id and o.status = 'submitted' and o.action_type = 'fortify';
   update public.orders set status = 'revealed', revealed_at = now() where campaign_id = v_campaign.id and turn_id = v_turn.id and status = 'submitted';
-  update public.campaign_turns set phase = 'resolving' where id = v_turn.id;
-  update public.campaigns set current_phase = 'resolving', updated_at = now() where id = v_campaign.id;
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
   values (v_campaign.id, v_turn.id, 'orders_revealed', 'Ordres révélés', 'Révélation : ' || v_battle_count || ' bataille(s), ' || v_exploration_count || ' conquête(s) automatique(s), ' || v_fortification_count || ' fortification(s).' || case when v_multiple_attack_count > 0 then ' Attention : ' || v_multiple_attack_count || ' territoire(s) déclenchent un conflit multiple.' else '' end, auth.uid());
+  if v_battle_count = 0 then
+    v_next_turn_number := v_campaign.current_turn_number + 1;
+    v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
+    update public.orders set status = 'resolved' where campaign_id = v_campaign.id and turn_id = v_turn.id and status = 'revealed';
+    update public.campaign_turns set phase = 'finished', ended_at = now() where id = v_turn.id;
+    insert into public.campaign_turns (campaign_id, season_number, turn_number, phase, army_base_points)
+    values (v_campaign.id, v_campaign.season_number, v_next_turn_number, 'orders', v_next_army_base_points)
+    on conflict (campaign_id, turn_number) do update set phase = 'orders', army_base_points = excluded.army_base_points, ended_at = null;
+    update public.campaigns set current_turn_number = v_next_turn_number, current_phase = 'orders', updated_at = now() where id = v_campaign.id;
+    insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
+    values (v_campaign.id, v_turn.id, 'turn_finished', 'Tour terminé automatiquement', 'Aucune bataille à résoudre. Le tour ' || v_campaign.current_turn_number || ' est terminé automatiquement. Le tour ' || v_next_turn_number || ' commence avec ' || v_next_army_base_points || ' points d''armée.', auth.uid());
+  else
+    update public.campaign_turns set phase = 'resolving' where id = v_turn.id;
+    update public.campaigns set current_phase = 'resolving', updated_at = now() where id = v_campaign.id;
+  end if;
   return query select true, null::text, v_battle_count, v_exploration_count, v_fortification_count, v_multiple_attack_count;
 end;
 $$;

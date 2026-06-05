@@ -143,7 +143,7 @@ N’afficher que les sources contrôlées et cibles valides. Si ordre validé : 
 
 Avant révélation : liste statuts joueurs. Dès que tous les joueurs actifs ont validé, la révélation se déclenche automatiquement.
 
-Quand tous validés : passage automatique en révélation, puis en résolution.
+Quand tous validés : passage automatique en révélation. Si aucune bataille n'est générée, afficher un message et ouvrir directement le tour suivant ; sinon passer en résolution.
 
 Après révélation : tableau joueur/action/source/cible + bouton voir résultats à résoudre.
 

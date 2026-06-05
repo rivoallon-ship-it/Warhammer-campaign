@@ -132,7 +132,7 @@ Actions internes :
 
 ## 16. Révélation des ordres
 
-Quand tous les joueurs actifs ont soumis leurs ordres, la révélation se déclenche automatiquement. Après révélation, tous les ordres deviennent visibles, les batailles/conquêtes automatiques sont générées, les fortifications appliquées, et la campagne passe en résolution.
+Quand tous les joueurs actifs ont soumis leurs ordres, la révélation se déclenche automatiquement. Après révélation, tous les ordres deviennent visibles, les batailles/conquêtes automatiques sont générées et les fortifications appliquées. Si au moins une bataille est créée, la campagne passe en résolution. Si aucune bataille n'est créée, le tour est terminé automatiquement et le tour suivant s'ouvre.
 
 ## 17. Batailles
 
@@ -164,7 +164,7 @@ Gains MVP : conquête neutre automatique +1, conquérant victorieux +3, défense
 
 Le maître termine le tour quand toutes les conquêtes automatiques et batailles sont résolues. Un nouveau tour est créé, la taille d’armée recalculée, et les joueurs peuvent soumettre de nouveaux ordres.
 
-La page campagne affiche une progression de tour en trois étapes : ordres, révélation, résultats. Elle sert à montrer l'état courant, les compteurs utiles et les actions disponibles au bon moment. Le passage `Ordres` -> `Révélation` est automatique ; les actions maître restent surtout sur les résultats et la fin de tour.
+La page campagne affiche une progression de tour en trois étapes : ordres, révélation, résultats. Elle sert à montrer l'état courant, les compteurs utiles et les actions disponibles au bon moment. Le passage `Ordres` -> `Révélation` est automatique ; si la révélation ne génère aucune bataille, la page affiche un message et le tour suivant est ouvert directement.
 
 ## 22. Tableaux de bord
 

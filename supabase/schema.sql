@@ -856,6 +856,8 @@ declare
   v_exploration_count int := 0;
   v_fortification_count int := 0;
   v_multiple_attack_count int := 0;
+  v_next_turn_number int;
+  v_next_army_base_points int;
 begin
   select *
   into v_campaign
@@ -1297,15 +1299,6 @@ begin
     and turn_id = v_turn.id
     and status = 'submitted';
 
-  update public.campaign_turns
-  set phase = 'resolving'
-  where id = v_turn.id;
-
-  update public.campaigns
-  set current_phase = 'resolving',
-      updated_at = now()
-  where id = v_campaign.id;
-
   insert into public.campaign_logs (
     campaign_id,
     turn_id,
@@ -1329,6 +1322,76 @@ begin
       end,
     auth.uid()
   );
+
+  if v_battle_count = 0 then
+    v_next_turn_number := v_campaign.current_turn_number + 1;
+    v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
+
+    update public.orders
+    set status = 'resolved'
+    where campaign_id = v_campaign.id
+      and turn_id = v_turn.id
+      and status = 'revealed';
+
+    update public.campaign_turns
+    set phase = 'finished',
+        ended_at = now()
+    where id = v_turn.id;
+
+    insert into public.campaign_turns (
+      campaign_id,
+      season_number,
+      turn_number,
+      phase,
+      army_base_points
+    )
+    values (
+      v_campaign.id,
+      v_campaign.season_number,
+      v_next_turn_number,
+      'orders',
+      v_next_army_base_points
+    )
+    on conflict (campaign_id, turn_number) do update
+      set phase = 'orders',
+          army_base_points = excluded.army_base_points,
+          ended_at = null;
+
+    update public.campaigns
+    set current_turn_number = v_next_turn_number,
+        current_phase = 'orders',
+        updated_at = now()
+    where id = v_campaign.id;
+
+    insert into public.campaign_logs (
+      campaign_id,
+      turn_id,
+      type,
+      title,
+      description,
+      created_by_user_id
+    )
+    values (
+      v_campaign.id,
+      v_turn.id,
+      'turn_finished',
+      'Tour terminé automatiquement',
+      'Aucune bataille à résoudre. Le tour ' || v_campaign.current_turn_number
+        || ' est terminé automatiquement. Le tour '
+        || v_next_turn_number || ' commence avec '
+        || v_next_army_base_points || ' points d''armée.',
+      auth.uid()
+    );
+  else
+    update public.campaign_turns
+    set phase = 'resolving'
+    where id = v_turn.id;
+
+    update public.campaigns
+    set current_phase = 'resolving',
+        updated_at = now()
+    where id = v_campaign.id;
+  end if;
 
   return query select true, null::text, v_battle_count, v_exploration_count, v_fortification_count, v_multiple_attack_count;
 end;

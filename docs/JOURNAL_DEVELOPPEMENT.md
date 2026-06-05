@@ -317,6 +317,10 @@ Commit principal :
   - coût fixe de 10 Gloire ;
   - prérequis : contrôler au moins un territoire du type recruté ;
   - carte de recrutement sur l'écran campagne et log `legendary_recruitment`.
+- Redécoupage des morceaux SQL Supabase pour que chaque fichier à copier reste sous 100 lignes :
+  - remplacement de l'ancien `05_auth_helpers_2.sql` par `05a`, `05b`, `05c` ;
+  - compactage de `08_resolve_exploration_function.sql` et `09b_finish_turn_function.sql` ;
+  - mise à jour de `00_LIRE_AVANT_DE_COPIER.md`.
 
 ## Fichiers importants
 
@@ -359,6 +363,7 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `09_resolve_battle_function.sql`
 - `09b_finish_turn_function.sql`
 - `15_territory_rules_schema.sql`
+- `16_legendary_recruitment.sql`
 - `14_logs_grants.sql`
 
 ## Vérifications réalisées

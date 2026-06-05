@@ -59,6 +59,6 @@ grant execute on function public.request_join_campaign(text, text, text, text, t
 grant execute on function public.get_current_turn_order_visibility(uuid) to authenticated;
 grant execute on function public.reveal_current_turn_orders(uuid) to authenticated;
 grant execute on function public.resolve_exploration_result(uuid, int) to authenticated;
-grant execute on function public.resolve_battle_result(uuid, uuid, text) to authenticated;
+grant execute on function public.resolve_battle_result(uuid, uuid, text, jsonb) to authenticated;
 grant execute on function public.finish_current_turn(uuid) to authenticated;
 grant execute on function public.recruit_legendary_unit(uuid, text) to authenticated;

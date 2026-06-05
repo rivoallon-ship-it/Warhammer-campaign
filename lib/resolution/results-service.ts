@@ -4,7 +4,7 @@ import {
   getCampaignDashboard,
   getPlayerById,
 } from "@/lib/campaigns/campaign-dashboard-service";
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 
 type CampaignPlayerRow = Database["public"]["Tables"]["campaign_players"]["Row"];
 type TerritoryRow = Database["public"]["Tables"]["territories"]["Row"];
@@ -18,6 +18,12 @@ type ResolveBattleRpcResult =
   Database["public"]["Functions"]["resolve_battle_result"]["Returns"][number];
 type FinishTurnRpcResult =
   Database["public"]["Functions"]["finish_current_turn"]["Returns"][number];
+
+export type LegendaryBattleLossInput = {
+  campaign_player_id: string;
+  dragon_losses: number;
+  giant_losses: number;
+};
 
 export type ExplorationResultItem = ExplorationRow & {
   player: CampaignPlayerRow | null;
@@ -311,6 +317,7 @@ export async function resolveBattle(
   battleId: string,
   winnerCampaignPlayerId: string,
   resultNotes: string,
+  legendaryLosses: LegendaryBattleLossInput[],
 ) {
   if (!battleId) {
     return { result: null, error: "Bataille introuvable." };
@@ -354,10 +361,37 @@ export async function resolveBattle(
     return { result: null, error: "Le vainqueur doit participer à cette bataille." };
   }
 
+  for (const loss of legendaryLosses) {
+    const participant = battle.participants.find(
+      (item) => item.campaign_player_id === loss.campaign_player_id,
+    );
+
+    if (!participant) {
+      return { result: null, error: "Les pertes doivent concerner un participant." };
+    }
+
+    if (!Number.isInteger(loss.dragon_losses) || loss.dragon_losses < 0) {
+      return { result: null, error: "Pertes de Dragons invalides." };
+    }
+
+    if (!Number.isInteger(loss.giant_losses) || loss.giant_losses < 0) {
+      return { result: null, error: "Pertes de Géants invalides." };
+    }
+
+    if (loss.dragon_losses > (participant.player?.dragon_recruits ?? 0)) {
+      return { result: null, error: "Pertes de Dragons supérieures au stock." };
+    }
+
+    if (loss.giant_losses > (participant.player?.giant_recruits ?? 0)) {
+      return { result: null, error: "Pertes de Géants supérieures au stock." };
+    }
+  }
+
   const { data, error: rpcError } = await supabase.rpc("resolve_battle_result", {
     target_battle_id: battleId,
     submitted_winner_campaign_player_id: winnerCampaignPlayerId,
     submitted_result_notes: resultNotes,
+    submitted_legendary_losses: legendaryLosses as Json,
   });
 
   if (rpcError) {

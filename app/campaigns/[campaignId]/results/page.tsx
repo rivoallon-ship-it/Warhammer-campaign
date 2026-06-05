@@ -440,6 +440,9 @@ export default async function ResultsPage({
                             participants={battle.participants.map((participant) => ({
                               campaignPlayerId: participant.campaign_player_id,
                               name: getParticipantName(participant),
+                              dragonRecruits:
+                                participant.player?.dragon_recruits ?? 0,
+                              giantRecruits: participant.player?.giant_recruits ?? 0,
                             }))}
                           />
                         </div>

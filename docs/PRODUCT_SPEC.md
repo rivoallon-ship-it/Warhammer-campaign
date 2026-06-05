@@ -101,7 +101,7 @@ Bonus actifs :
 - Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Géant pour 10 Gloire si le joueur contrôle au moins un territoire Géant.
 - Sauvage : aucun bonus.
 
-Bonus en attente : consommation/utilisation détaillée des recrutements Dragon/Géant en bataille.
+Pertes légendaires : pendant la résolution d'une bataille entre joueurs, le maître de campagne peut indiquer les Dragons/Géants perdus par chaque participant. Ces pertes décrémentent les compteurs du joueur.
 
 ## 11. Carte et adjacence
 
@@ -174,7 +174,7 @@ Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à
 
 Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 10 Gloire. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
 
-Dans cette version, le recrutement est suivi comme ressource de campagne et affiché sur les participants pendant la résolution des batailles. Son utilisation exacte dans les batailles reste à préciser.
+Les recrues restent disponibles tant qu'elles ne sont pas perdues. Pendant la résolution d'une bataille entre joueurs, le maître de campagne peut saisir les pertes de Dragons/Géants pour chaque participant. Les pertes sont validées contre le stock disponible, décrémentées automatiquement et ajoutées à l'historique de bataille.
 
 Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 

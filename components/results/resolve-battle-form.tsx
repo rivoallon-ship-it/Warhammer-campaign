@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { resolveBattleAction } from "@/app/campaigns/[campaignId]/results/actions";
-import { Button, Select, Textarea } from "@/components/ui";
+import { Button, Input, Select, Textarea } from "@/components/ui";
 
 type ResolveBattleFormProps = {
   campaignId: string;
@@ -10,6 +10,8 @@ type ResolveBattleFormProps = {
   participants: {
     campaignPlayerId: string;
     name: string;
+    dragonRecruits: number;
+    giantRecruits: number;
   }[];
 };
 
@@ -43,6 +45,11 @@ export function ResolveBattleForm({
   battleId,
   participants,
 }: ResolveBattleFormProps) {
+  const participantsWithRecruits = participants.filter(
+    (participant) =>
+      participant.dragonRecruits > 0 || participant.giantRecruits > 0,
+  );
+
   return (
     <form action={resolveBattleAction} className="space-y-3">
       <input type="hidden" name="campaignId" value={campaignId} />
@@ -60,6 +67,40 @@ export function ResolveBattleForm({
         label="Notes"
         placeholder="Score, scénario, moment marquant..."
       />
+      {participantsWithRecruits.length ? (
+        <div className="fantasy-stat space-y-3 p-3">
+          <p className="text-sm font-semibold text-[#f3ead7]">
+            Pertes légendaires
+          </p>
+          {participantsWithRecruits.map((participant) => (
+            <div key={participant.campaignPlayerId} className="grid gap-2 sm:grid-cols-2">
+              <p className="sm:col-span-2 text-sm font-semibold text-[#f3ead7]">
+                {participant.name}
+              </p>
+              {participant.dragonRecruits > 0 ? (
+                <Input
+                  name={`dragonLoss:${participant.campaignPlayerId}`}
+                  type="number"
+                  min={0}
+                  max={participant.dragonRecruits}
+                  defaultValue={0}
+                  label={`Dragons perdus / ${participant.dragonRecruits}`}
+                />
+              ) : null}
+              {participant.giantRecruits > 0 ? (
+                <Input
+                  name={`giantLoss:${participant.campaignPlayerId}`}
+                  type="number"
+                  min={0}
+                  max={participant.giantRecruits}
+                  defaultValue={0}
+                  label={`Géants perdus / ${participant.giantRecruits}`}
+                />
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
       <ResolveBattleButton />
     </form>
   );

@@ -323,6 +323,11 @@ Commit principal :
   - mise à jour de `00_LIRE_AVANT_DE_COPIER.md`.
 - Déplacement du bloc `Recrutements` dans la colonne droite de la carte, sous les informations du territoire sélectionné.
 - Affichage des renforts Dragon/Géant disponibles sur les participants dans l'écran de résolution des batailles, sans consommation automatique.
+- Ajout des pertes légendaires à la résolution des batailles :
+  - saisie des Dragons/Géants perdus par participant ;
+  - validation contre le stock disponible ;
+  - décrément automatique des compteurs `dragon_recruits` et `giant_recruits` ;
+  - trace des pertes dans l'historique de bataille.
 
 ## Fichiers importants
 

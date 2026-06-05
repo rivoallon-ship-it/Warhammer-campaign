@@ -130,7 +130,7 @@ Tour magique : le défenseur dispose d'un magicien niveau 1 pour la bataille (sa
 
 ### Recrutements légendaires
 
-Un joueur actif peut recruter un Dragon pour 10 Gloire s'il contrôle au moins un territoire `dragon`, ou un Géant pour 10 Gloire s'il contrôle au moins un territoire `giant`. Le recrutement déduit la Gloire, incrémente `campaign_players.dragon_recruits` ou `campaign_players.giant_recruits`, et écrit un log `legendary_recruitment`. Ne pas encore consommer automatiquement ces compteurs en bataille tant que la règle d'utilisation n'est pas définie.
+Un joueur actif peut recruter un Dragon pour 10 Gloire s'il contrôle au moins un territoire `dragon`, ou un Géant pour 10 Gloire s'il contrôle au moins un territoire `giant`. Le recrutement déduit la Gloire, incrémente `campaign_players.dragon_recruits` ou `campaign_players.giant_recruits`, et écrit un log `legendary_recruitment`. Les recrues persistent jusqu'à ce que le maître de campagne saisisse leur perte pendant la résolution d'une bataille entre joueurs ; la RPC `resolve_battle_result` décrémente alors les compteurs validés.
 
 ### Points d’armée
 

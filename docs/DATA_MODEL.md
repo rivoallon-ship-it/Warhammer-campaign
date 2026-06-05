@@ -94,8 +94,8 @@ export const MAP_CONFIGS = {
 | `status` | text | Oui | `pending`, `active`, `rejected`, `left` |
 | `starting_capital_code` | text | Non | Capitale choisie |
 | `glory` | int | Oui | Gloire actuelle |
-| `dragon_recruits` | int | Oui | Dragons recrutés contre Gloire |
-| `giant_recruits` | int | Oui | Géants recrutés contre Gloire |
+| `dragon_recruits` | int | Oui | Dragons recrutés, décrémentés en cas de perte |
+| `giant_recruits` | int | Oui | Géants recrutés, décrémentés en cas de perte |
 | `is_ready` | boolean | Oui | Prêt dans le lobby |
 | `created_at` | timestamptz | Oui | Entrée |
 | `updated_at` | timestamptz | Oui | Mise à jour |

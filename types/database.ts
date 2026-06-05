@@ -547,6 +547,7 @@ export type Database = {
           target_battle_id: string;
           submitted_winner_campaign_player_id: string;
           submitted_result_notes?: string | null;
+          submitted_legendary_losses?: Json;
         };
         Returns: {
           success: boolean;

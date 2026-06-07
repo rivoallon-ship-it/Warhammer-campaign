@@ -39,6 +39,7 @@ type CampaignPageProps = {
     submitted?: string;
     cancelled?: string;
     recruited?: string;
+    spent?: string;
     error?: string;
   }>;
 };
@@ -560,7 +561,10 @@ export default async function CampaignPage({
         ) : null}
         {query?.recruited ? (
           <p className="fantasy-alert fantasy-alert-success mt-4 p-3 text-sm">
-            {query.recruited} recruté. 10 Gloire ont été dépensés.
+            {query.recruited} recruté.{" "}
+            {query.spent
+              ? `${query.spent} Gloire ont été dépensés.`
+              : "La Gloire a été dépensée."}
           </p>
         ) : null}
         {query?.error ? (

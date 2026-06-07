@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  getLegendaryRecruitmentCost,
   getLegendaryRecruitsSummary,
   getLegendaryUnitLabel,
   isLegendaryUnitType,
-  LEGENDARY_RECRUITMENT_COST,
 } from "@/lib/campaigns/recruitment-rules";
 import { getArmyBasePoints } from "@/lib/campaigns/turns";
 
@@ -17,8 +17,9 @@ describe("turns", () => {
 });
 
 describe("recruitment-rules", () => {
-  it("keeps legendary recruitment cost stable", () => {
-    expect(LEGENDARY_RECRUITMENT_COST).toBe(10);
+  it("keeps legendary recruitment costs balanced by points", () => {
+    expect(getLegendaryRecruitmentCost("dragon")).toBe(10);
+    expect(getLegendaryRecruitmentCost("giant")).toBe(8);
   });
 
   it("labels legendary units", () => {

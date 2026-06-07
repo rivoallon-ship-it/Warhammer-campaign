@@ -1,6 +1,13 @@
-export const LEGENDARY_RECRUITMENT_COST = 10;
-
 export type LegendaryUnitType = "dragon" | "giant";
+
+export const LEGENDARY_RECRUITMENT_COSTS: Record<LegendaryUnitType, number> = {
+  dragon: 10,
+  giant: 8,
+};
+
+export function getLegendaryRecruitmentCost(unitType: LegendaryUnitType) {
+  return LEGENDARY_RECRUITMENT_COSTS[unitType];
+}
 
 export function getLegendaryUnitLabel(unitType: string) {
   if (unitType === "dragon") return "Dragon";

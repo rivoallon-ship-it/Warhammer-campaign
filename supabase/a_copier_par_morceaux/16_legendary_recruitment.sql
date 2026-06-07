@@ -15,6 +15,7 @@ as $recruit_legendary_unit$
 declare
   v_type text := lower(trim(coalesce(requested_unit_type, '')));
   v_label text := case when lower(trim(coalesce(requested_unit_type, ''))) = 'dragon' then 'Dragon' else 'Géant' end;
+  v_cost int := case when lower(trim(coalesce(requested_unit_type, ''))) = 'giant' then 8 else 10 end;
   v_campaign_status text;
   v_campaign_phase text;
   v_turn_number int;
@@ -71,13 +72,13 @@ begin
     return query select false, 'Tu dois contrôler un territoire ' || v_label || ' pour recruter.', null::text, null::int, null::int, null::int;
     return;
   end if;
-  if v_glory < 10 then
-    return query select false, 'Il faut 10 Gloire pour recruter.', null::text, null::int, null::int, null::int;
+  if v_glory < v_cost then
+    return query select false, 'Il faut ' || v_cost || ' Gloire pour recruter.', null::text, null::int, null::int, null::int;
     return;
   end if;
 
   update public.campaign_players as player
-  set glory = player.glory - 10,
+  set glory = player.glory - v_cost,
       dragon_recruits = player.dragon_recruits + case when v_type = 'dragon' then 1 else 0 end,
       giant_recruits = player.giant_recruits + case when v_type = 'giant' then 1 else 0 end,
       updated_at = now()
@@ -86,7 +87,7 @@ begin
   into v_remaining_glory, v_dragon_recruits, v_giant_recruits;
 
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
-  values (target_campaign_id, v_turn_id, 'legendary_recruitment', 'Recrutement légendaire', v_display_name || ' recrute un ' || v_label || ' pour 10 Gloire.', auth.uid());
+  values (target_campaign_id, v_turn_id, 'legendary_recruitment', 'Recrutement légendaire', v_display_name || ' recrute un ' || v_label || ' pour ' || v_cost || ' Gloire.', auth.uid());
   return query select true, null::text, v_type, v_remaining_glory, v_dragon_recruits, v_giant_recruits;
 end;
 $recruit_legendary_unit$;

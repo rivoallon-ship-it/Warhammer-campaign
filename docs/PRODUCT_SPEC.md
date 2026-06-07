@@ -98,7 +98,7 @@ Bonus actifs :
 - Tour magique : magicien niveau 1 pour le défenseur en bataille (santé 8, sauvegarde 4+).
 - Ruines : +1 Gloire supplémentaire à la première conquête du territoire.
 - Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Dragon pour 10 Gloire si le joueur contrôle au moins un territoire Dragon.
-- Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Géant pour 10 Gloire si le joueur contrôle au moins un territoire Géant.
+- Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Géant pour 8 Gloire si le joueur contrôle au moins un territoire Géant.
 - Sauvage : aucun bonus.
 
 Pertes légendaires : pendant la résolution d'une bataille entre joueurs, le maître de campagne peut indiquer les Dragons/Géants perdus par chaque participant. Ces pertes décrémentent les compteurs du joueur.
@@ -172,7 +172,7 @@ Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à
 
 ## 18b. Recrutements légendaires
 
-Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire pendant la phase d'ordres. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 10 Gloire pendant la phase d'ordres. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
+Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire pendant la phase d'ordres. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 8 Gloire pendant la phase d'ordres. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
 
 Les recrues restent disponibles tant qu'elles ne sont pas perdues. Pendant la résolution d'une bataille entre joueurs, le maître de campagne peut saisir les pertes de Dragons/Géants pour chaque participant. Les pertes sont validées contre le stock disponible, décrémentées automatiquement et ajoutées à l'historique de bataille.
 

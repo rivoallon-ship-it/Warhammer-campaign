@@ -316,7 +316,7 @@ Commit principal :
 - Ajout du recrutement légendaire :
   - colonnes `dragon_recruits` et `giant_recruits` sur les joueurs ;
   - RPC `recruit_legendary_unit(campaign_id, unit_type)` ;
-  - coût fixe de 10 Gloire ;
+  - coûts équilibrés sur les valeurs d'armée : Dragon 10 Gloire pour 160 points, Géant 8 Gloire pour 120 points ;
   - prérequis : contrôler au moins un territoire du type recruté ;
   - recrutement limité à la phase d'ordres côté interface et côté SQL ;
   - carte de recrutement sur l'écran campagne et log `legendary_recruitment`.
@@ -335,6 +335,7 @@ Commit principal :
 ### Mise à jour du 2026-06-07 : unités légendaires persistantes
 
 - Le recrutement Dragon/Géant est maintenant une décision de phase d'ordres uniquement.
+- Les coûts sont différenciés : Dragon 10 Gloire, Géant 8 Gloire.
 - L'interface bloque le bouton de recrutement hors phase d'ordres et affiche une raison lisible au joueur.
 - La fonction SQL `recruit_legendary_unit` vérifie aussi la phase de la campagne et du tour courant, afin que la règle ne dépende pas seulement de l'interface.
 - Les Dragons et Géants recrutés restent sur le joueur via `campaign_players.dragon_recruits` et `campaign_players.giant_recruits`.

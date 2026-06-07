@@ -2,7 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { recruitLegendaryUnit } from "@/lib/campaigns/recruitment-service";
-import { getLegendaryUnitLabel } from "@/lib/campaigns/recruitment-rules";
+import {
+  getLegendaryRecruitmentCost,
+  getLegendaryUnitLabel,
+  isLegendaryUnitType,
+} from "@/lib/campaigns/recruitment-rules";
 import { createClient } from "@/lib/supabase/server";
 
 function getFormValue(formData: FormData, key: string) {
@@ -40,5 +44,8 @@ export async function recruitLegendaryUnitAction(formData: FormData) {
 
   redirectToCampaign(campaignId, {
     recruited: getLegendaryUnitLabel(unitType),
+    spent: isLegendaryUnitType(unitType)
+      ? String(getLegendaryRecruitmentCost(unitType))
+      : "",
   });
 }

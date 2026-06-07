@@ -2011,6 +2011,7 @@ declare
   v_turn public.campaign_turns%rowtype;
   v_unit_type text;
   v_unit_label text;
+  v_recruitment_cost int := 0;
   v_owned_territory_count int := 0;
   v_remaining_glory int := 0;
   v_dragon_recruits int := 0;
@@ -2026,6 +2027,10 @@ begin
   v_unit_label := case
     when v_unit_type = 'dragon' then 'Dragon'
     else 'Géant'
+  end;
+  v_recruitment_cost := case
+    when v_unit_type = 'dragon' then 10
+    else 8
   end;
 
   select *
@@ -2087,13 +2092,13 @@ begin
     return;
   end if;
 
-  if v_player.glory < 10 then
-    return query select false, 'Il faut 10 Gloire pour recruter.', null::text, null::int, null::int, null::int;
+  if v_player.glory < v_recruitment_cost then
+    return query select false, 'Il faut ' || v_recruitment_cost || ' Gloire pour recruter.', null::text, null::int, null::int, null::int;
     return;
   end if;
 
   update public.campaign_players
-  set glory = glory - 10,
+  set glory = glory - v_recruitment_cost,
       dragon_recruits = dragon_recruits + case when v_unit_type = 'dragon' then 1 else 0 end,
       giant_recruits = giant_recruits + case when v_unit_type = 'giant' then 1 else 0 end,
       updated_at = now()
@@ -2114,7 +2119,7 @@ begin
     v_turn.id,
     'legendary_recruitment',
     'Recrutement légendaire',
-    v_player.display_name || ' recrute un ' || v_unit_label || ' pour 10 Gloire.',
+    v_player.display_name || ' recrute un ' || v_unit_label || ' pour ' || v_recruitment_cost || ' Gloire.',
     auth.uid()
   );
 

@@ -8,7 +8,7 @@ declare
   v_territory public.territories%rowtype; v_winner public.campaign_players%rowtype; v_loss record;
   v_winner_role text; v_notes text; v_loss_name text; v_loss_summary text := ''; v_losses jsonb := coalesce(submitted_legendary_losses, '[]'::jsonb);
   v_dragon_losses int := 0; v_giant_losses int := 0;
-  v_participant_count int := 0; v_loser_count int := 0; v_capital_bonus int := 0; v_ruins_bonus int := 0; v_legendary_bonus int := 0; v_winner_bonus int := 0;
+  v_participant_count int := 0; v_loser_count int := 0; v_capital_bonus int := 0; v_ruins_bonus int := 0; v_legendary_bonus int := 0; v_winner_bonus int := 0; v_has_participants boolean := false;
 begin
   if jsonb_typeof(v_losses) <> 'array' then return query select false, 'Format des pertes légendaires invalide.', null::text; return; end if;
   select * into v_battle from public.battles where id = target_battle_id for update;
@@ -24,24 +24,30 @@ begin
   select * into v_winner from public.campaign_players where id = submitted_winner_campaign_player_id;
   if v_winner.id is null or v_territory.id is null then return query select false, 'Données de bataille incomplètes.', null::text; return; end if;
   select count(*) into v_participant_count from public.battle_participants where battle_id = v_battle.id;
-  if v_participant_count > 0 then
+  v_has_participants := v_participant_count > 0;
+  if v_has_participants then
     select role into v_winner_role from public.battle_participants where battle_id = v_battle.id and campaign_player_id = submitted_winner_campaign_player_id limit 1;
     if not found then return query select false, 'Le vainqueur doit participer à cette bataille.', null::text; return; end if;
   else
     if submitted_winner_campaign_player_id is distinct from v_battle.attacker_campaign_player_id and submitted_winner_campaign_player_id is distinct from v_battle.defender_campaign_player_id then return query select false, 'Le vainqueur doit participer à cette bataille.', null::text; return; end if;
     v_winner_role := case when submitted_winner_campaign_player_id = v_battle.attacker_campaign_player_id then 'attacker' else 'defender' end; v_participant_count := 2;
   end if;
-  for v_loss in select * from jsonb_to_recordset(v_losses) as x(campaign_player_id uuid, dragon_losses int, giant_losses int) loop
+  for v_loss in select campaign_player_id, sum(coalesce(dragon_losses,0))::int dragon_losses, sum(coalesce(giant_losses,0))::int giant_losses, min(coalesce(dragon_losses,0)) min_dragon_losses, min(coalesce(giant_losses,0)) min_giant_losses from jsonb_to_recordset(v_losses) as x(campaign_player_id uuid, dragon_losses int, giant_losses int) group by campaign_player_id loop
     v_dragon_losses := coalesce(v_loss.dragon_losses, 0); v_giant_losses := coalesce(v_loss.giant_losses, 0); v_loss_name := null;
-    if v_loss.campaign_player_id is null or v_dragon_losses < 0 or v_giant_losses < 0 then return query select false, 'Pertes légendaires invalides.', null::text; return; end if;
+    if v_loss.campaign_player_id is null or v_loss.min_dragon_losses < 0 or v_loss.min_giant_losses < 0 then return query select false, 'Pertes légendaires invalides.', null::text; return; end if;
     if v_dragon_losses = 0 and v_giant_losses = 0 then continue; end if;
-    if v_participant_count > 0 and not exists (select 1 from public.battle_participants where battle_id = v_battle.id and campaign_player_id = v_loss.campaign_player_id) then return query select false, 'Les pertes doivent concerner un participant.', null::text; return; end if;
-    if v_participant_count = 0 and v_loss.campaign_player_id not in (v_battle.attacker_campaign_player_id, v_battle.defender_campaign_player_id) then return query select false, 'Les pertes doivent concerner un participant.', null::text; return; end if;
+    if v_has_participants and not exists (select 1 from public.battle_participants where battle_id = v_battle.id and campaign_player_id = v_loss.campaign_player_id) then return query select false, 'Les pertes doivent concerner un participant.', null::text; return; end if;
+    if not v_has_participants and v_loss.campaign_player_id not in (v_battle.attacker_campaign_player_id, v_battle.defender_campaign_player_id) then return query select false, 'Les pertes doivent concerner un participant.', null::text; return; end if;
+    select cp.display_name into v_loss_name from public.campaign_players cp where cp.id = v_loss.campaign_player_id and cp.campaign_id = v_battle.campaign_id and cp.dragon_recruits >= v_dragon_losses and cp.giant_recruits >= v_giant_losses for update;
+    if v_loss_name is null then return query select false, 'Pertes légendaires supérieures au stock disponible.', null::text; return; end if;
+  end loop;
+  for v_loss in select campaign_player_id, sum(coalesce(dragon_losses,0))::int dragon_losses, sum(coalesce(giant_losses,0))::int giant_losses from jsonb_to_recordset(v_losses) as x(campaign_player_id uuid, dragon_losses int, giant_losses int) group by campaign_player_id loop
+    v_dragon_losses := coalesce(v_loss.dragon_losses, 0); v_giant_losses := coalesce(v_loss.giant_losses, 0); v_loss_name := null;
+    if v_dragon_losses = 0 and v_giant_losses = 0 then continue; end if;
     update public.campaign_players cp
     set dragon_recruits = cp.dragon_recruits - v_dragon_losses, giant_recruits = cp.giant_recruits - v_giant_losses, updated_at = now()
-    where cp.id = v_loss.campaign_player_id and cp.dragon_recruits >= v_dragon_losses and cp.giant_recruits >= v_giant_losses
+    where cp.id = v_loss.campaign_player_id
     returning cp.display_name into v_loss_name;
-    if v_loss_name is null then return query select false, 'Pertes légendaires supérieures au stock disponible.', null::text; return; end if;
     v_loss_summary := v_loss_summary || ' ' || v_loss_name || ' perd' || case when v_dragon_losses > 0 then ' ' || v_dragon_losses || ' Dragon(s)' else '' end || case when v_giant_losses > 0 then ' ' || v_giant_losses || ' Géant(s)' else '' end || '.';
   end loop;
   v_loser_count := greatest(v_participant_count - 1, 0); v_notes := nullif(trim(coalesce(submitted_result_notes, '')), '');

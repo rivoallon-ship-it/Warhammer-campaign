@@ -340,6 +340,7 @@ Commit principal :
 - Les Dragons et Géants recrutés restent sur le joueur via `campaign_players.dragon_recruits` et `campaign_players.giant_recruits`.
 - Pendant la résolution d'une bataille entre joueurs, le maître de campagne peut saisir combien de Dragons/Géants chaque participant perd.
 - La résolution valide les pertes contre le stock disponible, décrémente les compteurs et ajoute les pertes au journal de bataille.
+- La RPC `resolve_battle_result` valide et verrouille toutes les pertes légendaires avant de modifier les compteurs, afin d'éviter une résolution partiellement appliquée.
 - Le morceau Supabase à recopier pour cette partie est `supabase/a_copier_par_morceaux/16_legendary_recruitment.sql`, qui reste sous la limite de 100 lignes.
 
 ### Mise à jour du 2026-06-07 : tests et CI

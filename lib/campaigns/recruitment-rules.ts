@@ -12,6 +12,10 @@ export function getLegendaryRecruitmentCost(unitType: LegendaryUnitType) {
   return LEGENDARY_RECRUITMENT_COSTS[unitType];
 }
 
+export function getLegendaryUnitArmyPoints(unitType: LegendaryUnitType) {
+  return unitType === "dragon" ? DRAGON_ARMY_POINTS : GIANT_ARMY_POINTS;
+}
+
 export function getLegendaryCommitmentArmyPoints(
   dragonRecruitsCommitted: number,
   giantRecruitsCommitted: number,

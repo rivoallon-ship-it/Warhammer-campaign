@@ -4,6 +4,7 @@ import { useFormStatus } from "react-dom";
 import { recruitLegendaryUnitAction } from "@/app/campaigns/[campaignId]/actions";
 import {
   getLegendaryRecruitmentCost,
+  getLegendaryUnitArmyPoints,
   getLegendaryUnitLabel,
   type LegendaryUnitType,
 } from "@/lib/campaigns/recruitment-rules";
@@ -69,6 +70,7 @@ function RecruitmentRow({
 }: RecruitmentRowProps) {
   const label = getLegendaryUnitLabel(unitType);
   const recruitmentCost = getLegendaryRecruitmentCost(unitType);
+  const armyPoints = getLegendaryUnitArmyPoints(unitType);
   const hasTerritory = territoryCount > 0;
   const hasEnoughGlory = glory >= recruitmentCost;
   const disabled = !canRecruit || !hasTerritory || !hasEnoughGlory;
@@ -86,7 +88,7 @@ function RecruitmentRow({
         <div>
           <p className="font-semibold text-[#f3ead7]">{label}</p>
           <p className="fantasy-muted mt-1 text-xs">
-            Coût : {recruitmentCost} Gloire
+            Coût : {recruitmentCost} Gloire · +{armyPoints} pts engagés
           </p>
         </div>
         <Badge variant={hasTerritory ? "success" : "neutral"}>

@@ -4,6 +4,7 @@ import {
   GIANT_ARMY_POINTS,
   getLegendaryCommitmentArmyPoints,
   getLegendaryRecruitmentCost,
+  getLegendaryUnitArmyPoints,
   getLegendaryRecruitsSummary,
   getLegendaryUnitLabel,
   isLegendaryUnitType,
@@ -25,6 +26,8 @@ describe("recruitment-rules", () => {
     expect(getLegendaryRecruitmentCost("giant")).toBe(8);
     expect(DRAGON_ARMY_POINTS).toBe(160);
     expect(GIANT_ARMY_POINTS).toBe(120);
+    expect(getLegendaryUnitArmyPoints("dragon")).toBe(160);
+    expect(getLegendaryUnitArmyPoints("giant")).toBe(120);
   });
 
   it("counts only committed legendary recruits as battle army points", () => {

@@ -173,7 +173,9 @@ La carte doit afficher couleurs joueurs, neutres en gris, type, fortification, f
 Avant de terminer une tâche :
 
 ```bash
+npm run typecheck
 npm run lint
+npm run test
 npm run build
 ```
 

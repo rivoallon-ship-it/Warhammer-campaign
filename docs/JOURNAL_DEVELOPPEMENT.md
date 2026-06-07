@@ -342,6 +342,14 @@ Commit principal :
 - La résolution valide les pertes contre le stock disponible, décrémente les compteurs et ajoute les pertes au journal de bataille.
 - Le morceau Supabase à recopier pour cette partie est `supabase/a_copier_par_morceaux/16_legendary_recruitment.sql`, qui reste sous la limite de 100 lignes.
 
+### Mise à jour du 2026-06-07 : tests et CI
+
+- Ajout de Vitest pour tester les fonctions métier pures sans Supabase.
+- Ajout des scripts `typecheck`, `test` et `test:watch`.
+- Ajout de `.nvmrc` et de `engines.node` pour fixer une base Node 20+.
+- Ajout d'une CI GitHub Actions sur `main` : installation, typecheck, lint, tests, build.
+- Premiers tests automatisés sur les adjacences de carte, la distribution des territoires, les seuils de conquête, les revenus de Gloire, les bonus village, les points d'armée et les règles Dragon/Géant.
+
 ## Fichiers importants
 
 ### Application
@@ -390,7 +398,9 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 
 Les lots ont été validés progressivement avec :
 
+- `npm run typecheck`
 - `npm run lint`
+- `npm run test`
 - `npm run build`
 - vérifications locales de routes quand nécessaire ;
 - tests manuels guidés sur Supabase et Vercel.

@@ -241,9 +241,13 @@ Ne code pas encore les campagnes.
 ```bash
 npm install
 npm run dev
+npm run typecheck
 npm run lint
+npm run test
 npm run build
 ```
+
+La CI GitHub exécute `typecheck`, `lint`, `test` et `build` sur chaque push ou pull request vers `main`.
 
 ## 14. Variables d’environnement prévues
 

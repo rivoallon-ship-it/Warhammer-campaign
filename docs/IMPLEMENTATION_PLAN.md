@@ -275,4 +275,4 @@ Le scénario de bout en bout doit fonctionner : compte, campagne 2-6, invitation
 
 ## Qualité
 
-Avant de considérer le MVP utilisable : `npm run lint` et `npm run build` doivent passer ou les exceptions être documentées.
+Avant de considérer le MVP utilisable : `npm run typecheck`, `npm run lint`, `npm run test` et `npm run build` doivent passer ou les exceptions être documentées.

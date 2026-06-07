@@ -51,11 +51,11 @@ Progression des armées :
 
 | Tours | Taille d’armée de base |
 |---|---:|
-| 1 | 400 points |
-| 2 | 600 points |
-| 3 | 800 points |
+| 1 | 0 point |
+| 2 | 200 points |
+| 3 | 400 points |
 | ... | +200 points par tour |
-| 9+ | 2 000 points |
+| 11+ | 2 000 points |
 
 ## 8. Nombre de joueurs modulable
 

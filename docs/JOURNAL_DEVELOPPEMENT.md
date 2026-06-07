@@ -236,7 +236,7 @@ Commits principaux :
 - Suppression des blocs `Type` et `Adjacents`, déjà visibles sur la carte.
 - Remplacement du bloc explicatif de conquête par un bouton direct `Conquérir`.
 - Sélection automatique d'une source valide quand plusieurs territoires contrôlés peuvent attaquer la cible.
-- Modification de la progression des points d'armée : 400 points au tour 1, +200 points par tour, maximum 2000 points.
+- Modification de la progression des points d'armée : 0 point au tour 1, +200 points par tour, maximum 2000 points.
 - Ajout du correctif SQL `supabase/02_CORRECTIF_POINTS_ARMEE.sql` pour mettre à jour une base Supabase déjà installée.
 - Suppression des codes visibles de territoires comme `A1` ou `A2` sur la carte et dans les résumés d'ordre ; ces codes restent uniquement techniques pour l'adjacence et les scripts.
 - Suppression des badges d'en-tête `Active`, `Ordres` et `Maître/Joueur` sur la page campagne pour réduire le bruit visuel.
@@ -358,6 +358,17 @@ Commit principal :
   - `supabase/a_copier_par_morceaux/17_legendary_commitments.sql` ;
   - `supabase/a_copier_par_morceaux/09_resolve_battle_function.sql`.
 
+### Mise à jour du 2026-06-07 : progression d'armée à zéro
+
+- La taille d'armée de base commence maintenant à 0 point au tour 1.
+- La progression devient +200 points par tour jusqu'au plafond de 2000 points :
+  - tour 1 : 0 ;
+  - tour 2 : 200 ;
+  - tour 11 et suivants : 2000.
+- Les contraintes SQL `campaign_turns.army_base_points` et `battles.army_base_points` acceptent maintenant `0`.
+- Le morceau Supabase à recopier pour une base déjà installée est `supabase/a_copier_par_morceaux/18_zero_start_army_points.sql`.
+- Les fonctions SQL de révélation automatique sans bataille et de fin de tour utilisent la nouvelle formule.
+
 ### Mise à jour du 2026-06-07 : tests et CI
 
 - Ajout de Vitest pour tester les fonctions métier pures sans Supabase.
@@ -408,6 +419,7 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `09b_finish_turn_function.sql`
 - `15_territory_rules_schema.sql`
 - `16_legendary_recruitment.sql`
+- `18_zero_start_army_points.sql`
 - `14_logs_grants.sql`
 
 ## Vérifications réalisées

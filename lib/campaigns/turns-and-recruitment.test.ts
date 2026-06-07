@@ -12,10 +12,10 @@ import {
 import { getArmyBasePoints } from "@/lib/campaigns/turns";
 
 describe("turns", () => {
-  it("starts at 400 army points and caps at 2000", () => {
-    expect(getArmyBasePoints(1)).toBe(400);
-    expect(getArmyBasePoints(2)).toBe(600);
-    expect(getArmyBasePoints(9)).toBe(2000);
+  it("starts at 0 army points and caps at 2000", () => {
+    expect(getArmyBasePoints(1)).toBe(0);
+    expect(getArmyBasePoints(2)).toBe(200);
+    expect(getArmyBasePoints(11)).toBe(2000);
     expect(getArmyBasePoints(20)).toBe(2000);
   });
 });

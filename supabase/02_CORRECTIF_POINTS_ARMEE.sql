@@ -1,9 +1,9 @@
 -- Correctif points d'armée.
 -- À copier dans Supabase SQL Editor pour mettre à jour une base déjà installée.
--- Nouvelle règle : tour 1 = 400 points, +200 points par tour, maximum 2000 points.
+-- Nouvelle règle : tour 1 = 0 point, +200 points par tour, maximum 2000 points.
 
 update public.campaign_turns
-set army_base_points = least(400 + greatest(turn_number - 1, 0) * 200, 2000)
+set army_base_points = least(greatest(turn_number - 1, 0) * 200, 2000)
 where phase <> 'finished';
 
 update public.battles b
@@ -74,7 +74,7 @@ begin
   end if;
 
   v_next_turn_number := v_campaign.current_turn_number + 1;
-  v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
+  v_next_army_base_points := least(greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
   update public.orders set status = 'resolved'
   where campaign_id = v_campaign.id and turn_id = v_turn.id and status = 'revealed';

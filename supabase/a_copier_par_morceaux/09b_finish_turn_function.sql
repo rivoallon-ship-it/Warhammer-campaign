@@ -45,7 +45,7 @@ begin
   end if;
 
   v_next_turn := v_campaign.current_turn_number + 1;
-  v_next_points := least(400 + greatest(v_next_turn - 1, 0) * 200, 2000);
+  v_next_points := least(greatest(v_next_turn - 1, 0) * 200, 2000);
   with income as (
     select cp.id, floor(count(t.id)::numeric / 3)::int as territory_glory,
       (count(t.id) filter (where t.type = 'mine'))::int as mine_glory

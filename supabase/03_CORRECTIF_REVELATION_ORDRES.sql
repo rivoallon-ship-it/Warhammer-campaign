@@ -57,7 +57,7 @@ begin
   values (v_campaign.id, v_turn.id, 'orders_revealed', 'Ordres révélés', 'Révélation : ' || v_battle_count || ' bataille(s), ' || v_exploration_count || ' conquête(s) automatique(s), ' || v_fortification_count || ' fortification(s).' || case when v_multiple_attack_count > 0 then ' Attention : ' || v_multiple_attack_count || ' territoire(s) déclenchent un conflit multiple.' else '' end, auth.uid());
   if v_battle_count = 0 then
     v_next_turn_number := v_campaign.current_turn_number + 1;
-    v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
+    v_next_army_base_points := least(greatest(v_next_turn_number - 1, 0) * 200, 2000);
     with income as (select cp.id campaign_player_id, floor(count(t.id)::numeric / 3)::int territory_glory, (count(t.id) filter (where t.type = 'mine'))::int mine_glory from public.campaign_players cp left join public.territories t on t.owner_campaign_player_id = cp.id and t.campaign_id = cp.campaign_id where cp.campaign_id = v_campaign.id and cp.status = 'active' group by cp.id),
     awarded as (update public.campaign_players cp set glory = glory + income.territory_glory + income.mine_glory, updated_at = now() from income where cp.id = income.campaign_player_id and income.territory_glory + income.mine_glory > 0 returning income.territory_glory + income.mine_glory glory_gain)
     select count(*)::int, coalesce(sum(glory_gain), 0)::int into v_income_player_count, v_income_glory_total from awarded;

@@ -131,7 +131,7 @@ create table if not exists public.campaign_turns (
   season_number int not null default 1 check (season_number > 0),
   turn_number int not null check (turn_number > 0),
   phase text not null default 'orders',
-  army_base_points int not null check (army_base_points > 0),
+  army_base_points int not null check (army_base_points >= 0),
   event_name text,
   event_description text,
   started_at timestamptz not null default now(),
@@ -194,7 +194,7 @@ create table if not exists public.battles (
   defender_campaign_player_id uuid not null references public.campaign_players(id) on delete cascade,
   status text not null default 'pending',
   winner_campaign_player_id uuid references public.campaign_players(id) on delete set null,
-  army_base_points int not null check (army_base_points > 0),
+  army_base_points int not null check (army_base_points >= 0),
   defender_bonus text,
   result_notes text,
   created_at timestamptz not null default now(),
@@ -1450,7 +1450,7 @@ begin
 
   if v_battle_count = 0 then
     v_next_turn_number := v_campaign.current_turn_number + 1;
-    v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
+    v_next_army_base_points := least(greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
     with income as (
       select
@@ -1953,7 +1953,7 @@ begin
   end if;
 
   v_next_turn_number := v_campaign.current_turn_number + 1;
-  v_next_army_base_points := least(400 + greatest(v_next_turn_number - 1, 0) * 200, 2000);
+  v_next_army_base_points := least(greatest(v_next_turn_number - 1, 0) * 200, 2000);
 
   with income as (
     select

@@ -332,7 +332,7 @@ export default async function CampaignPage({
   const rankedPlayers = getRankedPlayers(activePlayers);
   const territoryStats = getTerritoryStats(territories);
   const playerTerritoryRuleStats = getPlayerTerritoryRuleStats(territories);
-  const armyBasePoints = currentTurn?.army_base_points ?? 400;
+  const armyBasePoints = currentTurn?.army_base_points ?? 0;
   const territoryNameById = new Map(
     territories.map((territory) => [territory.id, territory.name]),
   );

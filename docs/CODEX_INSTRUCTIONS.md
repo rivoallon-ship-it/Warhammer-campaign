@@ -136,7 +136,7 @@ Un joueur actif peut recruter pendant la phase d'ordres un Dragon pour 10 Gloire
 
 ```ts
 export function getArmyBasePoints(turnNumber: number): number {
-  return Math.min(400 + Math.max(turnNumber - 1, 0) * 200, 2000);
+  return Math.min(Math.max(turnNumber - 1, 0) * 200, 2000);
 }
 ```
 

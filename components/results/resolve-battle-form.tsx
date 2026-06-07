@@ -10,8 +10,8 @@ type ResolveBattleFormProps = {
   participants: {
     campaignPlayerId: string;
     name: string;
-    dragonRecruits: number;
-    giantRecruits: number;
+    dragonRecruitsCommitted: number;
+    giantRecruitsCommitted: number;
   }[];
 };
 
@@ -45,9 +45,10 @@ export function ResolveBattleForm({
   battleId,
   participants,
 }: ResolveBattleFormProps) {
-  const participantsWithRecruits = participants.filter(
+  const participantsWithCommittedRecruits = participants.filter(
     (participant) =>
-      participant.dragonRecruits > 0 || participant.giantRecruits > 0,
+      participant.dragonRecruitsCommitted > 0 ||
+      participant.giantRecruitsCommitted > 0,
   );
 
   return (
@@ -67,34 +68,34 @@ export function ResolveBattleForm({
         label="Notes"
         placeholder="Score, scénario, moment marquant..."
       />
-      {participantsWithRecruits.length ? (
+      {participantsWithCommittedRecruits.length ? (
         <div className="fantasy-stat space-y-3 p-3">
           <p className="text-sm font-semibold text-[#f3ead7]">
             Pertes légendaires
           </p>
-          {participantsWithRecruits.map((participant) => (
+          {participantsWithCommittedRecruits.map((participant) => (
             <div key={participant.campaignPlayerId} className="grid gap-2 sm:grid-cols-2">
               <p className="sm:col-span-2 text-sm font-semibold text-[#f3ead7]">
                 {participant.name}
               </p>
-              {participant.dragonRecruits > 0 ? (
+              {participant.dragonRecruitsCommitted > 0 ? (
                 <Input
                   name={`dragonLoss:${participant.campaignPlayerId}`}
                   type="number"
                   min={0}
-                  max={participant.dragonRecruits}
+                  max={participant.dragonRecruitsCommitted}
                   defaultValue={0}
-                  label={`Dragons perdus / ${participant.dragonRecruits}`}
+                  label={`Dragons perdus / ${participant.dragonRecruitsCommitted}`}
                 />
               ) : null}
-              {participant.giantRecruits > 0 ? (
+              {participant.giantRecruitsCommitted > 0 ? (
                 <Input
                   name={`giantLoss:${participant.campaignPlayerId}`}
                   type="number"
                   min={0}
-                  max={participant.giantRecruits}
+                  max={participant.giantRecruitsCommitted}
                   defaultValue={0}
-                  label={`Géants perdus / ${participant.giantRecruits}`}
+                  label={`Géants perdus / ${participant.giantRecruitsCommitted}`}
                 />
               ) : null}
             </div>

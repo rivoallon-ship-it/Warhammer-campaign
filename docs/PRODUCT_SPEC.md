@@ -101,7 +101,7 @@ Bonus actifs :
 - Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Géant pour 8 Gloire si le joueur contrôle au moins un territoire Géant.
 - Sauvage : aucun bonus.
 
-Pertes légendaires : pendant la résolution d'une bataille entre joueurs, le maître de campagne peut indiquer les Dragons/Géants perdus par chaque participant. Ces pertes décrémentent les compteurs du joueur.
+Renforts légendaires : pendant la résolution d'une bataille entre joueurs, chaque participant peut engager des Dragons/Géants qu'il possède. Un Dragon engagé ajoute +160 points d'armée, un Géant engagé ajoute +120 points d'armée. Les unités non engagées restent en réserve et ne peuvent pas être perdues. Le maître de campagne peut ensuite indiquer les pertes, plafonnées aux unités engagées dans cette bataille.
 
 ## 11. Carte et adjacence
 
@@ -174,7 +174,7 @@ Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à
 
 Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire pendant la phase d'ordres. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 8 Gloire pendant la phase d'ordres. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
 
-Les recrues restent disponibles tant qu'elles ne sont pas perdues. Pendant la résolution d'une bataille entre joueurs, le maître de campagne peut saisir les pertes de Dragons/Géants pour chaque participant. Les pertes sont validées contre le stock disponible, décrémentées automatiquement et ajoutées à l'historique de bataille.
+Les recrues restent disponibles tant qu'elles ne sont pas perdues. Pendant la résolution d'une bataille entre joueurs, un participant peut choisir combien de Dragons/Géants il engage. Un Dragon engagé ajoute +160 points d'armée, un Géant engagé ajoute +120 points d'armée. Les pertes saisies par le maître de campagne sont validées contre les unités engagées et le stock disponible, puis décrémentées automatiquement et ajoutées à l'historique de bataille.
 
 Si plusieurs joueurs visent le même territoire neutre, il n'y a pas de conquête automatique : une bataille multi-joueurs est créée. Le D6 automatique sert seulement à indiquer l'avantage.
 

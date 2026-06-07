@@ -36,10 +36,15 @@ begin
     v_dragon_losses := coalesce(v_loss.dragon_losses, 0); v_giant_losses := coalesce(v_loss.giant_losses, 0); v_loss_name := null;
     if v_loss.campaign_player_id is null or v_loss.min_dragon_losses < 0 or v_loss.min_giant_losses < 0 then return query select false, 'Pertes légendaires invalides.', null::text; return; end if;
     if v_dragon_losses = 0 and v_giant_losses = 0 then continue; end if;
-    if v_has_participants and not exists (select 1 from public.battle_participants where battle_id = v_battle.id and campaign_player_id = v_loss.campaign_player_id) then return query select false, 'Les pertes doivent concerner un participant.', null::text; return; end if;
-    if not v_has_participants and v_loss.campaign_player_id not in (v_battle.attacker_campaign_player_id, v_battle.defender_campaign_player_id) then return query select false, 'Les pertes doivent concerner un participant.', null::text; return; end if;
-    select cp.display_name into v_loss_name from public.campaign_players cp where cp.id = v_loss.campaign_player_id and cp.campaign_id = v_battle.campaign_id and cp.dragon_recruits >= v_dragon_losses and cp.giant_recruits >= v_giant_losses for update;
-    if v_loss_name is null then return query select false, 'Pertes légendaires supérieures au stock disponible.', null::text; return; end if;
+    if not v_has_participants then return query select false, 'Aucun renfort légendaire n''est engagé sur cette bataille.', null::text; return; end if;
+    select cp.display_name into v_loss_name
+    from public.battle_participants bp
+    join public.campaign_players cp on cp.id = bp.campaign_player_id and cp.campaign_id = bp.campaign_id
+    where bp.battle_id = v_battle.id and bp.campaign_player_id = v_loss.campaign_player_id
+      and cp.dragon_recruits >= v_dragon_losses and cp.giant_recruits >= v_giant_losses
+      and bp.dragon_recruits_committed >= v_dragon_losses and bp.giant_recruits_committed >= v_giant_losses
+    for update of cp, bp;
+    if v_loss_name is null then return query select false, 'Pertes légendaires supérieures aux renforts engagés ou au stock disponible.', null::text; return; end if;
   end loop;
   for v_loss in select campaign_player_id, sum(coalesce(dragon_losses,0))::int dragon_losses, sum(coalesce(giant_losses,0))::int giant_losses from jsonb_to_recordset(v_losses) as x(campaign_player_id uuid, dragon_losses int, giant_losses int) group by campaign_player_id loop
     v_dragon_losses := coalesce(v_loss.dragon_losses, 0); v_giant_losses := coalesce(v_loss.giant_losses, 0); v_loss_name := null;

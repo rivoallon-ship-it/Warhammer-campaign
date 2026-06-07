@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
+import { LegendaryCommitmentForm } from "@/components/results/legendary-commitment-form";
 import { ResolveBattleForm } from "@/components/results/resolve-battle-form";
 import {
   Badge,
@@ -13,6 +14,7 @@ import {
   buttonVariants,
 } from "@/components/ui";
 import {
+  getLegendaryCommitmentsOnOtherBattles,
   getResultsPageData,
   getResultsReadiness,
 } from "@/lib/resolution/results-service";
@@ -23,7 +25,10 @@ import {
   hasDefensiveArmyPointsBonus,
   type PlayerTerritoryRuleStats,
 } from "@/lib/campaigns/territory-rules";
-import { getLegendaryRecruitsSummary } from "@/lib/campaigns/recruitment-rules";
+import {
+  getLegendaryCommitmentArmyPoints,
+  getLegendaryRecruitsSummary,
+} from "@/lib/campaigns/recruitment-rules";
 import { createClient } from "@/lib/supabase/server";
 
 type ResultsPageProps = {
@@ -33,6 +38,7 @@ type ResultsPageProps = {
   searchParams?: Promise<{
     exploration?: string;
     battle?: string;
+    commitment?: string;
     error?: string;
   }>;
 };
@@ -77,6 +83,8 @@ type BattleParticipantSummary = {
   role: string;
   dice_result: number | null;
   advantage_rank: number | null;
+  dragon_recruits_committed: number;
+  giant_recruits_committed: number;
   player: {
     display_name: string;
     dragon_recruits: number;
@@ -132,11 +140,16 @@ function getParticipantArmyPoints(
   const villageBonus = getVillageArmyBonus(stats.villageCount);
   const defenderBonus =
     hasDefenderBonus && participant.role === "defender" ? DEFENSIVE_ARMY_BONUS : 0;
+  const legendaryBonus = getLegendaryCommitmentArmyPoints(
+    participant.dragon_recruits_committed,
+    participant.giant_recruits_committed,
+  );
 
   return {
-    total: battleArmyBasePoints + villageBonus + defenderBonus,
+    total: battleArmyBasePoints + villageBonus + defenderBonus + legendaryBonus,
     villageBonus,
     defenderBonus,
+    legendaryBonus,
   };
 }
 
@@ -166,6 +179,13 @@ function getFeedbackMessage(query?: Awaited<ResultsPageProps["searchParams"]>) {
     };
   }
 
+  if (query.commitment === "updated") {
+    return {
+      variant: "success" as const,
+      text: "Renforts légendaires engagés pour cette bataille.",
+    };
+  }
+
   return null;
 }
 
@@ -191,7 +211,8 @@ export default async function ResultsPage({
     notFound();
   }
 
-  const { campaign, currentTurn, explorations, battles } = resultsData;
+  const { campaign, currentPlayer, currentTurn, explorations, battles } =
+    resultsData;
   const readiness = getResultsReadiness(resultsData);
   const playerTerritoryRuleStats = getPlayerTerritoryRuleStats(
     resultsData.territories,
@@ -331,7 +352,40 @@ export default async function ResultsPage({
               </CardHeader>
               <CardContent className="space-y-3">
                 {battles.length ? (
-                  battles.map((battle) => (
+                  battles.map((battle) => {
+                    const currentPlayerParticipant = currentPlayer
+                      ? battle.participants.find(
+                          (participant) =>
+                            participant.campaign_player_id === currentPlayer.id,
+                        )
+                      : null;
+                    const otherCommitments =
+                      currentPlayer && currentPlayerParticipant
+                        ? getLegendaryCommitmentsOnOtherBattles(
+                            battles,
+                            currentPlayer.id,
+                            battle.id,
+                          )
+                        : {
+                            dragonRecruitsCommitted: 0,
+                            giantRecruitsCommitted: 0,
+                          };
+                    const maxDragonRecruits = currentPlayer
+                      ? Math.max(
+                          currentPlayer.dragon_recruits -
+                            otherCommitments.dragonRecruitsCommitted,
+                          0,
+                        )
+                      : 0;
+                    const maxGiantRecruits = currentPlayer
+                      ? Math.max(
+                          currentPlayer.giant_recruits -
+                            otherCommitments.giantRecruitsCommitted,
+                          0,
+                        )
+                      : 0;
+
+                    return (
                     <div
                       key={battle.id}
                       className="fantasy-stat p-4"
@@ -378,12 +432,11 @@ export default async function ResultsPage({
                               },
                               hasDefensiveArmyPointsBonus(battle.defender_bonus),
                             );
-                            const legendaryRecruitsSummary = participant.player
-                              ? getLegendaryRecruitsSummary(
-                                  participant.player.dragon_recruits,
-                                  participant.player.giant_recruits,
-                                )
-                              : null;
+                            const legendaryCommittedSummary =
+                              getLegendaryRecruitsSummary(
+                                participant.dragon_recruits_committed,
+                                participant.giant_recruits_committed,
+                              );
 
                             return (
                               <li
@@ -407,14 +460,19 @@ export default async function ResultsPage({
                                     +{armyPoints.defenderBonus} défense
                                   </Badge>
                                 ) : null}
+                                {armyPoints.legendaryBonus > 0 ? (
+                                  <Badge variant="warning">
+                                    +{armyPoints.legendaryBonus} légendaires
+                                  </Badge>
+                                ) : null}
                                 {participant.dice_result ? (
                                   <Badge variant="info">
                                     D6 {participant.dice_result}
                                   </Badge>
                                 ) : null}
-                                {legendaryRecruitsSummary ? (
+                                {legendaryCommittedSummary ? (
                                   <Badge variant="warning">
-                                    Renforts : {legendaryRecruitsSummary}
+                                    Engagés : {legendaryCommittedSummary}
                                   </Badge>
                                 ) : null}
                               </li>
@@ -432,6 +490,22 @@ export default async function ResultsPage({
                           Notes : {battle.result_notes}
                         </p>
                       ) : null}
+                      {currentPlayerParticipant && battle.status === "pending" ? (
+                        <div className="mt-4">
+                          <LegendaryCommitmentForm
+                            campaignId={campaign.id}
+                            battleId={battle.id}
+                            dragonRecruitsCommitted={
+                              currentPlayerParticipant.dragon_recruits_committed
+                            }
+                            giantRecruitsCommitted={
+                              currentPlayerParticipant.giant_recruits_committed
+                            }
+                            maxDragonRecruits={maxDragonRecruits}
+                            maxGiantRecruits={maxGiantRecruits}
+                          />
+                        </div>
+                      ) : null}
                       {readiness.canResolveResults && battle.status === "pending" ? (
                         <div className="mt-4">
                           <ResolveBattleForm
@@ -440,15 +514,17 @@ export default async function ResultsPage({
                             participants={battle.participants.map((participant) => ({
                               campaignPlayerId: participant.campaign_player_id,
                               name: getParticipantName(participant),
-                              dragonRecruits:
-                                participant.player?.dragon_recruits ?? 0,
-                              giantRecruits: participant.player?.giant_recruits ?? 0,
+                              dragonRecruitsCommitted:
+                                participant.dragon_recruits_committed,
+                              giantRecruitsCommitted:
+                                participant.giant_recruits_committed,
                             }))}
                           />
                         </div>
                       ) : null}
                     </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="fantasy-alert p-4 text-sm">
                     Aucune bataille à résoudre pour ce tour.

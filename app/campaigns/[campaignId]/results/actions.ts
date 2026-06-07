@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import {
   type LegendaryBattleLossInput,
+  commitLegendaryReinforcements,
   finishTurn,
   resolveBattle,
   resolveExploration,
@@ -125,6 +126,40 @@ export async function resolveBattleAction(formData: FormData) {
   }
 
   redirectToResults(campaignId, { battle: "resolved" });
+}
+
+export async function commitLegendaryReinforcementsAction(formData: FormData) {
+  const campaignId = getFormValue(formData, "campaignId");
+  const battleId = getFormValue(formData, "battleId");
+  const dragonRecruitsCommitted = Number(
+    getFormValue(formData, "dragonRecruitsCommitted"),
+  );
+  const giantRecruitsCommitted = Number(
+    getFormValue(formData, "giantRecruitsCommitted"),
+  );
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/login?next=/campaigns/${campaignId}/results`);
+  }
+
+  const { result, error } = await commitLegendaryReinforcements(
+    supabase,
+    user,
+    campaignId,
+    battleId,
+    dragonRecruitsCommitted,
+    giantRecruitsCommitted,
+  );
+
+  if (error || !result) {
+    redirectToResults(campaignId, { error: error ?? "Engagement impossible." });
+  }
+
+  redirectToResults(campaignId, { commitment: "updated" });
 }
 
 export async function finishTurnAction(formData: FormData) {

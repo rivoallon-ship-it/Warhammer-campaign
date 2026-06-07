@@ -344,6 +344,20 @@ Commit principal :
 - La RPC `resolve_battle_result` valide et verrouille toutes les pertes légendaires avant de modifier les compteurs, afin d'éviter une résolution partiellement appliquée.
 - Le morceau Supabase à recopier pour cette partie est `supabase/a_copier_par_morceaux/16_legendary_recruitment.sql`, qui reste sous la limite de 100 lignes.
 
+### Mise à jour du 2026-06-07 : engagements légendaires en bataille
+
+- Ajout des engagements par bataille sur `battle_participants` :
+  - `dragon_recruits_committed` ;
+  - `giant_recruits_committed`.
+- Un participant peut engager ses recrues pendant la phase de résolution via la RPC `commit_legendary_reinforcements`.
+- Les engagements sont limités par le stock du joueur et par les autres batailles du même tour, afin qu'une même unité ne soit pas engagée deux fois.
+- Un Dragon engagé ajoute +160 points d'armée ; un Géant engagé ajoute +120 points d'armée.
+- Les recrues non engagées restent en réserve et ne peuvent pas être déclarées perdues.
+- La résolution de bataille valide maintenant les pertes contre les unités engagées et contre le stock disponible.
+- Morceaux Supabase à recopier pour cette partie :
+  - `supabase/a_copier_par_morceaux/17_legendary_commitments.sql` ;
+  - `supabase/a_copier_par_morceaux/09_resolve_battle_function.sql`.
+
 ### Mise à jour du 2026-06-07 : tests et CI
 
 - Ajout de Vitest pour tester les fonctions métier pures sans Supabase.
@@ -417,6 +431,5 @@ NEXT_PUBLIC_SUPABASE_URL="https://icfhmokcjkokgntrerwv.supabase.co" NEXT_PUBLIC_
 
 - Continuer le Lot 21 : responsive, confirmations et états d'erreur.
 - Tester un tour complet avec plusieurs vrais comptes.
-- Définir l'effet concret des Dragons et Géants pendant une bataille : bonus de points, unité spéciale obligatoire, option d'engagement ou effet narratif.
-- Ajouter éventuellement des tests automatisés après stabilisation du MVP.
+- Étendre les tests automatisés sur les Server Actions et les transitions SQL critiques.
 - Nettoyer progressivement les mentions historiques `exploration` quand elles ne sont plus utiles côté interface.

@@ -144,7 +144,7 @@ Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées s
 
 ## Lot 18 — Résolution des batailles
 
-Maître saisit vainqueur + notes. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire inchangé, +2/+1. Capitale capturée : +5 Gloire attaquant. Ruine conquise pour la première fois : +1 Gloire. Fortification/forteresse : +200 points défenseur. Retirer seulement la fortification manuelle. Status played, log.
+Chaque participant peut engager ses Dragons/Géants disponibles avant résolution : Dragon +160 points, Géant +120 points, réserve protégée. Maître saisit vainqueur + notes + pertes légendaires plafonnées aux unités engagées. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire inchangé, +2/+1. Capitale capturée : +5 Gloire attaquant. Ruine conquise pour la première fois : +1 Gloire. Fortification/forteresse : +200 points défenseur. Retirer seulement la fortification manuelle. Status played, log.
 
 ## Lot 19 — Fin de tour
 

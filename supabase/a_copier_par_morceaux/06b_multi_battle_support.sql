@@ -24,6 +24,8 @@ create table if not exists public.battle_participants (
   role text not null default 'contender',
   dice_result int check (dice_result between 1 and 6),
   advantage_rank int check (advantage_rank is null or advantage_rank > 0),
+  dragon_recruits_committed int not null default 0 check (dragon_recruits_committed >= 0),
+  giant_recruits_committed int not null default 0 check (giant_recruits_committed >= 0),
   created_at timestamptz not null default now(),
   unique (battle_id, campaign_player_id),
   check (role in ('attacker', 'defender', 'contender'))

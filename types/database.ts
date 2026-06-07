@@ -361,6 +361,8 @@ export type Database = {
           role: string;
           dice_result: number | null;
           advantage_rank: number | null;
+          dragon_recruits_committed: number;
+          giant_recruits_committed: number;
           created_at: string;
         };
         Insert: {
@@ -372,6 +374,8 @@ export type Database = {
           role?: string;
           dice_result?: number | null;
           advantage_rank?: number | null;
+          dragon_recruits_committed?: number;
+          giant_recruits_committed?: number;
           created_at?: string;
         };
         Update: {
@@ -383,6 +387,8 @@ export type Database = {
           role?: string;
           dice_result?: number | null;
           advantage_rank?: number | null;
+          dragon_recruits_committed?: number;
+          giant_recruits_committed?: number;
           created_at?: string;
         };
         Relationships: [];
@@ -553,6 +559,19 @@ export type Database = {
           success: boolean;
           error: string | null;
           winner_role: string | null;
+        }[];
+      };
+      commit_legendary_reinforcements: {
+        Args: {
+          target_battle_id: string;
+          submitted_dragon_recruits?: number;
+          submitted_giant_recruits?: number;
+        };
+        Returns: {
+          success: boolean;
+          error: string | null;
+          dragon_recruits_committed: number | null;
+          giant_recruits_committed: number | null;
         }[];
       };
       finish_current_turn: {

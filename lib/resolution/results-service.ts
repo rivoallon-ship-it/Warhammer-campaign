@@ -16,6 +16,8 @@ type ResolveExplorationRpcResult =
   Database["public"]["Functions"]["resolve_exploration_result"]["Returns"][number];
 type ResolveBattleRpcResult =
   Database["public"]["Functions"]["resolve_battle_result"]["Returns"][number];
+type CommitLegendaryReinforcementsRpcResult =
+  Database["public"]["Functions"]["commit_legendary_reinforcements"]["Returns"][number];
 type FinishTurnRpcResult =
   Database["public"]["Functions"]["finish_current_turn"]["Returns"][number];
 
@@ -171,6 +173,8 @@ export async function getResultsPageData(
   for (const participant of battleParticipants ?? []) {
     const item = {
       ...participant,
+      dragon_recruits_committed: participant.dragon_recruits_committed ?? 0,
+      giant_recruits_committed: participant.giant_recruits_committed ?? 0,
       player: playersById.get(participant.campaign_player_id) ?? null,
     };
     const existingItems = participantsByBattleId.get(participant.battle_id) ?? [];
@@ -204,6 +208,8 @@ export async function getResultsPageData(
               role: "attacker",
               dice_result: null,
               advantage_rank: null,
+              dragon_recruits_committed: 0,
+              giant_recruits_committed: 0,
               created_at: battle.created_at,
               player:
                 playersById.get(battle.attacker_campaign_player_id) ?? null,
@@ -217,6 +223,8 @@ export async function getResultsPageData(
               role: "defender",
               dice_result: null,
               advantage_rank: null,
+              dragon_recruits_committed: 0,
+              giant_recruits_committed: 0,
               created_at: battle.created_at,
               player:
                 playersById.get(battle.defender_campaign_player_id) ?? null,
@@ -233,6 +241,36 @@ export async function getResultsPageData(
     } satisfies ResultsPageData,
     error: null,
   };
+}
+
+export function getLegendaryCommitmentsOnOtherBattles(
+  battles: BattleResultItem[],
+  campaignPlayerId: string,
+  currentBattleId: string,
+) {
+  return battles.reduce(
+    (commitments, battle) => {
+      if (battle.id === currentBattleId || battle.status === "cancelled") {
+        return commitments;
+      }
+
+      const participant = battle.participants.find(
+        (item) => item.campaign_player_id === campaignPlayerId,
+      );
+
+      if (!participant) return commitments;
+
+      return {
+        dragonRecruitsCommitted:
+          commitments.dragonRecruitsCommitted +
+          participant.dragon_recruits_committed,
+        giantRecruitsCommitted:
+          commitments.giantRecruitsCommitted +
+          participant.giant_recruits_committed,
+      };
+    },
+    { dragonRecruitsCommitted: 0, giantRecruitsCommitted: 0 },
+  );
 }
 
 export async function resolveExploration(
@@ -310,6 +348,130 @@ export async function resolveExploration(
   return { result, error: null };
 }
 
+export async function commitLegendaryReinforcements(
+  supabase: SupabaseClient<Database>,
+  user: User,
+  campaignId: string,
+  battleId: string,
+  dragonRecruitsCommitted: number,
+  giantRecruitsCommitted: number,
+) {
+  if (!battleId) {
+    return { result: null, error: "Bataille introuvable." };
+  }
+
+  if (
+    !Number.isInteger(dragonRecruitsCommitted) ||
+    dragonRecruitsCommitted < 0 ||
+    !Number.isInteger(giantRecruitsCommitted) ||
+    giantRecruitsCommitted < 0
+  ) {
+    return {
+      result: null,
+      error: "Les renforts engagés doivent être des nombres entiers positifs.",
+    };
+  }
+
+  const { resultsData, error } = await getResultsPageData(
+    supabase,
+    campaignId,
+    user.id,
+  );
+
+  if (error || !resultsData) {
+    return { result: null, error: error ?? "Campagne introuvable." };
+  }
+
+  if (
+    resultsData.campaign.status !== "active" ||
+    resultsData.campaign.current_phase !== "resolving" ||
+    resultsData.currentTurn?.phase !== "resolving"
+  ) {
+    return {
+      result: null,
+      error: "Les renforts se choisissent pendant la résolution.",
+    };
+  }
+
+  if (!resultsData.currentPlayer || resultsData.currentPlayer.status !== "active") {
+    return { result: null, error: "Joueur actif introuvable." };
+  }
+
+  const battle = resultsData.battles.find((item) => item.id === battleId);
+
+  if (!battle) {
+    return { result: null, error: "Bataille introuvable pour ce tour." };
+  }
+
+  if (battle.status !== "pending") {
+    return { result: null, error: "Cette bataille est déjà résolue." };
+  }
+
+  const participant = battle.participants.find(
+    (item) => item.campaign_player_id === resultsData.currentPlayer?.id,
+  );
+
+  if (!participant) {
+    return { result: null, error: "Tu ne participes pas à cette bataille." };
+  }
+
+  const otherCommitments = getLegendaryCommitmentsOnOtherBattles(
+    resultsData.battles,
+    resultsData.currentPlayer.id,
+    battle.id,
+  );
+  const availableDragons = Math.max(
+    resultsData.currentPlayer.dragon_recruits -
+      otherCommitments.dragonRecruitsCommitted,
+    0,
+  );
+  const availableGiants = Math.max(
+    resultsData.currentPlayer.giant_recruits -
+      otherCommitments.giantRecruitsCommitted,
+    0,
+  );
+
+  if (dragonRecruitsCommitted > availableDragons) {
+    return { result: null, error: "Pas assez de Dragons disponibles pour ce tour." };
+  }
+
+  if (giantRecruitsCommitted > availableGiants) {
+    return { result: null, error: "Pas assez de Géants disponibles pour ce tour." };
+  }
+
+  const { data, error: rpcError } = await supabase.rpc(
+    "commit_legendary_reinforcements",
+    {
+      target_battle_id: battleId,
+      submitted_dragon_recruits: dragonRecruitsCommitted,
+      submitted_giant_recruits: giantRecruitsCommitted,
+    },
+  );
+
+  if (rpcError) {
+    return {
+      result: null,
+      error:
+        "La fonction SQL d'engagement des renforts n'est pas encore installée dans Supabase.",
+    };
+  }
+
+  const result = data?.[0] as CommitLegendaryReinforcementsRpcResult | undefined;
+
+  if (!result) {
+    return { result: null, error: "Engagement impossible." };
+  }
+
+  if (!result.success) {
+    return {
+      result: null,
+      error: result.error ?? "Engagement impossible.",
+    };
+  }
+
+  return { result, error: null };
+}
+
 export async function resolveBattle(
   supabase: SupabaseClient<Database>,
   user: User,
@@ -376,6 +538,20 @@ export async function resolveBattle(
 
     if (!Number.isInteger(loss.giant_losses) || loss.giant_losses < 0) {
       return { result: null, error: "Pertes de Géants invalides." };
+    }
+
+    if (loss.dragon_losses > participant.dragon_recruits_committed) {
+      return {
+        result: null,
+        error: "Pertes de Dragons supérieures aux Dragons engagés.",
+      };
+    }
+
+    if (loss.giant_losses > participant.giant_recruits_committed) {
+      return {
+        result: null,
+        error: "Pertes de Géants supérieures aux Géants engagés.",
+      };
     }
 
     if (loss.dragon_losses > (participant.player?.dragon_recruits ?? 0)) {

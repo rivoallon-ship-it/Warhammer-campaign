@@ -212,11 +212,13 @@ Pour une bataille multi-joueurs sur territoire neutre : le vainqueur gagne le te
 
 ## 14. `battle_participants`
 
-Champs : `id`, `battle_id`, `campaign_id`, `campaign_player_id`, `order_id`, `role`, `dice_result`, `advantage_rank`, `created_at`.
+Champs : `id`, `battle_id`, `campaign_id`, `campaign_player_id`, `order_id`, `role`, `dice_result`, `advantage_rank`, `dragon_recruits_committed`, `giant_recruits_committed`, `created_at`.
 
 `role` : `attacker`, `defender`, `contender`.
 
 Cette table permet d'avoir plus de deux participants dans une bataille. Pour les batailles classiques, elle contient l'attaquant et le défenseur. Pour les batailles multi-joueurs sur territoire neutre, elle contient tous les prétendants avec leur D6 d'avantage.
+
+Les colonnes `dragon_recruits_committed` et `giant_recruits_committed` stockent les recrues légendaires engagées dans cette bataille précise. Ces engagements ajoutent des points d'armée, mais seules les unités engagées peuvent ensuite être déclarées perdues par le maître de campagne.
 
 ## 15. `explorations`
 

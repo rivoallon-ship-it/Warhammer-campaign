@@ -60,6 +60,7 @@ type RecruitmentState = {
   dragonRecruits: number;
   giantRecruits: number;
   canRecruit: boolean;
+  unavailableMessage: string | null;
 };
 
 type CampaignCommandCenterProps = {
@@ -805,6 +806,7 @@ export function CampaignCommandCenter({
           dragonRecruits={recruitment.dragonRecruits}
           giantRecruits={recruitment.giantRecruits}
           canRecruit={recruitment.canRecruit}
+          unavailableMessage={recruitment.unavailableMessage}
         />
       </div>
     </div>

@@ -389,11 +389,18 @@ export default async function CampaignPage({
   const giantTerritoryCount = currentPlayerLegendaryTerritories.filter(
     (territory) => territory.type === "giant",
   ).length;
-  const canRecruitLegendaryUnits = Boolean(
-    currentPlayer &&
-      currentPlayer.status === "active" &&
-      campaign.status === "active",
-  );
+  const legendaryRecruitmentUnavailableMessage = !currentPlayer
+    ? "Tu dois rejoindre cette campagne avant de recruter."
+    : currentPlayer.status !== "active"
+      ? "Ton joueur n'est pas encore actif dans cette campagne."
+      : campaign.status !== "active"
+        ? "La campagne doit être active pour recruter."
+        : campaign.current_phase !== "orders" ||
+            !currentTurn ||
+            currentTurn.phase !== "orders"
+          ? "Le recrutement est disponible pendant la phase d'ordres."
+          : null;
+  const canRecruitLegendaryUnits = !legendaryRecruitmentUnavailableMessage;
 
   return (
     <main className="campaign-fantasy-shell min-h-screen px-4 py-8 text-[#f3ead7] sm:px-6 lg:py-10">
@@ -611,6 +618,7 @@ export default async function CampaignPage({
                 dragonRecruits: currentPlayer?.dragon_recruits ?? 0,
                 giantRecruits: currentPlayer?.giant_recruits ?? 0,
                 canRecruit: canRecruitLegendaryUnits,
+                unavailableMessage: legendaryRecruitmentUnavailableMessage,
               }}
             />
           ) : (

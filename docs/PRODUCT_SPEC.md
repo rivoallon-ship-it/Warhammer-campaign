@@ -172,7 +172,7 @@ Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à
 
 ## 18b. Recrutements légendaires
 
-Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 10 Gloire. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
+Un joueur actif qui contrôle au moins un territoire Dragon peut recruter un Dragon pour 10 Gloire pendant la phase d'ordres. Un joueur actif qui contrôle au moins un territoire Géant peut recruter un Géant pour 10 Gloire pendant la phase d'ordres. Le recrutement déduit automatiquement la Gloire, incrémente le compteur correspondant sur le joueur et ajoute une entrée dans l'historique.
 
 Les recrues restent disponibles tant qu'elles ne sont pas perdues. Pendant la résolution d'une bataille entre joueurs, le maître de campagne peut saisir les pertes de Dragons/Géants pour chaque participant. Les pertes sont validées contre le stock disponible, décrémentées automatiquement et ajoutées à l'historique de bataille.
 

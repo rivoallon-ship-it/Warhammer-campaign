@@ -316,6 +316,7 @@ Commit principal :
   - RPC `recruit_legendary_unit(campaign_id, unit_type)` ;
   - coût fixe de 10 Gloire ;
   - prérequis : contrôler au moins un territoire du type recruté ;
+  - recrutement limité à la phase d'ordres côté interface et côté SQL ;
   - carte de recrutement sur l'écran campagne et log `legendary_recruitment`.
 - Redécoupage des morceaux SQL Supabase pour que chaque fichier à copier reste sous 100 lignes :
   - remplacement de l'ancien `05_auth_helpers_2.sql` par `05a`, `05b`, `05c` ;

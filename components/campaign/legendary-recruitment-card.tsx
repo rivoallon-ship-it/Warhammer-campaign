@@ -25,6 +25,7 @@ type LegendaryRecruitmentCardProps = {
   dragonRecruits: number;
   giantRecruits: number;
   canRecruit: boolean;
+  unavailableMessage: string | null;
 };
 
 type RecruitButtonProps = {
@@ -54,6 +55,7 @@ type RecruitmentRowProps = {
   recruitCount: number;
   glory: number;
   canRecruit: boolean;
+  unavailableMessage: string | null;
 };
 
 function RecruitmentRow({
@@ -63,12 +65,15 @@ function RecruitmentRow({
   recruitCount,
   glory,
   canRecruit,
+  unavailableMessage,
 }: RecruitmentRowProps) {
   const label = getLegendaryUnitLabel(unitType);
   const hasTerritory = territoryCount > 0;
   const hasEnoughGlory = glory >= LEGENDARY_RECRUITMENT_COST;
   const disabled = !canRecruit || !hasTerritory || !hasEnoughGlory;
-  const unavailableMessage = !hasTerritory
+  const rowUnavailableMessage = unavailableMessage
+    ? unavailableMessage
+    : !hasTerritory
     ? `Contrôle un territoire ${label} pour débloquer ce recrutement.`
     : !hasEnoughGlory
       ? `Il faut ${LEGENDARY_RECRUITMENT_COST} Gloire.`
@@ -101,9 +106,9 @@ function RecruitmentRow({
         <RecruitButton unitType={unitType} disabled={disabled} />
       </form>
 
-      {unavailableMessage ? (
+      {rowUnavailableMessage ? (
         <p className="fantasy-muted mt-2 text-xs leading-5">
-          {unavailableMessage}
+          {rowUnavailableMessage}
         </p>
       ) : null}
     </div>
@@ -118,6 +123,7 @@ export function LegendaryRecruitmentCard({
   dragonRecruits,
   giantRecruits,
   canRecruit,
+  unavailableMessage,
 }: LegendaryRecruitmentCardProps) {
   return (
     <Card className="fantasy-panel">
@@ -137,6 +143,7 @@ export function LegendaryRecruitmentCard({
           recruitCount={dragonRecruits}
           glory={glory}
           canRecruit={canRecruit}
+          unavailableMessage={unavailableMessage}
         />
         <RecruitmentRow
           campaignId={campaignId}
@@ -145,6 +152,7 @@ export function LegendaryRecruitmentCard({
           recruitCount={giantRecruits}
           glory={glory}
           canRecruit={canRecruit}
+          unavailableMessage={unavailableMessage}
         />
       </CardContent>
     </Card>

@@ -16,11 +16,13 @@ declare
   v_type text := lower(trim(coalesce(requested_unit_type, '')));
   v_label text := case when lower(trim(coalesce(requested_unit_type, ''))) = 'dragon' then 'Dragon' else 'Géant' end;
   v_campaign_status text;
+  v_campaign_phase text;
   v_turn_number int;
   v_player_id uuid;
   v_display_name text;
   v_glory int;
   v_turn_id uuid;
+  v_turn_phase text;
   v_owned_count int;
   v_remaining_glory int;
   v_dragon_recruits int;
@@ -31,8 +33,8 @@ begin
     return;
   end if;
 
-  for v_campaign_status, v_turn_number in
-    select status, current_turn_number from public.campaigns where id = target_campaign_id for update
+  for v_campaign_status, v_campaign_phase, v_turn_number in
+    select status, current_phase, current_turn_number from public.campaigns where id = target_campaign_id for update
   loop exit; end loop;
   if v_campaign_status is null then
     return query select false, 'Campagne introuvable.', null::text, null::int, null::int, null::int;
@@ -40,6 +42,18 @@ begin
   end if;
   if v_campaign_status <> 'active' then
     return query select false, 'La campagne doit être active pour recruter.', null::text, null::int, null::int, null::int;
+    return;
+  end if;
+  if v_campaign_phase is distinct from 'orders' then
+    return query select false, 'Le recrutement est possible uniquement pendant la phase d''ordres.', null::text, null::int, null::int, null::int;
+    return;
+  end if;
+
+  for v_turn_id, v_turn_phase in
+    select id, phase from public.campaign_turns where campaign_id = target_campaign_id and turn_number = v_turn_number order by started_at desc limit 1
+  loop exit; end loop;
+  if v_turn_phase is distinct from 'orders' then
+    return query select false, 'Le recrutement est possible uniquement pendant la phase d''ordres.', null::text, null::int, null::int, null::int;
     return;
   end if;
 
@@ -71,7 +85,6 @@ begin
   returning player.glory, player.dragon_recruits, player.giant_recruits
   into v_remaining_glory, v_dragon_recruits, v_giant_recruits;
 
-  v_turn_id := (select id from public.campaign_turns where campaign_id = target_campaign_id and turn_number = v_turn_number order by started_at desc limit 1);
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
   values (target_campaign_id, v_turn_id, 'legendary_recruitment', 'Recrutement légendaire', v_display_name || ' recrute un ' || v_label || ' pour 10 Gloire.', auth.uid());
   return query select true, null::text, v_type, v_remaining_glory, v_dragon_recruits, v_giant_recruits;

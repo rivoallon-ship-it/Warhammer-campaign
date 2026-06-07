@@ -2038,6 +2038,24 @@ begin
     return;
   end if;
 
+  if v_campaign.current_phase is distinct from 'orders' then
+    return query select false, 'Le recrutement est possible uniquement pendant la phase d''ordres.', null::text, null::int, null::int, null::int;
+    return;
+  end if;
+
+  select *
+  into v_turn
+  from public.campaign_turns
+  where campaign_id = v_campaign.id
+    and turn_number = v_campaign.current_turn_number
+  order by started_at desc
+  limit 1;
+
+  if not found or v_turn.phase is distinct from 'orders' then
+    return query select false, 'Le recrutement est possible uniquement pendant la phase d''ordres.', null::text, null::int, null::int, null::int;
+    return;
+  end if;
+
   select *
   into v_player
   from public.campaign_players
@@ -2076,14 +2094,6 @@ begin
   where id = v_player.id
   returning glory, dragon_recruits, giant_recruits
   into v_remaining_glory, v_dragon_recruits, v_giant_recruits;
-
-  select *
-  into v_turn
-  from public.campaign_turns
-  where campaign_id = v_campaign.id
-    and turn_number = v_campaign.current_turn_number
-  order by started_at desc
-  limit 1;
 
   insert into public.campaign_logs (
     campaign_id,

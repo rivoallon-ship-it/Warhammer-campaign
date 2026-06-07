@@ -2,7 +2,7 @@
 ## HexRealm
 ### Suivi du travail réalisé
 
-Dernière mise à jour : 2026-06-05.
+Dernière mise à jour : 2026-06-07.
 
 Ce document résume le travail réalisé depuis le début du développement. Il complète le `README.md`, le plan d'implémentation et l'historique Git.
 
@@ -25,6 +25,8 @@ Le MVP principal est fonctionnel jusqu'au cycle de campagne complet :
 - batailles multi-joueurs quand plusieurs joueurs visent le même territoire neutre ;
 - saisie du vainqueur des batailles ;
 - mise à jour des territoires, de la Gloire et des fortifications ;
+- recrutement Dragon/Géant pendant la phase d'ordres ;
+- conservation des unités légendaires recrutées jusqu'à perte déclarée en bataille ;
 - fin de tour et passage au tour suivant sans limite automatique ;
 - historique de campagne ;
 - RLS renforcée sur la lecture des lobbys et les demandes d'inscription.
@@ -330,6 +332,16 @@ Commit principal :
   - décrément automatique des compteurs `dragon_recruits` et `giant_recruits` ;
   - trace des pertes dans l'historique de bataille.
 
+### Mise à jour du 2026-06-07 : unités légendaires persistantes
+
+- Le recrutement Dragon/Géant est maintenant une décision de phase d'ordres uniquement.
+- L'interface bloque le bouton de recrutement hors phase d'ordres et affiche une raison lisible au joueur.
+- La fonction SQL `recruit_legendary_unit` vérifie aussi la phase de la campagne et du tour courant, afin que la règle ne dépende pas seulement de l'interface.
+- Les Dragons et Géants recrutés restent sur le joueur via `campaign_players.dragon_recruits` et `campaign_players.giant_recruits`.
+- Pendant la résolution d'une bataille entre joueurs, le maître de campagne peut saisir combien de Dragons/Géants chaque participant perd.
+- La résolution valide les pertes contre le stock disponible, décrémente les compteurs et ajoute les pertes au journal de bataille.
+- Le morceau Supabase à recopier pour cette partie est `supabase/a_copier_par_morceaux/16_legendary_recruitment.sql`, qui reste sous la limite de 100 lignes.
+
 ## Fichiers importants
 
 ### Application
@@ -393,5 +405,6 @@ NEXT_PUBLIC_SUPABASE_URL="https://icfhmokcjkokgntrerwv.supabase.co" NEXT_PUBLIC_
 
 - Continuer le Lot 21 : responsive, confirmations et états d'erreur.
 - Tester un tour complet avec plusieurs vrais comptes.
+- Définir l'effet concret des Dragons et Géants pendant une bataille : bonus de points, unité spéciale obligatoire, option d'engagement ou effet narratif.
 - Ajouter éventuellement des tests automatisés après stabilisation du MVP.
 - Nettoyer progressivement les mentions historiques `exploration` quand elles ne sont plus utiles côté interface.

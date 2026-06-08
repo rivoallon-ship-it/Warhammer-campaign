@@ -377,6 +377,16 @@ Commit principal :
 - Ajout d'une CI GitHub Actions sur `main` : installation, typecheck, lint, tests, build.
 - Premiers tests automatisés sur les adjacences de carte, la distribution des territoires, les seuils de conquête, les revenus de Gloire, les bonus village, les points d'armée et les règles Dragon/Géant.
 
+### Mise à jour du 2026-06-08 : chat de partie
+
+- Ajout d'un chat simple sur l'écran principal de campagne.
+- Ajout de la table Supabase `campaign_messages`.
+- Les messages sont persistés, limités à 800 caractères et affichés du plus ancien au plus récent dans le bloc de chat.
+- RLS : seuls les joueurs actifs peuvent lire les messages d'une campagne ; un joueur actif ne peut insérer que ses propres messages.
+- Ajout de la Server Action `sendCampaignMessageAction`.
+- Ajout du morceau Supabase `supabase/a_copier_par_morceaux/19_campaign_chat.sql`.
+- Le temps réel et les notifications restent hors périmètre de ce premier lot.
+
 ## Fichiers importants
 
 ### Application
@@ -388,6 +398,7 @@ Commit principal :
 - `app/campaigns/join/page.tsx` : rejoindre une campagne.
 - `app/campaigns/[campaignId]/lobby/page.tsx` : lobby.
 - `app/campaigns/[campaignId]/page.tsx` : écran principal de campagne, carte interactive et ordres directs.
+- `app/campaigns/[campaignId]/actions.ts` : actions de campagne, recrutement et envoi de message.
 - `app/campaigns/[campaignId]/map/page.tsx` : redirection vers l'écran principal.
 - `app/campaigns/[campaignId]/orders/page.tsx` : redirection vers l'écran principal.
 - `app/campaigns/[campaignId]/reveal/page.tsx` : révélation.
@@ -420,6 +431,7 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `15_territory_rules_schema.sql`
 - `16_legendary_recruitment.sql`
 - `18_zero_start_army_points.sql`
+- `19_campaign_chat.sql`
 - `14_logs_grants.sql`
 
 ## Vérifications réalisées
@@ -442,6 +454,7 @@ NEXT_PUBLIC_SUPABASE_URL="https://icfhmokcjkokgntrerwv.supabase.co" NEXT_PUBLIC_
 ## À faire ensuite
 
 - Continuer le Lot 21 : responsive, confirmations et états d'erreur.
+- Ajouter éventuellement le rafraîchissement temps réel du chat via Supabase Realtime.
 - Tester un tour complet avec plusieurs vrais comptes.
 - Étendre les tests automatisés sur les Server Actions et les transitions SQL critiques.
 - Nettoyer progressivement les mentions historiques `exploration` quand elles ne sont plus utiles côté interface.

@@ -160,6 +160,10 @@ Navigation, loading/error/empty states, confirmations, responsive, lisibilité c
 
 État partiel déjà livré : écran campagne compact, carte et ordres fusionnés, routes legacy redirigées, ordre annulable, action de conquête affichée uniquement quand une cible conquérable est sélectionnée.
 
+## Lot 22 — Chat de partie simple
+
+Ajouter un chat de campagne sur l'écran principal. Les messages sont persistés en base, limités à 800 caractères, visibles uniquement par les joueurs actifs de la campagne et envoyables uniquement par leur auteur actif. Le temps réel et les notifications restent hors périmètre de ce lot.
+
 ## Backlog post-MVP
 
 V2 héros ; V3 Dragons/Géants/mercenaires ; V4 détachements ; V5 diplomatie ; V6 cartes avancées.

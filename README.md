@@ -2,7 +2,7 @@
 
 Application web de gestion de campagne narrative pour **Warhammer Age of Sigmar**.
 
-Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une partie avec un code d’invitation, visualiser une carte de territoires, donner des ordres secrets, révéler automatiquement les ordres dès que tous les joueurs ont validé, résoudre les conquêtes et batailles, puis continuer la campagne tour après tour.
+Le projet permet à des joueurs de créer une campagne en ligne, rejoindre une partie avec un code d’invitation, visualiser une carte de territoires, donner des ordres secrets, échanger dans un chat de partie, révéler automatiquement les ordres dès que tous les joueurs ont validé, résoudre les conquêtes et batailles, puis continuer la campagne tour après tour.
 
 ## 1. Objectif du projet
 
@@ -28,6 +28,7 @@ Le MVP doit permettre :
 - page de campagne centrale avec carte interactive ;
 - ordres secrets directement depuis la carte ;
 - annulation ou remplacement d'un ordre tant que la phase d'ordres est ouverte ;
+- chat de partie visible par les joueurs actifs ;
 - révélation automatique et simultanée des ordres dès que tous les joueurs actifs ont validé ;
 - passage automatique au tour suivant quand la révélation ne génère aucune bataille ;
 - génération des batailles et conquêtes automatiques ;
@@ -39,7 +40,7 @@ Le MVP doit permettre :
 
 ## 3. Hors périmètre MVP
 
-Ne pas développer en V1 : héros, XP, blessures, artefacts, mercenaires, Influence Dragon / Géant, alliances, trahisons, détachements, raids avancés, éditeur de carte, chat, notifications, paiement, application mobile native.
+Ne pas développer en V1 : héros, XP, blessures, artefacts, mercenaires, Influence Dragon / Géant, alliances, trahisons, détachements, raids avancés, éditeur de carte, notifications temps réel avancées, paiement, application mobile native.
 
 ## 4. Stack technique
 

@@ -10,6 +10,8 @@ type AdjacencyRow =
 type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type BattleRow = Database["public"]["Tables"]["battles"]["Row"];
 type CampaignLogRow = Database["public"]["Tables"]["campaign_logs"]["Row"];
+type CampaignMessageRow =
+  Database["public"]["Tables"]["campaign_messages"]["Row"];
 export type CampaignOrderVisibilityRow =
   Database["public"]["Functions"]["get_current_turn_order_visibility"]["Returns"][number];
 export type CampaignLogItem = CampaignLogRow & {
@@ -28,6 +30,7 @@ export type CampaignDashboardData = {
   battles: BattleRow[];
   orderVisibility: CampaignOrderVisibilityRow[];
   logs: CampaignLogItem[];
+  messages: CampaignMessageRow[];
 };
 
 export function getPlayerById(players: CampaignPlayerRow[]) {
@@ -196,6 +199,12 @@ export async function getCampaignDashboard(
     .eq("campaign_id", campaign.id)
     .order("created_at", { ascending: false })
     .limit(10);
+  const { data: messages } = await supabase
+    .from("campaign_messages")
+    .select("*")
+    .eq("campaign_id", campaign.id)
+    .order("created_at", { ascending: false })
+    .limit(40);
   const logTurnIds = Array.from(
     new Set(
       (logs ?? [])
@@ -237,6 +246,7 @@ export async function getCampaignDashboard(
       battles: battles ?? [],
       orderVisibility,
       logs: logsWithTurns,
+      messages: messages ?? [],
     } satisfies CampaignDashboardData,
     error: null,
   };

@@ -468,6 +468,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      campaign_messages: {
+        Row: {
+          id: string;
+          campaign_id: string;
+          campaign_player_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          campaign_id: string;
+          campaign_player_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          campaign_id?: string;
+          campaign_player_id?: string;
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

@@ -6,17 +6,17 @@
 
 **HexRealm** est une application web permettant de gérer une campagne narrative de conquête pour **Warhammer Age of Sigmar**.
 
-L’application aide les joueurs à créer une campagne en ligne, inviter d’autres joueurs, rejoindre une partie avec un code, visualiser une carte de territoires, donner des ordres secrets, révéler automatiquement les ordres en même temps dès que tous les joueurs ont validé, générer les batailles à jouer, résoudre automatiquement les conquêtes neutres non contestées, saisir les résultats, mettre à jour automatiquement les territoires, la Gloire et le tour de campagne.
+L’application aide les joueurs à créer une campagne en ligne, inviter d’autres joueurs, rejoindre une partie avec un code, visualiser une carte de territoires, donner des ordres secrets, échanger dans un chat de partie, révéler automatiquement les ordres en même temps dès que tous les joueurs ont validé, générer les batailles à jouer, résoudre automatiquement les conquêtes neutres non contestées, saisir les résultats, mettre à jour automatiquement les territoires, la Gloire et le tour de campagne.
 
 Le site ne remplace pas les règles Age of Sigmar. Il gère uniquement la couche de campagne.
 
 ## 2. Objectifs du MVP
 
-Le MVP doit permettre de jouer une campagne complète en ligne avec un nombre de joueurs modulable : création de compte, connexion, profil joueur, création de campagne, choix du nombre de joueurs de 2 à 6, génération automatique d’une carte adaptée, invitation par code, lobby, validation des joueurs par le maître, choix de faction/couleur/capitale, lancement, carte interactive, ordres secrets, révélation automatique et simultanée, conquêtes, batailles, résultats, Gloire, passage au tour suivant et campagne ouverte.
+Le MVP doit permettre de jouer une campagne complète en ligne avec un nombre de joueurs modulable : création de compte, connexion, profil joueur, création de campagne, choix du nombre de joueurs de 2 à 6, génération automatique d’une carte adaptée, invitation par code, lobby, validation des joueurs par le maître, choix de faction/couleur/capitale, lancement, carte interactive, ordres secrets, chat de partie simple, révélation automatique et simultanée, conquêtes, batailles, résultats, Gloire, passage au tour suivant et campagne ouverte.
 
 ## 3. Hors périmètre du MVP
 
-Ne pas développer en V1 : héros, progression des héros, XP, blessures, artefacts, mercenaires, Dragons et Géants comme système actif, Influence Dragon/Géant, alliances, trahisons, détachements, raids avancés, garnisons avancées, diversions, éditeur de carte, cases bloquées, chat intégré, notifications, paiement, rôles admin globaux, application mobile native.
+Ne pas développer en V1 : héros, progression des héros, XP, blessures, artefacts, mercenaires, Dragons et Géants comme système actif, Influence Dragon/Géant, alliances, trahisons, détachements, raids avancés, garnisons avancées, diversions, éditeur de carte, cases bloquées, notifications temps réel avancées, paiement, rôles admin globaux, application mobile native.
 
 ## 4. Public cible
 

@@ -45,7 +45,7 @@ Sous-dossiers clés : `/lib/supabase`, `/lib/campaigns`, `/lib/maps`, `/lib/orde
 
 Avancer par lots. Après chaque lot, le code doit compiler, démarrer et rester testable. Ne pas construire toute l’application d’un coup.
 
-Garder le MVP simple : pas de héros, XP, mercenaires, alliances, détachements, influence Dragon/Géant, chat, notifications, éditeur de carte, paiement ou admin global.
+Garder le MVP simple : pas de héros, XP, mercenaires, alliances, détachements, influence Dragon/Géant, notifications temps réel avancées, éditeur de carte, paiement ou admin global.
 
 Utiliser TypeScript strict. Éviter `any` sauf exception justifiée.
 

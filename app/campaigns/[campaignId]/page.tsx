@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
+import { CampaignChat } from "@/components/campaign/campaign-chat";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
 import { CampaignLog } from "@/components/campaign/campaign-log";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
@@ -40,6 +41,7 @@ type CampaignPageProps = {
     cancelled?: string;
     recruited?: string;
     spent?: string;
+    chat?: string;
     error?: string;
   }>;
 };
@@ -328,6 +330,7 @@ export default async function CampaignPage({
     battles,
     orderVisibility,
     logs,
+    messages,
   } = dashboard;
   const rankedPlayers = getRankedPlayers(activePlayers);
   const territoryStats = getTerritoryStats(territories);
@@ -402,6 +405,12 @@ export default async function CampaignPage({
           ? "Le recrutement est disponible pendant la phase d'ordres."
           : null;
   const canRecruitLegendaryUnits = !legendaryRecruitmentUnavailableMessage;
+  const chatUnavailableMessage = !currentPlayer
+    ? "Tu dois rejoindre cette campagne pour écrire dans le chat."
+    : currentPlayer.status !== "active"
+      ? "Ton joueur doit être actif pour écrire dans le chat."
+      : null;
+  const canSendChatMessage = !chatUnavailableMessage;
 
   return (
     <main className="campaign-fantasy-shell min-h-screen px-4 py-8 text-[#f3ead7] sm:px-6 lg:py-10">
@@ -753,6 +762,23 @@ export default async function CampaignPage({
           </Card>
 
           <div className="space-y-4">
+            <CampaignChat
+              campaignId={campaign.id}
+              players={activePlayers.map((player) => ({
+                id: player.id,
+                displayName: player.display_name,
+                color: player.color,
+              }))}
+              messages={messages.map((message) => ({
+                id: message.id,
+                campaignPlayerId: message.campaign_player_id,
+                body: message.body,
+                createdAt: message.created_at,
+              }))}
+              currentPlayerId={currentPlayer?.id ?? null}
+              canSend={canSendChatMessage}
+              unavailableMessage={chatUnavailableMessage}
+            />
             <CampaignLog logs={logs} />
           </div>
         </section>

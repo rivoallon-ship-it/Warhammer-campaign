@@ -23,6 +23,7 @@ L’authentification est gérée par Supabase Auth. Les données applicatives so
 | `battle_participants` | Participants des batailles, y compris batailles multi-joueurs |
 | `explorations` | Résultats des conquêtes neutres automatiques |
 | `campaign_logs` | Historique simple |
+| `campaign_messages` | Chat de partie |
 
 ## 3. `profiles`
 
@@ -236,7 +237,15 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 
 `exploration_result` est conservé comme type technique pour les conquêtes neutres automatiques.
 
-## 17. Fonctions métier attendues
+## 17. `campaign_messages`
+
+Champs : `id`, `campaign_id`, `campaign_player_id`, `body`, `created_at`.
+
+`body` est limité à 800 caractères non vides. Les messages sont rattachés au joueur de campagne auteur via la paire `(campaign_id, campaign_player_id)`.
+
+RLS : seuls les joueurs actifs d'une campagne peuvent lire ses messages. Un joueur actif peut insérer uniquement ses propres messages. Il n'y a pas de modification ni suppression de message dans la V1.
+
+## 18. Fonctions métier attendues
 
 - `createCampaign` : créer campagne, code, config carte, créateur game_master actif, log.
 - `getJoinCampaignDetails` : appeler la RPC `get_join_campaign_details` pour lire les informations minimales d'un lobby à partir d'un code valide, sans exposer tous les lobbys par RLS.
@@ -250,10 +259,11 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 - `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
 - `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.
 - `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.
+- `sendCampaignMessage` : joueur actif seulement, message non vide limité à 800 caractères, insertion dans `campaign_messages`.
 
 Les fonctions SQL de transition `reveal_current_turn_orders`, `resolve_battle_result` et `finish_current_turn` doivent verrouiller les lignes critiques avec `for update` afin d'éviter les doubles traitements en cas de double clic ou d'appel concurrent. `reveal_current_turn_orders` accepte un joueur actif, mais refuse tant que tous les ordres actifs ne sont pas soumis.
 
-## 18. SQL conceptuel
+## 19. SQL conceptuel
 
 Le fichier final sera `/supabase/schema.sql`.
 
@@ -289,7 +299,7 @@ create table campaigns (
 );
 ```
 
-## 19. RLS — règles fonctionnelles
+## 20. RLS — règles fonctionnelles
 
 Activer RLS sur toutes les tables applicatives.
 
@@ -297,12 +307,12 @@ Règle générale : un utilisateur lit les données d’une campagne uniquement 
 
 Les campagnes en `lobby` ne sont pas lisibles globalement par tous les utilisateurs connectés. Un non-membre peut seulement fournir un code à `get_join_campaign_details`. La demande d'inscription passe par `request_join_campaign`; l'application ne doit pas contourner cette fonction par un `insert` direct dans `campaign_players`.
 
-Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier.
+Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier. Messages de chat : lecture par joueurs actifs, insertion uniquement par l'auteur actif.
 
-## 20. Données dérivées
+## 21. Données dérivées
 
 Statut d’ordre, classement et joueur le plus faible peuvent être calculés depuis les tables plutôt que stockés.
 
-## 21. Points d’attention Codex
+## 22. Points d’attention Codex
 
 Ne pas supposer 4 joueurs, ne pas coder une carte 4x4 fixe, ne pas bloquer au tour 6, ne pas révéler les ordres avant que tous les joueurs actifs aient soumis leur ordre, ne pas coder héros/mercenaires/détachements dans le MVP.

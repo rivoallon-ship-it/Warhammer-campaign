@@ -24,6 +24,7 @@ Chaque fichier est volontairement limité à moins de 100 lignes.
 19. `13_rls_orders_resolution.sql`
 20. `16_legendary_recruitment.sql`
 21. `14_logs_grants.sql`
+22. `19_campaign_chat.sql`
 
 Dans Supabase SQL Editor :
 

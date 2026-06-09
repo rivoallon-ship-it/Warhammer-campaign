@@ -74,3 +74,5 @@ begin
   return query select true, null::text, v_campaign.id;
 end;
 $$;
+
+grant execute on function public.request_join_campaign(text, text, text, text, text) to authenticated;

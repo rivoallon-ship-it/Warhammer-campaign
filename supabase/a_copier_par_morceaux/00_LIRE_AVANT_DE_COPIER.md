@@ -25,6 +25,7 @@ Chaque fichier est volontairement limité à moins de 100 lignes.
 20. `16_legendary_recruitment.sql`
 21. `14_logs_grants.sql`
 22. `19_campaign_chat.sql`
+23. `20_lobby_player_visibility.sql`
 
 Dans Supabase SQL Editor :
 
@@ -41,3 +42,5 @@ Correctifs ponctuels :
 
 - `17_hotfix_special_reward_claimed_at.sql` : à lancer si Supabase affiche
   `column t.special_reward_claimed_at does not exist` pendant la révélation.
+- `20_lobby_player_visibility.sql` : à lancer si une demande de joueur est
+  enregistrée mais n'apparaît pas dans le lobby.

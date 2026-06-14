@@ -26,6 +26,7 @@ Chaque fichier est volontairement limité à moins de 100 lignes.
 21. `14_logs_grants.sql`
 22. `19_campaign_chat.sql`
 23. `20_lobby_player_visibility.sql`
+24. `21_launch_map_insert_fix.sql`
 
 Dans Supabase SQL Editor :
 
@@ -44,3 +45,5 @@ Correctifs ponctuels :
   `column t.special_reward_claimed_at does not exist` pendant la révélation.
 - `20_lobby_player_visibility.sql` : à lancer si une demande de joueur est
   enregistrée mais n'apparaît pas dans le lobby.
+- `21_launch_map_insert_fix.sql` : à lancer si le lancement de campagne affiche
+  `Impossible d'enregistrer les territoires.`

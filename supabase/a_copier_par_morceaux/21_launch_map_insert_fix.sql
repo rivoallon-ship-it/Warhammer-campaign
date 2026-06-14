@@ -31,6 +31,18 @@ alter table public.territories
   add constraint territories_type_check
   check (type in ('capital', 'village', 'mine', 'ruins', 'fort', 'magic_tower', 'dragon', 'giant', 'wild'));
 
+alter table public.campaign_turns
+  drop constraint if exists campaign_turns_army_base_points_check;
+alter table public.campaign_turns
+  add constraint campaign_turns_army_base_points_check
+  check (army_base_points >= 0);
+
+alter table public.battles
+  drop constraint if exists battles_army_base_points_check;
+alter table public.battles
+  add constraint battles_army_base_points_check
+  check (army_base_points >= 0);
+
 alter table public.territories enable row level security;
 alter table public.territory_adjacencies enable row level security;
 alter table public.campaign_turns enable row level security;

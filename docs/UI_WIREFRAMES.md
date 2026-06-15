@@ -179,7 +179,7 @@ Lisibilité, compréhension des actions, carte claire, statut des ordres, résol
 
 ## 21. À ne pas faire
 
-Pas de chat, boutique, héros, mercenaires, alliances, diplomatie, éditeur de carte, upload images, animations complexes, drag and drop obligatoire.
+Pas de canal de chat général, boutique, héros, mercenaires, alliances mécaniques, éditeur de carte, upload images, animations complexes, drag and drop obligatoire. La diplomatie reste limitée à une messagerie privée simple entre deux joueurs.
 
 ## 22. Définition d’un écran réussi
 

@@ -406,9 +406,9 @@ export default async function CampaignPage({
           : null;
   const canRecruitLegendaryUnits = !legendaryRecruitmentUnavailableMessage;
   const chatUnavailableMessage = !currentPlayer
-    ? "Tu dois rejoindre cette campagne pour écrire dans le chat."
+    ? "Tu dois rejoindre cette campagne pour utiliser la diplomatie privée."
     : currentPlayer.status !== "active"
-      ? "Ton joueur doit être actif pour écrire dans le chat."
+      ? "Ton joueur doit être actif pour utiliser la diplomatie privée."
       : null;
   const canSendChatMessage = !chatUnavailableMessage;
 
@@ -772,6 +772,7 @@ export default async function CampaignPage({
               messages={messages.map((message) => ({
                 id: message.id,
                 campaignPlayerId: message.campaign_player_id,
+                recipientCampaignPlayerId: message.recipient_campaign_player_id,
                 body: message.body,
                 createdAt: message.created_at,
               }))}

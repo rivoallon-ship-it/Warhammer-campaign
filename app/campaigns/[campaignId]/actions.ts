@@ -36,9 +36,10 @@ function redirectToCampaignAnchor(
 function getChatInstallError(errorMessage: string) {
   if (
     errorMessage.includes("campaign_messages") ||
+    errorMessage.includes("recipient_campaign_player_id") ||
     errorMessage.includes("Could not find the table")
   ) {
-    return "Le chat n'est pas encore installé dans Supabase. Copie le morceau SQL 19_campaign_chat.sql.";
+    return "La messagerie privée n'est pas encore installée dans Supabase. Copie le morceau SQL 22_private_diplomacy_messages.sql.";
   }
 
   return "Impossible d'envoyer le message pour le moment.";
@@ -77,10 +78,22 @@ export async function recruitLegendaryUnitAction(formData: FormData) {
 
 export async function sendCampaignMessageAction(formData: FormData) {
   const campaignId = getFormValue(formData, "campaignId");
+  const recipientCampaignPlayerId = getFormValue(
+    formData,
+    "recipientCampaignPlayerId",
+  );
   const body = getFormValue(formData, "body");
 
   if (!campaignId) {
     redirect("/dashboard?error=Campagne introuvable.");
+  }
+
+  if (!recipientCampaignPlayerId) {
+    redirectToCampaignAnchor(
+      campaignId,
+      { error: "Choisis un joueur destinataire." },
+      "campaign-chat",
+    );
   }
 
   if (!body) {
@@ -118,7 +131,34 @@ export async function sendCampaignMessageAction(formData: FormData) {
   if (playerError || !campaignPlayer || campaignPlayer.status !== "active") {
     redirectToCampaignAnchor(
       campaignId,
-      { error: "Tu dois être un joueur actif pour écrire dans le chat." },
+      { error: "Tu dois être un joueur actif pour écrire un message privé." },
+      "campaign-chat",
+    );
+  }
+
+  if (campaignPlayer.id === recipientCampaignPlayerId) {
+    redirectToCampaignAnchor(
+      campaignId,
+      { error: "Choisis un autre joueur comme destinataire." },
+      "campaign-chat",
+    );
+  }
+
+  const { data: recipientPlayer, error: recipientError } = await supabase
+    .from("campaign_players")
+    .select("id, status")
+    .eq("campaign_id", campaignId)
+    .eq("id", recipientCampaignPlayerId)
+    .maybeSingle();
+
+  if (
+    recipientError ||
+    !recipientPlayer ||
+    recipientPlayer.status !== "active"
+  ) {
+    redirectToCampaignAnchor(
+      campaignId,
+      { error: "Le destinataire doit être un joueur actif de la campagne." },
       "campaign-chat",
     );
   }
@@ -126,6 +166,7 @@ export async function sendCampaignMessageAction(formData: FormData) {
   const { error } = await supabase.from("campaign_messages").insert({
     campaign_id: campaignId,
     campaign_player_id: campaignPlayer.id,
+    recipient_campaign_player_id: recipientPlayer.id,
     body,
   });
 

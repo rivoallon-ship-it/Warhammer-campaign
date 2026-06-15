@@ -387,6 +387,15 @@ Commit principal :
 - Ajout du morceau Supabase `supabase/a_copier_par_morceaux/19_campaign_chat.sql`.
 - Le temps réel et les notifications restent hors périmètre de ce premier lot.
 
+### Mise à jour du 2026-06-15 : diplomatie privée
+
+- Remplacement du chat général par une messagerie diplomatique privée.
+- Ajout du champ `recipient_campaign_player_id` sur `campaign_messages`.
+- L'interface affiche une conversation par interlocuteur, avec sélection du joueur destinataire.
+- RLS : seuls l'auteur et le destinataire peuvent lire un message.
+- Les nouveaux messages exigent un destinataire actif différent de l'auteur.
+- Ajout du morceau Supabase `supabase/a_copier_par_morceaux/22_private_diplomacy_messages.sql`.
+
 ## Fichiers importants
 
 ### Application
@@ -432,6 +441,7 @@ Les derniers morceaux SQL importants pour la logique de conquête sont :
 - `16_legendary_recruitment.sql`
 - `18_zero_start_army_points.sql`
 - `19_campaign_chat.sql`
+- `22_private_diplomacy_messages.sql`
 - `14_logs_grants.sql`
 
 ## Vérifications réalisées

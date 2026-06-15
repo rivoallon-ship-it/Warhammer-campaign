@@ -473,6 +473,7 @@ export type Database = {
           id: string;
           campaign_id: string;
           campaign_player_id: string;
+          recipient_campaign_player_id: string | null;
           body: string;
           created_at: string;
         };
@@ -480,6 +481,7 @@ export type Database = {
           id?: string;
           campaign_id: string;
           campaign_player_id: string;
+          recipient_campaign_player_id: string;
           body: string;
           created_at?: string;
         };
@@ -487,6 +489,7 @@ export type Database = {
           id?: string;
           campaign_id?: string;
           campaign_player_id?: string;
+          recipient_campaign_player_id?: string | null;
           body?: string;
           created_at?: string;
         };

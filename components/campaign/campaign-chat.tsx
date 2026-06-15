@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { sendCampaignMessageAction } from "@/app/campaigns/[campaignId]/actions";
 import {
+  Badge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  Select,
   Textarea,
 } from "@/components/ui";
 
@@ -22,6 +24,7 @@ type ChatPlayer = {
 type ChatMessage = {
   id: string;
   campaignPlayerId: string;
+  recipientCampaignPlayerId: string | null;
   body: string;
   createdAt: string;
 };
@@ -70,6 +73,19 @@ function SendMessageButton() {
   );
 }
 
+function PlayerMark({ player }: { player: ChatPlayer | undefined }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <span
+        className="inline-block size-3 shrink-0 rounded-sm border border-[#f1dfab]/70"
+        style={{ backgroundColor: player?.color ?? "#c8bca7" }}
+        aria-hidden="true"
+      />
+      <span className="truncate">{player?.displayName ?? "Joueur"}</span>
+    </span>
+  );
+}
+
 export function CampaignChat({
   campaignId,
   players,
@@ -78,27 +94,75 @@ export function CampaignChat({
   canSend,
   unavailableMessage,
 }: CampaignChatProps) {
+  const conversationPartners = useMemo(
+    () =>
+      currentPlayerId
+        ? players.filter((player) => player.id !== currentPlayerId)
+        : [],
+    [currentPlayerId, players],
+  );
+  const [selectedPlayerId, setSelectedPlayerId] = useState(
+    conversationPartners[0]?.id ?? "",
+  );
   const playersById = useMemo(
     () => new Map(players.map((player) => [player.id, player])),
     [players],
   );
   const orderedMessages = useMemo(() => [...messages].reverse(), [messages]);
+  const selectedPlayer = selectedPlayerId
+    ? playersById.get(selectedPlayerId)
+    : null;
+  const conversationMessages =
+    currentPlayerId && selectedPlayerId
+      ? orderedMessages.filter((message) => {
+          const participants = [
+            message.campaignPlayerId,
+            message.recipientCampaignPlayerId,
+          ];
+
+          return (
+            participants.includes(currentPlayerId) &&
+            participants.includes(selectedPlayerId)
+          );
+        })
+      : [];
 
   return (
     <Card id="campaign-chat" className="fantasy-panel scroll-mt-4">
       <CardHeader>
-        <CardTitle className="fantasy-panel-title">Chat de partie</CardTitle>
+        <CardTitle className="fantasy-panel-title">Diplomatie</CardTitle>
         <CardDescription className="fantasy-muted">
-          Messages visibles par les joueurs actifs de cette campagne.
+          Messages privés entre deux joueurs. Aucun canal général.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {canSend && conversationPartners.length ? (
+          <Select
+            label="Interlocuteur"
+            name="selectedConversation"
+            value={selectedPlayerId}
+            onChange={(event) => setSelectedPlayerId(event.currentTarget.value)}
+            options={conversationPartners.map((player) => ({
+              label: player.displayName,
+              value: player.id,
+            }))}
+          />
+        ) : null}
+
         <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
-          {orderedMessages.length ? (
-            orderedMessages.map((message) => {
+          {selectedPlayer ? (
+            <div className="fantasy-stat flex items-center justify-between gap-3 p-3 text-sm">
+              <span className="min-w-0 font-semibold text-[#f3ead7]">
+                Conversation avec <PlayerMark player={selectedPlayer} />
+              </span>
+              <Badge variant="neutral">Privé</Badge>
+            </div>
+          ) : null}
+
+          {conversationMessages.length ? (
+            conversationMessages.map((message) => {
               const author = playersById.get(message.campaignPlayerId);
               const isCurrentPlayer = message.campaignPlayerId === currentPlayerId;
-              const authorName = author?.displayName ?? "Joueur";
 
               return (
                 <article
@@ -108,18 +172,9 @@ export function CampaignChat({
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span
-                        className="inline-block size-3 shrink-0 rounded-sm border border-[#f1dfab]/70"
-                        style={{
-                          backgroundColor: author?.color ?? "#c8bca7",
-                        }}
-                        aria-hidden="true"
-                      />
-                      <p className="truncate text-sm font-semibold text-[#f3ead7]">
-                        {authorName}
-                      </p>
-                    </div>
+                    <p className="min-w-0 text-sm font-semibold text-[#f3ead7]">
+                      {isCurrentPlayer ? "Moi" : <PlayerMark player={author} />}
+                    </p>
                     <time
                       className="shrink-0 text-xs font-semibold text-[#c9a45d]"
                       dateTime={message.createdAt}
@@ -135,28 +190,36 @@ export function CampaignChat({
             })
           ) : (
             <p className="fantasy-alert p-4 text-sm">
-              Aucun message pour le moment.
+              {selectedPlayer
+                ? "Aucun message avec ce joueur pour le moment."
+                : "Choisis un joueur pour démarrer une conversation."}
             </p>
           )}
         </div>
 
-        {canSend ? (
+        {canSend && conversationPartners.length ? (
           <form action={sendCampaignMessageAction} className="space-y-3">
             <input type="hidden" name="campaignId" value={campaignId} />
+            <input
+              type="hidden"
+              name="recipientCampaignPlayerId"
+              value={selectedPlayerId}
+            />
             <Textarea
               name="body"
-              label="Message"
+              label="Message privé"
               maxLength={800}
               rows={3}
               required
-              placeholder="Écrire aux autres joueurs..."
+              placeholder="Proposer une alliance, négocier une frontière..."
               className="min-h-24 resize-none"
             />
             <SendMessageButton />
           </form>
         ) : (
           <p className="fantasy-alert p-3 text-sm">
-            {unavailableMessage ?? "Le chat n'est pas disponible."}
+            {unavailableMessage ??
+              "La diplomatie privée nécessite au moins deux joueurs actifs."}
           </p>
         )}
       </CardContent>

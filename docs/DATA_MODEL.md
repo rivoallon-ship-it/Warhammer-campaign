@@ -23,7 +23,7 @@ L’authentification est gérée par Supabase Auth. Les données applicatives so
 | `battle_participants` | Participants des batailles, y compris batailles multi-joueurs |
 | `explorations` | Résultats des conquêtes neutres automatiques |
 | `campaign_logs` | Historique simple |
-| `campaign_messages` | Chat de partie |
+| `campaign_messages` | Messagerie diplomatique privée |
 
 ## 3. `profiles`
 
@@ -239,11 +239,11 @@ Types : `campaign_created`, `player_joined`, `player_approved`, `campaign_launch
 
 ## 17. `campaign_messages`
 
-Champs : `id`, `campaign_id`, `campaign_player_id`, `body`, `created_at`.
+Champs : `id`, `campaign_id`, `campaign_player_id`, `recipient_campaign_player_id`, `body`, `created_at`.
 
-`body` est limité à 800 caractères non vides. Les messages sont rattachés au joueur de campagne auteur via la paire `(campaign_id, campaign_player_id)`.
+`body` est limité à 800 caractères non vides. Les messages sont rattachés au joueur de campagne auteur via `(campaign_id, campaign_player_id)` et au joueur destinataire via `(campaign_id, recipient_campaign_player_id)`.
 
-RLS : seuls les joueurs actifs d'une campagne peuvent lire ses messages. Un joueur actif peut insérer uniquement ses propres messages. Il n'y a pas de modification ni suppression de message dans la V1.
+RLS : seuls l'auteur actif et le destinataire actif peuvent lire un message. Un joueur actif peut insérer uniquement ses propres messages vers un autre joueur actif de la même campagne. Il n'y a pas de canal général, ni de modification ou suppression de message dans la V1.
 
 ## 18. Fonctions métier attendues
 
@@ -259,7 +259,7 @@ RLS : seuls les joueurs actifs d'une campagne peuvent lire ses messages. Un joue
 - `resolveExploration` : compatibilité/correction manuelle des anciennes explorations, D6, Gloire, territoire si succès, status resolved, log.
 - `resolveBattle` : maître, vainqueur, Gloire, territoire, fortification, participants multi-joueurs, status played, log.
 - `finishTurn` : maître, tout résolu, clôturer tour, créer suivant, phase orders, log.
-- `sendCampaignMessage` : joueur actif seulement, message non vide limité à 800 caractères, insertion dans `campaign_messages`.
+- `sendCampaignMessage` : joueur actif seulement, destinataire actif obligatoire, message non vide limité à 800 caractères, insertion dans `campaign_messages`.
 
 Les fonctions SQL de transition `reveal_current_turn_orders`, `resolve_battle_result` et `finish_current_turn` doivent verrouiller les lignes critiques avec `for update` afin d'éviter les doubles traitements en cas de double clic ou d'appel concurrent. `reveal_current_turn_orders` accepte un joueur actif, mais refuse tant que tous les ordres actifs ne sont pas soumis.
 
@@ -307,7 +307,7 @@ Règle générale : un utilisateur lit les données d’une campagne uniquement 
 
 Les campagnes en `lobby` ne sont pas lisibles globalement par tous les utilisateurs connectés. Un non-membre peut seulement fournir un code à `get_join_campaign_details`. La demande d'inscription passe par `request_join_campaign`; l'application ne doit pas contourner cette fonction par un `insert` direct dans `campaign_players`.
 
-Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier. Messages de chat : lecture par joueurs actifs, insertion uniquement par l'auteur actif.
+Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier. Messages diplomatiques : lecture uniquement par l'auteur et le destinataire, insertion uniquement par l'auteur actif vers un autre joueur actif.
 
 ## 21. Données dérivées
 

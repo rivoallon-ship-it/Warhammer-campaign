@@ -27,6 +27,7 @@ Chaque fichier est volontairement limité à moins de 100 lignes.
 22. `19_campaign_chat.sql`
 23. `20_lobby_player_visibility.sql`
 24. `21_launch_map_insert_fix.sql`
+25. `22_private_diplomacy_messages.sql`
 
 Dans Supabase SQL Editor :
 
@@ -47,3 +48,5 @@ Correctifs ponctuels :
   enregistrée mais n'apparaît pas dans le lobby.
 - `21_launch_map_insert_fix.sql` : à lancer si le lancement de campagne affiche
   `Impossible d'enregistrer les territoires.`
+- `22_private_diplomacy_messages.sql` : à lancer pour remplacer le chat général
+  par une messagerie diplomatique privée entre deux joueurs.

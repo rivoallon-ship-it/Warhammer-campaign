@@ -160,9 +160,9 @@ Navigation, loading/error/empty states, confirmations, responsive, lisibilité c
 
 État partiel déjà livré : écran campagne compact, carte et ordres fusionnés, routes legacy redirigées, ordre annulable, action de conquête affichée uniquement quand une cible conquérable est sélectionnée.
 
-## Lot 22 — Chat de partie simple
+## Lot 22 — Messagerie diplomatique privée
 
-Ajouter un chat de campagne sur l'écran principal. Les messages sont persistés en base, limités à 800 caractères, visibles uniquement par les joueurs actifs de la campagne et envoyables uniquement par leur auteur actif. Le temps réel et les notifications restent hors périmètre de ce lot.
+Ajouter une messagerie privée sur l'écran principal. Les messages sont persistés en base, limités à 800 caractères, rattachés à un auteur et un destinataire, et visibles uniquement par ces deux joueurs actifs. Il n'y a pas de canal général visible par toute la table. Le temps réel et les notifications restent hors périmètre de ce lot.
 
 ## Backlog post-MVP
 

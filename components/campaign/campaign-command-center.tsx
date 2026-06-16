@@ -100,6 +100,8 @@ const territoryTypeMarks: Record<string, string> = {
   giant: "GI",
   wild: "SA",
 };
+const fortifyOrderTooltip =
+  "Fortifier donne +200 points d'armée au défenseur si ce territoire est attaqué. La fortification est retirée après la bataille.";
 
 const territoryTypeBadgeStyles: Record<
   string,
@@ -256,6 +258,51 @@ function ConquestSubmitButton() {
         "Conquérir"
       )}
     </Button>
+  );
+}
+
+function FortifySubmitButton() {
+  const { pending } = useFormStatus();
+  const tooltipId = "fortify-order-tooltip";
+
+  return (
+    <div className="group relative w-full">
+      <Button
+        type="submit"
+        variant="outlineDark"
+        className="fantasy-action-button w-full gap-2 border-[#2f5f91] bg-[#17456d] text-[#f4e6c8] hover:bg-[#1f5786]"
+        disabled={pending}
+        aria-describedby={tooltipId}
+        aria-live="polite"
+      >
+        {pending ? (
+          <>
+            <span
+              className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+              aria-hidden="true"
+            />
+            Enregistrement...
+          </>
+        ) : (
+          <>
+            Fortifier
+            <span
+              className="inline-flex size-5 items-center justify-center rounded-full border border-[#f3d58c]/70 bg-[#0f1718]/45 text-xs font-bold text-[#f3d58c]"
+              aria-hidden="true"
+            >
+              ?
+            </span>
+          </>
+        )}
+      </Button>
+      <span
+        id={tooltipId}
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 w-full rounded-md border border-[#d5a653]/60 bg-[#111819] px-3 py-2 text-left text-xs leading-relaxed text-[#f4e6c8] opacity-0 shadow-xl shadow-black/30 transition duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {fortifyOrderTooltip}
+      </span>
+    </div>
   );
 }
 
@@ -729,13 +776,7 @@ export function CampaignCommandCenter({
                           name="targetTerritoryId"
                           value={selectedTerritory.id}
                         />
-                        <Button
-                          type="submit"
-                          variant="outlineDark"
-                          className="fantasy-action-button w-full border-[#2f5f91] bg-[#17456d] text-[#f4e6c8] hover:bg-[#1f5786]"
-                        >
-                          Fortifier
-                        </Button>
+                        <FortifySubmitButton />
                       </form>
                     )}
 

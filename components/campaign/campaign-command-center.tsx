@@ -20,6 +20,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
+import {
+  blendHexColors,
+  getReadableTextColor,
+  getVisibleAccentColor,
+} from "@/lib/colors";
 import { cn } from "@/lib/utils";
 
 type CommandPlayer = {
@@ -83,6 +88,9 @@ const neutralTerritoryColor = "#c8bca7";
 const neutralTerritoryFill = "#f2eee5";
 const contestedTerritoryColor = "#9f2f45";
 const contestedTerritoryFill = "#68221f";
+const mapBoardBaseColor = "#0a1214";
+const mapTileLightText = "#fffaf0";
+const mapTileDarkText = "#120f0c";
 const hexClipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
 const hexTileWidth = 136;
 const hexTileHeight = 144;
@@ -433,9 +441,14 @@ export function CampaignCommandCenter({
       : null;
     const isSelected = territory.id === selectedTerritory?.id;
     const isContested = contestedTerritoryIdSet.has(territory.id);
-    const ownerColor = isContested
+    const ownerRawColor = isContested
       ? contestedTerritoryColor
       : (owner?.color ?? neutralTerritoryColor);
+    const ownerAccentColor = isContested
+      ? contestedTerritoryColor
+      : getVisibleAccentColor(ownerRawColor, {
+          mapBackground: mapBoardBaseColor,
+        });
     const isOwnedByCurrentPlayer = owner?.id === currentPlayerId;
     const isConquerableByCurrentPlayer =
       canSubmitOrders &&
@@ -446,28 +459,38 @@ export function CampaignCommandCenter({
           ?.has(territory.code),
       );
     const territoryColor =
-      isSelected && isConquerableByCurrentPlayer ? "#79a83d" : ownerColor;
-    const backgroundColor = isContested
+      isSelected && isConquerableByCurrentPlayer
+        ? "#79a83d"
+        : ownerAccentColor;
+    const tileBackgroundColor = isContested
       ? contestedTerritoryFill
       : owner?.color
-        ? `${owner.color}52`
+        ? blendHexColors(owner.color, mapBoardBaseColor, 0.42)
         : neutralTerritoryFill;
+    const tileTextColor = getReadableTextColor(tileBackgroundColor, {
+      lightText: mapTileLightText,
+      darkText: mapTileDarkText,
+    });
+    const tileTextShadow =
+      tileTextColor === mapTileLightText
+        ? "0 1px 1px rgb(0 0 0 / 72%)"
+        : "0 1px 0 rgb(255 250 240 / 42%)";
     const ownerLabel = isContested
       ? "Bataille en cours"
       : (owner?.displayName ?? "Neutre");
-    const isDarkTile = isContested;
 
     const typeBadge = <TerritoryTypeBadge type={territory.type} />;
     const ownerLine = (
       <span
-        className={cn(
-          "flex min-w-0 max-w-full items-center gap-2 font-medium",
-          isDarkTile ? "text-[#f5dca8]" : "text-[#55483a]",
-        )}
+        className="flex min-w-0 max-w-full items-center gap-2 font-semibold"
+        style={{ color: tileTextColor, textShadow: tileTextShadow }}
       >
         <span
-          className="inline-block size-2.5 shrink-0 rounded-sm border border-[#fff8dd]"
-          style={{ backgroundColor: ownerColor }}
+          className="inline-block size-2.5 shrink-0 rounded-sm border"
+          style={{
+            backgroundColor: ownerRawColor,
+            borderColor: tileTextColor,
+          }}
           aria-hidden="true"
         />
         <span className="truncate">{ownerLabel}</span>
@@ -500,10 +523,8 @@ export function CampaignCommandCenter({
           ) : null}
         </span>
         <span
-          className={cn(
-            "my-auto line-clamp-2 px-1 text-center text-[13px] font-bold leading-[15px]",
-            isDarkTile ? "text-[#fff4d1]" : "text-[#211a16]",
-          )}
+          className="my-auto line-clamp-2 px-1 text-center text-[13px] font-bold leading-[15px]"
+          style={{ color: tileTextColor, textShadow: tileTextShadow }}
         >
           {territory.name}
         </span>
@@ -517,10 +538,8 @@ export function CampaignCommandCenter({
       <>
         <span className="flex items-start justify-between gap-2">
           <span
-            className={cn(
-              "line-clamp-2 min-h-10 font-semibold leading-5",
-              isDarkTile ? "text-[#fff4d1]" : "text-[#211a16]",
-            )}
+            className="line-clamp-2 min-h-10 font-semibold leading-5"
+            style={{ color: tileTextColor, textShadow: tileTextShadow }}
           >
             {territory.name}
           </span>
@@ -552,7 +571,7 @@ export function CampaignCommandCenter({
           <span
             className="hex-territory-inner flex h-full w-full flex-col overflow-hidden px-4 py-4"
             style={{
-              backgroundColor,
+              backgroundColor: tileBackgroundColor,
               clipPath: hexClipPath,
             }}
           >
@@ -574,7 +593,8 @@ export function CampaignCommandCenter({
         )}
         style={{
           borderColor: territoryColor,
-          backgroundColor,
+          backgroundColor: tileBackgroundColor,
+          color: tileTextColor,
           boxShadow: isSelected ? "0 0 0 2px #302720" : undefined,
         }}
       >

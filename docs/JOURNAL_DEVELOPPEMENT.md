@@ -404,6 +404,13 @@ Commit principal :
 - Le journal de bataille indique la perte du territoire source quand elle a lieu.
 - Les morceaux Supabase concernés sont `supabase/a_copier_par_morceaux/07_reveal_orders_function.sql` et `supabase/a_copier_par_morceaux/09_resolve_battle_function.sql`.
 
+### Mise à jour du 2026-06-16 : contraste de la carte
+
+- Ajout d'un utilitaire de contraste couleur dans `lib/colors.ts`.
+- Les hexagones choisissent maintenant automatiquement une couleur de texte claire ou sombre selon le fond calculé de la case.
+- Les contours des territoires aux couleurs très sombres sont éclaircis pour rester visibles sur le fond de carte.
+- Ajout de tests automatisés pour le calcul de contraste et les couleurs d'accent.
+
 ## Fichiers importants
 
 ### Application

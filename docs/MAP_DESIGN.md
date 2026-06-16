@@ -90,7 +90,9 @@ Exemple :
 
 Couleurs MVP : rouge, bleu, vert, jaune, violet, orange, rose, turquoise.
 
-Une couleur ne peut être utilisée que par un joueur actif dans une campagne. Utiliser fond clair + bordure forte pour préserver la lisibilité. Neutre = gris.
+Une couleur ne peut être utilisée que par un joueur actif dans une campagne. Neutre = gris.
+
+La carte doit adapter automatiquement les couleurs de texte et d'accent selon la couleur réelle de la case. Objectif : conserver un contraste lisible, y compris pour les couleurs joueur très sombres comme noir, bleu nuit ou rouge sombre. Les contours des cases sombres peuvent être éclaircis pour rester visibles sur le fond de carte.
 
 ## 10. Fiche territoire
 

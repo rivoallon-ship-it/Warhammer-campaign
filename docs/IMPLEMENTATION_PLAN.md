@@ -136,7 +136,7 @@ Page `/campaigns/[campaignId]/reveal`. Page de suivi/compatibilité. La révéla
 
 ## Lot 16 — Génération batailles/conquêtes
 
-`conquer` vers territoire ennemi -> `battles`. `conquer` vers territoire neutre seul -> D6 automatique et ligne `explorations` résolue. `conquer` vers territoire neutre ciblé par plusieurs joueurs -> bataille multi-joueurs avec participants et D6 d'avantage. `fortify` -> `territories.is_fortified=true` + log, sauf forteresse ou territoire déjà fortifié.
+`conquer` vers territoire ennemi -> `battles`. `conquer` vers territoire neutre seul -> D6 automatique et ligne `explorations` résolue. `conquer` vers territoire neutre ciblé par plusieurs joueurs -> bataille multi-joueurs avec participants et D6 d'avantage. `fortify` -> `territories.is_fortified=true` + log, sauf forteresse ou territoire déjà fortifié. Les fortifications sont appliquées avant la création des batailles pour compter si le territoire est attaqué le même tour.
 
 ## Lot 17 — Résolution des conquêtes automatiques
 
@@ -144,7 +144,7 @@ Page `/campaigns/[campaignId]/results`. Les conquêtes neutres non contestées s
 
 ## Lot 18 — Résolution des batailles
 
-Chaque participant peut engager ses Dragons/Géants disponibles avant résolution : Dragon +160 points, Géant +120 points, réserve protégée. Maître saisit vainqueur + notes + pertes légendaires plafonnées aux unités engagées. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire inchangé, +2/+1. Capitale capturée : +5 Gloire attaquant. Ruine conquise pour la première fois : +1 Gloire. Fortification/forteresse : +200 points défenseur. Retirer seulement la fortification manuelle. Status played, log.
+Chaque participant peut engager ses Dragons/Géants disponibles avant résolution : Dragon +160 points, Géant +120 points, réserve protégée. Maître saisit vainqueur + notes + pertes légendaires plafonnées aux unités engagées. Attaquant gagne : territoire à attaquant, +3/+1. Défenseur gagne : territoire attaqué inchangé, +2/+1, et capture le territoire source de l'attaque s'il est encore contrôlé par l'attaquant. Capitale capturée : +5 Gloire attaquant. Ruine conquise pour la première fois : +1 Gloire. Fortification/forteresse : +200 points défenseur. Retirer seulement la fortification manuelle. Status played, log.
 
 ## Lot 19 — Fin de tour
 

@@ -146,7 +146,7 @@ Actions internes :
 
 ## 16. Révélation des ordres
 
-Quand tous les joueurs actifs ont soumis leurs ordres, la révélation se déclenche automatiquement. Après révélation, tous les ordres deviennent visibles, les batailles/conquêtes automatiques sont générées et les fortifications appliquées. Si au moins une bataille est créée, la campagne passe en résolution. Si aucune bataille n'est créée, le tour est terminé automatiquement et le tour suivant s'ouvre.
+Quand tous les joueurs actifs ont soumis leurs ordres, la révélation se déclenche automatiquement. Après révélation, tous les ordres deviennent visibles, les fortifications sont appliquées, puis les batailles/conquêtes automatiques sont générées. Si un territoire est fortifié pendant le même tour où il est attaqué, la bataille bénéficie donc de la fortification. Si au moins une bataille est créée, la campagne passe en résolution. Si aucune bataille n'est créée, le tour est terminé automatiquement et le tour suivant s'ouvre.
 
 ## 17. Batailles
 
@@ -154,7 +154,7 @@ Une bataille est créée quand un joueur conquiert un territoire ennemi ou quand
 
 Si l’attaquant gagne contre un défenseur : territoire à l’attaquant, attaquant +3 Gloire, défenseur +1 Gloire.
 
-Si le défenseur gagne : territoire inchangé, défenseur +2 Gloire, attaquant +1 Gloire.
+Si le défenseur gagne : territoire attaqué inchangé, défenseur +2 Gloire, attaquant +1 Gloire. Le territoire source de l'attaque passe au défenseur s'il est encore contrôlé par l'attaquant.
 
 Si le territoire était fortifié : défenseur +200 points d’armée, bonus affiché puis fortification retirée après la bataille.
 

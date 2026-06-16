@@ -207,7 +207,7 @@ Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `territory_id`, `attacker_c
 
 `status` : `pending`, `played`, `cancelled`.
 
-Pour une bataille classique contre un territoire ennemi : si attaquant gagne, territoire attaquant, attaquant +3, défenseur +1. Si défenseur gagne, territoire inchangé, défenseur +2, attaquant +1. Retirer fortification après bataille si elle a fourni un bonus.
+Pour une bataille classique contre un territoire ennemi : si attaquant gagne, territoire attaquant, attaquant +3, défenseur +1. Si défenseur gagne, territoire attaqué inchangé, défenseur +2, attaquant +1, et le territoire source de l'attaque passe au défenseur s'il est encore contrôlé par l'attaquant. Retirer fortification après bataille si elle a fourni un bonus.
 
 Pour une bataille multi-joueurs sur territoire neutre : le vainqueur gagne le territoire et +3 Gloire, chaque autre participant gagne +1 Gloire.
 

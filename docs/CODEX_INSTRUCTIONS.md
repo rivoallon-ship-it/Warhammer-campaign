@@ -118,13 +118,13 @@ Si deux joueurs ou plus visent le même territoire neutre, créer une bataille m
 
 ### Bataille
 
-Conquête d'un territoire ennemi : bataille entre attaquant et défenseur. Attaquant gagne : territoire à attaquant, attaquant +3, défenseur +1. Défenseur gagne : territoire inchangé, défenseur +2, attaquant +1.
+Conquête d'un territoire ennemi : bataille entre attaquant et défenseur. Attaquant gagne : territoire à attaquant, attaquant +3, défenseur +1. Défenseur gagne : territoire attaqué inchangé, défenseur +2, attaquant +1, et le territoire source de l'attaque passe au défenseur s'il est encore contrôlé par l'attaquant.
 
 Bataille multi-joueurs : le vainqueur gagne le territoire et +3 Gloire, chaque autre participant gagne +1 Gloire.
 
 Bonus de territoire : capitale capturée par attaquant = +5 Gloire supplémentaire ; première conquête d'une ruine = +1 Gloire supplémentaire ; Dragon/Géant neutre conquis = +3 Gloire supplémentaire.
 
-Fortification ou forteresse : défenseur +200 points d'armée. Retirer seulement la fortification manuelle après bataille ; la forteresse garde son bonus naturel.
+Fortification ou forteresse : défenseur +200 points d'armée. Une fortification posée pendant le même tour que l'attaque doit être appliquée avant la création de la bataille pour compter dans `defender_bonus`. Retirer seulement la fortification manuelle après bataille ; la forteresse garde son bonus naturel.
 
 Tour magique : le défenseur dispose d'un magicien niveau 1 pour la bataille (santé 8, sauvegarde 4+). Ce bonus ne donne pas +200 points d'armée.
 

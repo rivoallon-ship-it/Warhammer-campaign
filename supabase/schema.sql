@@ -1003,6 +1003,43 @@ begin
     return;
   end if;
 
+  update public.territories target
+  set is_fortified = true,
+      updated_at = now()
+  from public.orders o
+  where target.id = o.target_territory_id
+    and o.campaign_id = v_campaign.id
+    and o.turn_id = v_turn.id
+    and o.status = 'submitted'
+    and o.action_type = 'fortify'
+    and target.type <> 'fort'
+    and not target.is_fortified;
+
+  get diagnostics v_fortification_count = row_count;
+
+  insert into public.campaign_logs (
+    campaign_id,
+    turn_id,
+    type,
+    title,
+    description,
+    created_by_user_id
+  )
+  select
+    o.campaign_id,
+    o.turn_id,
+    'territory_fortified',
+    'Territoire fortifié',
+    cp.display_name || ' fortifie ' || target.code || ' - ' || target.name || '.',
+    auth.uid()
+  from public.orders o
+  join public.campaign_players cp on cp.id = o.campaign_player_id
+  join public.territories target on target.id = o.target_territory_id
+  where o.campaign_id = v_campaign.id
+    and o.turn_id = v_turn.id
+    and o.status = 'submitted'
+    and o.action_type = 'fortify';
+
   select count(*)
   into v_multiple_attack_count
   from (
@@ -1399,43 +1436,6 @@ begin
 
   v_battle_count := v_enemy_battle_count + v_contested_battle_count;
 
-  update public.territories target
-  set is_fortified = true,
-      updated_at = now()
-  from public.orders o
-  where target.id = o.target_territory_id
-    and o.campaign_id = v_campaign.id
-    and o.turn_id = v_turn.id
-    and o.status = 'submitted'
-    and o.action_type = 'fortify'
-    and target.type <> 'fort'
-    and not target.is_fortified;
-
-  get diagnostics v_fortification_count = row_count;
-
-  insert into public.campaign_logs (
-    campaign_id,
-    turn_id,
-    type,
-    title,
-    description,
-    created_by_user_id
-  )
-  select
-    o.campaign_id,
-    o.turn_id,
-    'territory_fortified',
-    'Territoire fortifié',
-    cp.display_name || ' fortifie ' || target.code || ' - ' || target.name || '.',
-    auth.uid()
-  from public.orders o
-  join public.campaign_players cp on cp.id = o.campaign_player_id
-  join public.territories target on target.id = o.target_territory_id
-  where o.campaign_id = v_campaign.id
-    and o.turn_id = v_turn.id
-    and o.status = 'submitted'
-    and o.action_type = 'fortify';
-
   update public.orders
   set status = 'revealed',
       revealed_at = now()
@@ -1772,8 +1772,8 @@ returns table (success boolean, error text, winner_role text)
 language plpgsql volatile security definer set search_path = public as $resolve_battle_result$
 declare
   v_battle public.battles%rowtype; v_campaign public.campaigns%rowtype; v_turn public.campaign_turns%rowtype;
-  v_territory public.territories%rowtype; v_winner public.campaign_players%rowtype; v_loss record;
-  v_winner_role text; v_notes text; v_loss_name text; v_loss_summary text := ''; v_losses jsonb := coalesce(submitted_legendary_losses, '[]'::jsonb);
+  v_territory public.territories%rowtype; v_attack_source public.territories%rowtype; v_winner public.campaign_players%rowtype; v_loss record;
+  v_winner_role text; v_notes text; v_loss_name text; v_loss_summary text := ''; v_source_loss_description text := ''; v_losses jsonb := coalesce(submitted_legendary_losses, '[]'::jsonb);
   v_dragon_losses int := 0; v_giant_losses int := 0;
   v_participant_count int := 0; v_loser_count int := 0; v_capital_bonus int := 0; v_ruins_bonus int := 0; v_legendary_bonus int := 0; v_winner_bonus int := 0; v_has_participants boolean := false;
 begin
@@ -1827,6 +1827,32 @@ begin
   v_ruins_bonus := case when v_territory.type = 'ruins' and v_territory.special_reward_claimed_at is null and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id then 1 else 0 end;
   v_legendary_bonus := case when v_territory.type in ('dragon', 'giant') and v_territory.owner_campaign_player_id is null and submitted_winner_campaign_player_id is distinct from v_territory.owner_campaign_player_id then 3 else 0 end;
   v_winner_bonus := case when v_winner_role = 'defender' then 2 else 3 end + v_capital_bonus + v_ruins_bonus + v_legendary_bonus;
+  if v_winner_role = 'defender' and v_battle.order_id is not null then
+    select source.*
+    into v_attack_source
+    from public.orders o
+    join public.territories source on source.id = o.source_territory_id
+    where o.id = v_battle.order_id
+      and source.owner_campaign_player_id = v_battle.attacker_campaign_player_id
+      and exists (
+        select 1
+        from public.territory_adjacencies adjacency
+        where adjacency.campaign_id = v_battle.campaign_id
+          and adjacency.territory_code = v_territory.code
+          and adjacency.adjacent_territory_code = source.code
+      )
+    for update;
+
+    if found then
+      update public.territories
+      set owner_campaign_player_id = submitted_winner_campaign_player_id,
+          is_fortified = false,
+          updated_at = now()
+      where id = v_attack_source.id;
+
+      v_source_loss_description := ' ' || v_attack_source.code || ' - ' || v_attack_source.name || ' est perdu par l''attaquant et passe au défenseur.';
+    end if;
+  end if;
   update public.battles set status = 'played', winner_campaign_player_id = submitted_winner_campaign_player_id, result_notes = v_notes, resolved_at = now() where id = v_battle.id;
   if exists (select 1 from public.battle_participants where battle_id = v_battle.id) then
     update public.campaign_players cp set glory = glory + case when cp.id = submitted_winner_campaign_player_id then v_winner_bonus else 1 end, updated_at = now() where exists (select 1 from public.battle_participants bp where bp.battle_id = v_battle.id and bp.campaign_player_id = cp.id);
@@ -1836,7 +1862,7 @@ begin
   update public.territories set owner_campaign_player_id = submitted_winner_campaign_player_id, is_fortified = case when v_territory.is_fortified then false else is_fortified end, special_reward_claimed_at = case when v_ruins_bonus > 0 then now() else special_reward_claimed_at end, updated_at = now() where id = v_battle.territory_id;
   insert into public.campaign_logs (campaign_id, turn_id, type, title, description, created_by_user_id)
   values (v_battle.campaign_id, v_battle.turn_id, 'battle_result', 'Bataille résolue',
-    v_winner.display_name || ' remporte la bataille pour ' || v_territory.code || ' - ' || v_territory.name || '. +' || v_winner_bonus || ' Gloire vainqueur' || case when v_capital_bonus > 0 then ' dont +5 pour capitale capturée' else '' end || case when v_ruins_bonus > 0 then ' dont +1 pour ruines' else '' end || case when v_legendary_bonus > 0 and v_territory.type = 'dragon' then ' dont +3 pour Dragon' when v_legendary_bonus > 0 and v_territory.type = 'giant' then ' dont +3 pour Géant' else '' end || case when v_loser_count > 0 then ', +1 Gloire pour chaque autre participant.' else '.' end || case when v_territory.is_fortified then ' La fortification est retirée.' else '' end || v_loss_summary || case when v_notes is not null then ' Notes : ' || v_notes else '' end,
+    v_winner.display_name || ' remporte la bataille pour ' || v_territory.code || ' - ' || v_territory.name || '. +' || v_winner_bonus || ' Gloire vainqueur' || case when v_capital_bonus > 0 then ' dont +5 pour capitale capturée' else '' end || case when v_ruins_bonus > 0 then ' dont +1 pour ruines' else '' end || case when v_legendary_bonus > 0 and v_territory.type = 'dragon' then ' dont +3 pour Dragon' when v_legendary_bonus > 0 and v_territory.type = 'giant' then ' dont +3 pour Géant' else '' end || case when v_loser_count > 0 then ', +1 Gloire pour chaque autre participant.' else '.' end || case when v_territory.is_fortified then ' La fortification est retirée.' else '' end || v_source_loss_description || v_loss_summary || case when v_notes is not null then ' Notes : ' || v_notes else '' end,
     auth.uid());
   return query select true, null::text, v_winner_role;
 end;

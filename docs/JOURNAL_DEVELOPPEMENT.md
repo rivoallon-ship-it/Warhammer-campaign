@@ -396,6 +396,14 @@ Commit principal :
 - Les nouveaux messages exigent un destinataire actif différent de l'auteur.
 - Ajout du morceau Supabase `supabase/a_copier_par_morceaux/22_private_diplomacy_messages.sql`.
 
+### Mise à jour du 2026-06-16 : fortification et contre-attaque
+
+- La révélation applique maintenant les ordres `fortify` avant la création des batailles.
+- Si un défenseur fortifie un territoire pendant le même tour où il est attaqué, la bataille reçoit donc le bonus `Fortification : défenseur +200 points d'armée`.
+- Si l'attaquant perd une bataille contre un territoire adverse, le territoire source de l'attaque passe au défenseur s'il est encore contrôlé par l'attaquant.
+- Le journal de bataille indique la perte du territoire source quand elle a lieu.
+- Les morceaux Supabase concernés sont `supabase/a_copier_par_morceaux/07_reveal_orders_function.sql` et `supabase/a_copier_par_morceaux/09_resolve_battle_function.sql`.
+
 ## Fichiers importants
 
 ### Application

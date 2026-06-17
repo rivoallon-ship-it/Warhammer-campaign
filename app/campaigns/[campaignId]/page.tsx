@@ -420,6 +420,151 @@ export default async function CampaignPage({
       ? "Ton joueur doit être actif pour utiliser la diplomatie privée."
       : null;
   const canSendChatMessage = !chatUnavailableMessage;
+  const playersAndOrdersSection = (
+    <section className="min-w-0">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="fantasy-panel-title text-lg font-bold">
+          Joueurs et ordres
+        </h2>
+        <Badge variant="neutral">
+          {submittedOrderCount} / {activePlayers.length} ordres
+        </Badge>
+      </div>
+
+      <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+        {rankedPlayers.map((player, index) => {
+          const playerRuleStats = playerTerritoryRuleStats.get(player.id) ?? {
+            controlledCount: 0,
+            villageCount: 0,
+            mineCount: 0,
+          };
+          const controlledTerritories = playerRuleStats.controlledCount;
+          const villageArmyBonus = getVillageArmyBonus(
+            playerRuleStats.villageCount,
+          );
+          const effectiveArmyPoints = armyBasePoints + villageArmyBonus;
+          const endTurnGloryIncome = getEndTurnGloryIncome(playerRuleStats);
+          const legendaryRecruitsSummary = getLegendaryRecruitsSummary(
+            player.dragon_recruits,
+            player.giant_recruits,
+          );
+          const order = orderVisibilityByPlayerId.get(player.id);
+          const displayedStatus = order?.can_view_details
+            ? order.order_status
+            : getPublicOrderStatus(order?.order_status);
+
+          return (
+            <div
+              key={player.id}
+              className="fantasy-stat flex min-h-[190px] flex-col justify-between p-3"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Badge variant="neutral">#{index + 1}</Badge>
+                    {player.color ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs text-[#cbbda6]"
+                        title={getColorLabel(player.color)}
+                      >
+                        <ColorSwatch color={player.color} />
+                      </span>
+                    ) : null}
+                  </div>
+                  <Badge variant={getOrderStatusVariant(displayedStatus)}>
+                    {getOrderStatusLabel(displayedStatus)}
+                  </Badge>
+                </div>
+                <p className="mt-3 truncate font-semibold text-[#f3ead7]">
+                  {player.display_name}
+                </p>
+                <p className="fantasy-muted mt-1 truncate text-sm">
+                  {player.aos_faction ?? "Faction non renseignée"}
+                </p>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p className="text-lg font-bold text-[#f4ce73]">
+                    {player.glory}
+                  </p>
+                  <p className="fantasy-muted">Gloire</p>
+                </div>
+                <div>
+                  <p className="font-bold text-[#f3ead7]">
+                    {controlledTerritories}
+                  </p>
+                  <p className="fantasy-muted">Territoires</p>
+                </div>
+                <div>
+                  <p className="font-bold text-[#f3ead7]">
+                    {effectiveArmyPoints} pts
+                  </p>
+                  <p className="fantasy-muted">
+                    Armée
+                    {villageArmyBonus > 0 ? ` +${villageArmyBonus}` : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-bold text-[#f3ead7]">
+                    +{endTurnGloryIncome}
+                  </p>
+                  <p className="fantasy-muted">Fin de tour</p>
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-1 text-xs">
+                <p
+                  className="fantasy-muted truncate"
+                  title={getOrderVisibilitySummary(order, territoryNameById)}
+                >
+                  {getOrderVisibilitySummary(order, territoryNameById)}
+                </p>
+                {legendaryRecruitsSummary ? (
+                  <p
+                    className="fantasy-muted truncate"
+                    title={`Renforts : ${legendaryRecruitsSummary}`}
+                  >
+                    Renforts : {legendaryRecruitsSummary}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {pendingPlayers.length ? (
+        <p className="fantasy-alert fantasy-alert-info mt-3 p-3 text-sm">
+          {pendingPlayers.length} demande
+          {pendingPlayers.length > 1 ? "s" : ""} encore en attente.
+        </p>
+      ) : null}
+    </section>
+  );
+  const campaignActivitySection = (
+    <div className="space-y-4">
+      <CampaignChat
+        campaignId={campaign.id}
+        players={activePlayers.map((player) => ({
+          id: player.id,
+          displayName: player.display_name,
+          color: player.color,
+        }))}
+        messages={messages.map((message) => ({
+          id: message.id,
+          campaignPlayerId: message.campaign_player_id,
+          recipientCampaignPlayerId: message.recipient_campaign_player_id,
+          body: message.body,
+          createdAt: message.created_at,
+        }))}
+        currentPlayerId={currentPlayer?.id ?? null}
+        canSend={canSendChatMessage}
+        unavailableMessage={chatUnavailableMessage}
+      />
+      <CampaignLog logs={logs} />
+    </div>
+  );
 
   return (
     <main className="campaign-fantasy-shell min-h-screen px-4 py-8 text-[#f3ead7] sm:px-6 lg:py-10">
@@ -586,6 +731,8 @@ export default async function CampaignPage({
         <section className="mt-4">
           {territories.length ? (
             <CampaignCommandCenter
+              belowMap={playersAndOrdersSection}
+              belowSidebar={campaignActivitySection}
               campaignId={campaign.id}
               mapWidth={campaign.map_width}
               mapHeight={campaign.map_height}
@@ -650,151 +797,12 @@ export default async function CampaignPage({
           )}
         </section>
 
-        <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <section className="min-w-0">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="fantasy-panel-title text-lg font-bold">
-                Joueurs et ordres
-              </h2>
-              <Badge variant="neutral">
-                {submittedOrderCount} / {activePlayers.length} ordres
-              </Badge>
-            </div>
-
-            <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
-              {rankedPlayers.map((player, index) => {
-                const playerRuleStats = playerTerritoryRuleStats.get(player.id) ?? {
-                    controlledCount: 0,
-                    villageCount: 0,
-                    mineCount: 0,
-                };
-                const controlledTerritories = playerRuleStats.controlledCount;
-                const villageArmyBonus = getVillageArmyBonus(
-                  playerRuleStats.villageCount,
-                );
-                const effectiveArmyPoints = armyBasePoints + villageArmyBonus;
-                const endTurnGloryIncome =
-                  getEndTurnGloryIncome(playerRuleStats);
-                const legendaryRecruitsSummary = getLegendaryRecruitsSummary(
-                  player.dragon_recruits,
-                  player.giant_recruits,
-                );
-                const order = orderVisibilityByPlayerId.get(player.id);
-                const displayedStatus = order?.can_view_details
-                  ? order.order_status
-                  : getPublicOrderStatus(order?.order_status);
-
-                return (
-                  <div
-                    key={player.id}
-                    className="fantasy-stat flex min-h-[190px] flex-col justify-between p-3"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <Badge variant="neutral">#{index + 1}</Badge>
-                          {player.color ? (
-                            <span
-                              className="inline-flex items-center gap-1.5 text-xs text-[#cbbda6]"
-                              title={getColorLabel(player.color)}
-                            >
-                              <ColorSwatch color={player.color} />
-                            </span>
-                          ) : null}
-                        </div>
-                        <Badge variant={getOrderStatusVariant(displayedStatus)}>
-                          {getOrderStatusLabel(displayedStatus)}
-                        </Badge>
-                      </div>
-                      <p className="mt-3 truncate font-semibold text-[#f3ead7]">
-                        {player.display_name}
-                      </p>
-                      <p className="fantasy-muted mt-1 truncate text-sm">
-                        {player.aos_faction ?? "Faction non renseignée"}
-                      </p>
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <p className="text-lg font-bold text-[#f4ce73]">
-                          {player.glory}
-                        </p>
-                        <p className="fantasy-muted">Gloire</p>
-                      </div>
-                      <div>
-                        <p className="font-bold text-[#f3ead7]">
-                          {controlledTerritories}
-                        </p>
-                        <p className="fantasy-muted">Territoires</p>
-                      </div>
-                      <div>
-                        <p className="font-bold text-[#f3ead7]">
-                          {effectiveArmyPoints} pts
-                        </p>
-                        <p className="fantasy-muted">
-                          Armée
-                          {villageArmyBonus > 0 ? ` +${villageArmyBonus}` : ""}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-bold text-[#f3ead7]">
-                          +{endTurnGloryIncome}
-                        </p>
-                        <p className="fantasy-muted">Fin de tour</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 space-y-1 text-xs">
-                      <p
-                        className="fantasy-muted truncate"
-                        title={getOrderVisibilitySummary(order, territoryNameById)}
-                      >
-                        {getOrderVisibilitySummary(order, territoryNameById)}
-                      </p>
-                      {legendaryRecruitsSummary ? (
-                        <p
-                          className="fantasy-muted truncate"
-                          title={`Renforts : ${legendaryRecruitsSummary}`}
-                        >
-                          Renforts : {legendaryRecruitsSummary}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {pendingPlayers.length ? (
-              <p className="fantasy-alert fantasy-alert-info mt-3 p-3 text-sm">
-                {pendingPlayers.length} demande
-                {pendingPlayers.length > 1 ? "s" : ""} encore en attente.
-              </p>
-            ) : null}
+        {!territories.length ? (
+          <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+            {playersAndOrdersSection}
+            {campaignActivitySection}
           </section>
-
-          <div className="space-y-4">
-            <CampaignChat
-              campaignId={campaign.id}
-              players={activePlayers.map((player) => ({
-                id: player.id,
-                displayName: player.display_name,
-                color: player.color,
-              }))}
-              messages={messages.map((message) => ({
-                id: message.id,
-                campaignPlayerId: message.campaign_player_id,
-                recipientCampaignPlayerId: message.recipient_campaign_player_id,
-                body: message.body,
-                createdAt: message.created_at,
-              }))}
-              currentPlayerId={currentPlayer?.id ?? null}
-              canSend={canSendChatMessage}
-              unavailableMessage={chatUnavailableMessage}
-            />
-            <CampaignLog logs={logs} />
-          </div>
-        </section>
+        ) : null}
       </div>
     </main>
   );

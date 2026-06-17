@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import {
   cancelOrderAction,
@@ -69,6 +69,8 @@ type RecruitmentState = {
 };
 
 type CampaignCommandCenterProps = {
+  belowMap?: ReactNode;
+  belowSidebar?: ReactNode;
   campaignId: string;
   mapWidth: number;
   mapHeight: number;
@@ -315,6 +317,8 @@ function FortifySubmitButton() {
 }
 
 export function CampaignCommandCenter({
+  belowMap,
+  belowSidebar,
   campaignId,
   mapWidth,
   mapHeight,
@@ -608,119 +612,122 @@ export function CampaignCommandCenter({
 
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_380px]">
-      <Card className="fantasy-panel">
-        <CardHeader>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle className="fantasy-panel-title text-2xl">
-                Carte de campagne
-              </CardTitle>
-              <CardDescription className="fantasy-muted">
-                {canSubmitOrders
-                  ? "Sélectionne un territoire contrôlé sur la carte pour donner ton ordre."
-                  : "Clique sur un territoire pour consulter ses informations et les actions disponibles."}
-              </CardDescription>
+      <div className="min-w-0 space-y-4">
+        <Card className="fantasy-panel">
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="fantasy-panel-title text-2xl">
+                  Carte de campagne
+                </CardTitle>
+                <CardDescription className="fantasy-muted">
+                  {canSubmitOrders
+                    ? "Sélectionne un territoire contrôlé sur la carte pour donner ton ordre."
+                    : "Clique sur un territoire pour consulter ses informations et les actions disponibles."}
+                </CardDescription>
+              </div>
+              <Badge
+                variant="neutral"
+                className="border-[#c89a53]/60 bg-[#11191a] text-[#f4ce73]"
+              >
+                {isHexMap ? "Hex" : "Grille"} {mapWidth} x {mapHeight} -{" "}
+                {territories.length} territoires
+              </Badge>
             </div>
-            <Badge
-              variant="neutral"
-              className="border-[#c89a53]/60 bg-[#11191a] text-[#f4ce73]"
-            >
-              {isHexMap ? "Hex" : "Grille"} {mapWidth} x {mapHeight} -{" "}
-              {territories.length} territoires
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="fantasy-map-board overflow-x-auto p-4 pb-6">
-            {isHexMap ? (
-              <div
-                className="py-3"
-                style={{
-                  minWidth: `${mapWidth * hexTileWidth + hexRowOffset}px`,
-                }}
-              >
-                {territoryRows.map(([positionY, rowTerritories], index) => (
-                  <div
-                    key={positionY}
-                    className="flex"
-                    style={{
-                      paddingLeft: positionY % 2 === 0 ? `${hexRowOffset}px` : 0,
-                      marginTop: index > 0 ? `-${hexVerticalOverlap}px` : 0,
-                    }}
-                  >
-                    {rowTerritories.map((territory) =>
-                      renderTerritoryButton(territory, "hex"),
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div
-                className="grid gap-3"
-                style={{
-                  gridTemplateColumns: `repeat(${mapWidth}, minmax(112px, 1fr))`,
-                  minWidth: `${mapWidth * 118}px`,
-                }}
-              >
-                {territories.map((territory) =>
-                  renderTerritoryButton(territory, "square"),
-                )}
-              </div>
-            )}
-          </div>
+          </CardHeader>
+          <CardContent>
+            <div className="fantasy-map-board overflow-x-auto p-4 pb-6">
+              {isHexMap ? (
+                <div
+                  className="py-3"
+                  style={{
+                    minWidth: `${mapWidth * hexTileWidth + hexRowOffset}px`,
+                  }}
+                >
+                  {territoryRows.map(([positionY, rowTerritories], index) => (
+                    <div
+                      key={positionY}
+                      className="flex"
+                      style={{
+                        paddingLeft: positionY % 2 === 0 ? `${hexRowOffset}px` : 0,
+                        marginTop: index > 0 ? `-${hexVerticalOverlap}px` : 0,
+                      }}
+                    >
+                      {rowTerritories.map((territory) =>
+                        renderTerritoryButton(territory, "hex"),
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  className="grid gap-3"
+                  style={{
+                    gridTemplateColumns: `repeat(${mapWidth}, minmax(112px, 1fr))`,
+                    minWidth: `${mapWidth * 118}px`,
+                  }}
+                >
+                  {territories.map((territory) =>
+                    renderTerritoryButton(territory, "square"),
+                  )}
+                </div>
+              )}
+            </div>
 
-          <div className="mt-3">
-            <div className="flex items-center gap-2">
-              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[#c9a45d]">
-                Tags
-              </span>
-              <div
-                className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1"
-                aria-label="Légende des tags de territoire"
-              >
-                {territoryTypeLegend.map((item) => (
-                  <button
-                    key={item.type}
-                    type="button"
-                    className={cn(
-                      "inline-flex shrink-0 rounded-md border p-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ce73]",
-                      activeLegendType === item.type
-                        ? "border-[#f4ce73] bg-[#3a2b18]"
-                        : "border-[#c89a53]/35 bg-[#0b1415]/70 hover:bg-[#d5a653]/12",
-                    )}
-                    aria-expanded={activeLegendType === item.type}
-                    aria-describedby={
-                      activeLegendType === item.type
-                        ? "territory-type-legend-tooltip"
-                        : undefined
-                    }
-                    title={`${item.label} - ${getTerritoryTypeEffectLabel(item.type)}`}
-                    onClick={() => setActiveLegendType(item.type)}
-                    onFocus={() => setActiveLegendType(item.type)}
-                  >
-                    <TerritoryTypeBadge type={item.type} />
-                    <span className="sr-only">
-                      {getTerritoryTypeMark(item.type)} - {item.label}
-                    </span>
-                  </button>
-                ))}
+            <div className="mt-3">
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[#c9a45d]">
+                  Tags
+                </span>
+                <div
+                  className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1"
+                  aria-label="Légende des tags de territoire"
+                >
+                  {territoryTypeLegend.map((item) => (
+                    <button
+                      key={item.type}
+                      type="button"
+                      className={cn(
+                        "inline-flex shrink-0 rounded-md border p-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ce73]",
+                        activeLegendType === item.type
+                          ? "border-[#f4ce73] bg-[#3a2b18]"
+                          : "border-[#c89a53]/35 bg-[#0b1415]/70 hover:bg-[#d5a653]/12",
+                      )}
+                      aria-expanded={activeLegendType === item.type}
+                      aria-describedby={
+                        activeLegendType === item.type
+                          ? "territory-type-legend-tooltip"
+                          : undefined
+                      }
+                      title={`${item.label} - ${getTerritoryTypeEffectLabel(item.type)}`}
+                      onClick={() => setActiveLegendType(item.type)}
+                      onFocus={() => setActiveLegendType(item.type)}
+                    >
+                      <TerritoryTypeBadge type={item.type} />
+                      <span className="sr-only">
+                        {getTerritoryTypeMark(item.type)} - {item.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
+              {activeLegend ? (
+                <p
+                  id="territory-type-legend-tooltip"
+                  role="tooltip"
+                  className="mt-2 rounded-md border border-[#c89a53]/35 bg-[#0b1415]/82 px-3 py-2 text-xs leading-5 text-[#cbbda6]"
+                >
+                  <span className="font-semibold text-[#f3ead7]">
+                    {activeLegend.label}
+                  </span>{" "}
+                  - {getTerritoryTypeEffectLabel(activeLegend.type)}
+                </p>
+              ) : null}
             </div>
-            {activeLegend ? (
-              <p
-                id="territory-type-legend-tooltip"
-                role="tooltip"
-                className="mt-2 rounded-md border border-[#c89a53]/35 bg-[#0b1415]/82 px-3 py-2 text-xs leading-5 text-[#cbbda6]"
-              >
-                <span className="font-semibold text-[#f3ead7]">
-                  {activeLegend.label}
-                </span>{" "}
-                - {getTerritoryTypeEffectLabel(activeLegend.type)}
-              </p>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        {belowMap}
+      </div>
 
       <div className="space-y-4">
         <Card className="fantasy-panel">
@@ -899,6 +906,7 @@ export function CampaignCommandCenter({
           canRecruit={recruitment.canRecruit}
           unavailableMessage={recruitment.unavailableMessage}
         />
+        {belowSidebar}
       </div>
     </div>
   );

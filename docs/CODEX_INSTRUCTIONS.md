@@ -110,7 +110,7 @@ Actions internes stockées dans `orders.action_type` : `conquer`, `fortify`.
 
 ### Conquête neutre non contestée
 
-D6 automatique à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent à la cible = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 soutien, réussite sur 4+ ; avec 2 soutiens, réussite sur 2+ ; avec 3 soutiens ou plus, conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
+Pendant les tours 1 à 3, une conquête neutre non contestée est automatique. À partir du tour 4, D6 automatique à la révélation. La difficulté dépend du soutien adjacent : 1 territoire contrôlé adjacent à la cible = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 soutien, réussite sur 4+ ; avec 2 soutiens, réussite sur 2+ ; avec 3 soutiens ou plus, conquête automatique. +1 Gloire dans tous les cas. Succès = territoire au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
 
 ### Conquête neutre contestée
 

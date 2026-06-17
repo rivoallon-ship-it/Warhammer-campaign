@@ -191,7 +191,7 @@ Règles :
 - conquérir un territoire ennemi crée une bataille ;
 - si le défenseur a fortifié le territoire attaqué pendant le même tour, la bataille bénéficie bien de la fortification ;
 - si l'attaquant perd une bataille contre un territoire ennemi, le territoire source de l'attaque passe au défenseur s'il est encore contrôlé par l'attaquant ;
-- conquérir seul un territoire neutre lance automatiquement un D6 : 3+ avec 1 territoire adjacent contrôlé, 2+ avec 2 territoires adjacents contrôlés, automatique avec 3 territoires adjacents contrôlés ou plus ; Dragon et Géant passent à 4+ avec 1 soutien et donnent +3 Gloire si la conquête réussit ;
+- conquérir seul un territoire neutre est automatique pendant les 3 premiers tours ; ensuite un D6 automatique s'applique : 3+ avec 1 territoire adjacent contrôlé, 2+ avec 2 territoires adjacents contrôlés, automatique avec 3 territoires adjacents contrôlés ou plus ; Dragon et Géant passent à 4+ avec 1 soutien et donnent +3 Gloire si la conquête réussit ;
 - si plusieurs joueurs visent le même territoire neutre, une bataille multi-joueurs est créée ;
 - fortifier cible un territoire contrôlé par le joueur, non fortifié et qui n’est pas une forteresse ;
 - les tags ont des effets : CA +5 Gloire si capturée, VI +100 points d’armée max +200, GE +1 Gloire en fin de tour, FO +200 points au défenseur, TO magicien niveau 1 pour le défenseur, RU +1 Gloire à la première conquête, DR/GI +3 Gloire si conquis, SA sans bonus ;

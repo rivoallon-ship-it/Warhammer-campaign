@@ -311,7 +311,7 @@ Commit principal :
 - L'interface affiche les effets des tags, les points d'armée effectifs et les revenus de fin de tour attendus.
 - Ajout des effets de conquête et de bataille restants :
   - `TO` Tour magique : le défenseur dispose d'un magicien niveau 1 en bataille (santé 8, sauvegarde 4+) ;
-  - `DR` Dragon et `GI` Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquis ;
+  - `DR` Dragon et `GI` Géant : conquête neutre sur 4+ avec 1 soutien après l'ouverture, +3 Gloire si conquis ;
   - en bataille multi-joueurs pour un Dragon/Géant neutre, le vainqueur reçoit aussi le +3 Gloire.
 - Ajout du recrutement légendaire :
   - colonnes `dragon_recruits` et `giant_recruits` sur les joueurs ;
@@ -417,6 +417,12 @@ Commit principal :
 - La progression du tour devient une ligne compacte sans titre ni séparateur.
 - La légende des tags devient une barre horizontale de badges cliquables avec détail au clic/focus.
 - Le bloc `Joueurs et ordres` utilise des cartes joueur compactes en grille responsive au lieu de grandes lignes.
+
+### Mise à jour du 2026-06-17 : conquêtes automatiques d'ouverture
+
+- Les conquêtes neutres non contestées sont maintenant automatiques pendant les tours 1 à 3.
+- À partir du tour 4, les seuils tactiques existants restent appliqués : 3+, 2+, ou automatique avec 3 soutiens adjacents.
+- La règle est appliquée côté interface et côté SQL dans `reveal_current_turn_orders`.
 
 ## Fichiers importants
 

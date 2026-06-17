@@ -31,6 +31,9 @@ describe("territory-rules", () => {
   });
 
   it("applies tactical neutral conquest thresholds", () => {
+    expect(getNeutralConquestThreshold("wild", 1, 1)).toBeNull();
+    expect(getNeutralConquestThreshold("dragon", 1, 3)).toBeNull();
+    expect(getNeutralConquestThreshold("wild", 1, 4)).toBe(3);
     expect(getNeutralConquestThreshold("wild", 1)).toBe(3);
     expect(getNeutralConquestThreshold("wild", 2)).toBe(2);
     expect(getNeutralConquestThreshold("wild", 3)).toBeNull();
@@ -46,6 +49,9 @@ describe("territory-rules", () => {
     );
     expect(getNeutralConquestDifficultyLabel("wild", 3)).toContain(
       "Conquête automatique",
+    );
+    expect(getNeutralConquestDifficultyLabel("dragon", 1, 2)).toContain(
+      "3 premiers tours",
     );
   });
 

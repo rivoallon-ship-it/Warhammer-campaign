@@ -225,7 +225,7 @@ Les colonnes `dragon_recruits_committed` et `giant_recruits_committed` stockent 
 
 Champs : `id`, `campaign_id`, `turn_id`, `order_id`, `campaign_player_id`, `territory_id`, `status`, `dice_result`, `success`, `created_at`, `resolved_at`.
 
-`status` : `pending`, `resolved`. Dans le fonctionnement actuel, les conquêtes neutres non contestées sont créées directement en `resolved` à la révélation. D6 automatique avec soutien adjacent : 1 territoire contrôlé adjacent = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. Joueur +1 Gloire dans tous les cas. Succès = territoire au joueur.
+`status` : `pending`, `resolved`. Dans le fonctionnement actuel, les conquêtes neutres non contestées sont créées directement en `resolved` à la révélation. Pendant les tours 1 à 3, ces conquêtes sont automatiques. À partir du tour 4, D6 automatique avec soutien adjacent : 1 territoire contrôlé adjacent = réussite sur 3+, 2 territoires contrôlés adjacents = réussite sur 2+, 3 territoires contrôlés adjacents ou plus = conquête automatique. Joueur +1 Gloire dans tous les cas. Succès = territoire au joueur.
 
 Le nom `explorations` reste en base pour compatibilité historique, mais l'interface parle de conquêtes automatiques.
 

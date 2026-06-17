@@ -36,7 +36,9 @@ export function getEndTurnGloryIncome(stats: PlayerTerritoryRuleStats) {
 export function getNeutralConquestThreshold(
   territoryType: string,
   adjacentControlledCount: number,
+  turnNumber?: number,
 ) {
+  if (typeof turnNumber === "number" && turnNumber <= 3) return null;
   if (adjacentControlledCount >= 3) return null;
   if (adjacentControlledCount >= 2) return 2;
   if (isLegendaryTerritory(territoryType)) return 4;
@@ -47,16 +49,22 @@ export function getNeutralConquestThreshold(
 export function getNeutralConquestDifficultyLabel(
   territoryType: string,
   adjacentControlledCount: number,
+  turnNumber?: number,
 ) {
   const threshold = getNeutralConquestThreshold(
     territoryType,
     adjacentControlledCount,
+    turnNumber,
   );
   const legendarySuffix = isLegendaryTerritory(territoryType)
     ? ` En cas de réussite : +${LEGENDARY_CONQUEST_GLORY_BONUS} Gloire.`
     : "";
 
   if (threshold === null) {
+    if (typeof turnNumber === "number" && turnNumber <= 3) {
+      return `Conquête automatique : les 3 premiers tours de campagne sécurisent l'expansion initiale.${legendarySuffix}`;
+    }
+
     return `Conquête automatique : tu contrôles 3 territoires adjacents ou plus.${legendarySuffix}`;
   }
 
@@ -125,11 +133,11 @@ export function getTerritoryTypeEffectLabel(type: string) {
   }
 
   if (type === "dragon") {
-    return "Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.";
+    return "Dragon : conquête neutre sur 4+ avec 1 soutien après l'ouverture, +3 Gloire si conquise.";
   }
 
   if (type === "giant") {
-    return "Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise.";
+    return "Géant : conquête neutre sur 4+ avec 1 soutien après l'ouverture, +3 Gloire si conquise.";
   }
 
   return "Sauvage : aucun bonus particulier.";

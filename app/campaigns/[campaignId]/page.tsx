@@ -734,6 +734,7 @@ export default async function CampaignPage({
               belowMap={playersAndOrdersSection}
               belowSidebar={campaignActivitySection}
               campaignId={campaign.id}
+              currentTurnNumber={campaign.current_turn_number || 1}
               mapWidth={campaign.map_width}
               mapHeight={campaign.map_height}
               mapTemplate={campaign.map_template}

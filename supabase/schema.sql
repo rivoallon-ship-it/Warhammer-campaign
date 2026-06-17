@@ -1266,17 +1266,21 @@ begin
       target.name as territory_name,
       target.type as territory_type,
       target.special_reward_claimed_at is null as special_reward_available,
+      v_turn.turn_number <= 3 as opening_auto_conquest,
       case
+        when v_turn.turn_number <= 3 then 6
         when support.adjacent_support_count >= 3 then 6
         else roll.dice_result
       end as dice_result,
       support.adjacent_support_count,
       case
+        when v_turn.turn_number <= 3 then null
         when support.adjacent_support_count >= 2 then 2
         when target.type in ('dragon', 'giant') then 4
         else 3
       end as conquest_threshold,
-      support.adjacent_support_count >= 3
+      v_turn.turn_number <= 3
+        or support.adjacent_support_count >= 3
         or roll.dice_result >= case
           when support.adjacent_support_count >= 2 then 2
           when target.type in ('dragon', 'giant') then 4
@@ -1402,6 +1406,8 @@ begin
       || target.name || ' : '
       || case when ie.exploration_success then 'réussite' else 'échec' end
       || case
+        when so.opening_auto_conquest
+          then ' automatique pendant les 3 premiers tours'
         when so.adjacent_support_count >= 3
           then ' automatique grâce à '
             || so.adjacent_support_count

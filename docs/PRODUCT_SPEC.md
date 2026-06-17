@@ -97,8 +97,8 @@ Bonus actifs :
 - Forteresse : défense automatique, +200 points d’armée pour le défenseur.
 - Tour magique : magicien niveau 1 pour le défenseur en bataille (santé 8, sauvegarde 4+).
 - Ruines : +1 Gloire supplémentaire à la première conquête du territoire.
-- Dragon : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Dragon pour 10 Gloire si le joueur contrôle au moins un territoire Dragon.
-- Géant : conquête neutre sur 4+ avec 1 soutien, +3 Gloire si conquise, recrutement de Géant pour 8 Gloire si le joueur contrôle au moins un territoire Géant.
+- Dragon : conquête neutre sur 4+ avec 1 soutien après les 3 premiers tours, +3 Gloire si conquise, recrutement de Dragon pour 10 Gloire si le joueur contrôle au moins un territoire Dragon.
+- Géant : conquête neutre sur 4+ avec 1 soutien après les 3 premiers tours, +3 Gloire si conquise, recrutement de Géant pour 8 Gloire si le joueur contrôle au moins un territoire Géant.
 - Sauvage : aucun bonus.
 
 Renforts légendaires : pendant la résolution d'une bataille entre joueurs, chaque participant peut engager des Dragons/Géants qu'il possède. Un Dragon engagé ajoute +160 points d'armée, un Géant engagé ajoute +120 points d'armée. Les unités non engagées restent en réserve et ne peuvent pas être perdues. Le maître de campagne peut ensuite indiquer les pertes, plafonnées aux unités engagées dans cette bataille.
@@ -168,7 +168,7 @@ Si l’attaquant capture une capitale, il gagne +5 Gloire supplémentaire. Si un
 
 ## 18. Conquêtes neutres automatiques
 
-Si un seul joueur vise un territoire neutre, le D6 est lancé automatiquement à la révélation. La difficulté dépend du nombre de territoires contrôlés par ce joueur qui sont adjacents à la cible : 1 territoire adjacent = réussite sur 3+, 2 territoires adjacents = réussite sur 2+, 3 territoires adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 territoire adjacent, réussite sur 4+ ; avec 2 territoires adjacents, réussite sur 2+ ; avec 3 territoires adjacents ou plus, conquête automatique. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
+Si un seul joueur vise un territoire neutre, la conquête est automatique pendant les 3 premiers tours de campagne. À partir du tour 4, le D6 est lancé automatiquement à la révélation. La difficulté dépend du nombre de territoires contrôlés par ce joueur qui sont adjacents à la cible : 1 territoire adjacent = réussite sur 3+, 2 territoires adjacents = réussite sur 2+, 3 territoires adjacents ou plus = conquête automatique. Dragon et Géant sont plus difficiles : avec 1 territoire adjacent, réussite sur 4+ ; avec 2 territoires adjacents, réussite sur 2+ ; avec 3 territoires adjacents ou plus, conquête automatique. Dans tous les cas, joueur +1 Gloire. En cas de succès, le territoire passe au joueur. Dragon et Géant donnent +3 Gloire supplémentaire si la conquête réussit.
 
 ## 18b. Recrutements légendaires
 

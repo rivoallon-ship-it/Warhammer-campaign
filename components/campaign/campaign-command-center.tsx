@@ -72,6 +72,7 @@ type CampaignCommandCenterProps = {
   belowMap?: ReactNode;
   belowSidebar?: ReactNode;
   campaignId: string;
+  currentTurnNumber: number;
   mapWidth: number;
   mapHeight: number;
   mapTemplate: string;
@@ -320,6 +321,7 @@ export function CampaignCommandCenter({
   belowMap,
   belowSidebar,
   campaignId,
+  currentTurnNumber,
   mapWidth,
   mapHeight,
   mapTemplate,
@@ -871,6 +873,7 @@ export function CampaignCommandCenter({
                         : getNeutralConquestDifficultyLabel(
                             selectedTerritory.type,
                             adjacentControlledCountForSelectedTarget,
+                            currentTurnNumber,
                           )}
                     </p>
                     <form action={submitOrderAction}>

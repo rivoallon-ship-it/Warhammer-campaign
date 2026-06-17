@@ -612,7 +612,7 @@ export function CampaignCommandCenter({
 
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_380px]">
-      <div className="min-w-0 space-y-4">
+      <div className="min-w-0">
         <Card className="fantasy-panel">
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -724,9 +724,13 @@ export function CampaignCommandCenter({
                 </p>
               ) : null}
             </div>
+            {belowMap ? (
+              <div className="mt-4 border-t border-[#c89a53]/25 pt-4">
+                {belowMap}
+              </div>
+            ) : null}
           </CardContent>
         </Card>
-        {belowMap}
       </div>
 
       <div className="space-y-4">

@@ -411,6 +411,13 @@ Commit principal :
 - Les contours des territoires aux couleurs très sombres sont éclaircis pour rester visibles sur le fond de carte.
 - Ajout de tests automatisés pour le calcul de contraste et les couleurs d'accent.
 
+### Mise à jour du 2026-06-17 : densification de l'écran campagne
+
+- Le haut de page campagne n'est plus encadré dans une grande carte.
+- La progression du tour devient une ligne compacte sans titre ni séparateur.
+- La légende des tags devient une barre horizontale de badges cliquables avec détail au clic/focus.
+- Le bloc `Joueurs et ordres` utilise des cartes joueur compactes en grille responsive au lieu de grandes lignes.
+
 ## Fichiers importants
 
 ### Application

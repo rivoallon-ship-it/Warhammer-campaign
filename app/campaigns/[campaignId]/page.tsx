@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
@@ -139,7 +138,7 @@ function getStepCircleClasses(state: StepState) {
   return "border-[#c89a53]/45 bg-[#eadfc9]/10 text-[#cbbda6]";
 }
 
-function getStepTitleClasses(state: StepState) {
+function getStepPillClasses(state: StepState) {
   if (state === "current") return "text-[#f4ce73]";
   if (state === "done") return "text-[#d8f0dd]";
 
@@ -151,8 +150,8 @@ type TurnProgressStepProps = {
   isLast: boolean;
   title: string;
   detail: string;
+  meta?: string;
   state: StepState;
-  children?: ReactNode;
 };
 
 function TurnProgressStep({
@@ -160,37 +159,44 @@ function TurnProgressStep({
   isLast,
   title,
   detail,
+  meta,
   state,
-  children,
 }: TurnProgressStepProps) {
   return (
-    <li className="relative min-w-0 text-center">
+    <li className="relative min-w-0" title={detail}>
       {!isLast ? (
         <span
-          className={`absolute top-[18px] h-px ${
+          className={`absolute top-1/2 h-px ${
             state === "done" ? "bg-[#6fa07e]" : "bg-[#c89a53]/35"
           }`}
           style={{
-            left: "calc(50% + 1.125rem)",
-            right: "calc(-50% + 1.125rem)",
+            left: "calc(50% + 2.75rem)",
+            right: "calc(-50% + 2.75rem)",
           }}
           aria-hidden="true"
         />
       ) : null}
       <span
-        className={`relative z-10 mx-auto grid size-9 place-items-center rounded-full border-2 text-sm font-bold ${getStepCircleClasses(
+        className={`relative z-10 flex min-h-10 items-center justify-center gap-2 rounded-md border border-[#c89a53]/35 bg-[#0b1415]/72 px-2 text-xs font-semibold ${getStepPillClasses(
           state,
         )}`}
+        aria-label={`${title} : ${detail}`}
       >
-        {index + 1}
+        <span
+          className={`grid size-6 shrink-0 place-items-center rounded-full border text-[11px] font-bold ${getStepCircleClasses(
+            state,
+          )}`}
+          aria-hidden="true"
+        >
+          {index + 1}
+        </span>
+        <span className="truncate">{title}</span>
+        {meta ? (
+          <span className="shrink-0 rounded border border-current/35 px-1.5 py-0.5 text-[10px] uppercase tracking-wide opacity-85">
+            {meta}
+          </span>
+        ) : null}
       </span>
-      <h3 className={`mt-3 text-sm font-bold ${getStepTitleClasses(state)}`}>
-        {title}
-      </h3>
-      <p className="mx-auto mt-1 max-w-48 text-xs leading-5 text-[#cbbda6]">
-        {detail}
-      </p>
-      {children ? <div className="mx-auto mt-3 max-w-52">{children}</div> : null}
     </li>
   );
 }
@@ -249,16 +255,13 @@ function TurnProgress({
     : "Les batailles apparaissent après la révélation.";
 
   return (
-    <section className="mt-5 border-t border-[#c89a53]/35 pt-4">
-      <h2 className="fantasy-panel-title text-lg font-bold">
-        Progression du tour
-      </h2>
-
-      <ol className="mt-4 grid grid-cols-3 gap-2 overflow-hidden px-1 sm:px-4">
+    <section className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <ol className="grid flex-1 grid-cols-3 gap-2 overflow-hidden">
         <TurnProgressStep
           index={0}
           isLast={false}
           title="Ordres"
+          meta={`${submittedOrderCount}/${activePlayerCount}`}
           detail={`${submittedOrderCount} / ${activePlayerCount} ordre${
             activePlayerCount > 1 ? "s" : ""
           } validé${submittedOrderCount > 1 ? "s" : ""}.`}
@@ -269,6 +272,7 @@ function TurnProgress({
           index={1}
           isLast={false}
           title="Révélation"
+          meta={isResultsPhase ? "fait" : "auto"}
           detail={revealDetail}
           state={revealState}
         />
@@ -277,23 +281,28 @@ function TurnProgress({
           index={2}
           isLast
           title="Résultats"
+          meta={battleCount > 0 ? `${resolvedBattleCount}/${battleCount}` : "-"}
           detail={battleDetail}
           state={resultsState}
-        >
+        />
+      </ol>
+
+      {canOpenResults || canFinishTurn ? (
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row lg:min-w-44 lg:justify-end">
           {canOpenResults ? (
             <Link
               href={`/campaigns/${campaignId}/results`}
               className={buttonVariants({
                 size: "sm",
-                className: "fantasy-action-button w-full",
+                className: "fantasy-action-button w-full lg:w-auto",
               })}
             >
               Saisir les résultats
             </Link>
           ) : null}
           {canFinishTurn ? <FinishTurnForm campaignId={campaignId} /> : null}
-        </TurnProgressStep>
-      </ol>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -415,22 +424,22 @@ export default async function CampaignPage({
   return (
     <main className="campaign-fantasy-shell min-h-screen px-4 py-8 text-[#f3ead7] sm:px-6 lg:py-10">
       <div className="campaign-fantasy-content mx-auto max-w-[1540px]">
-        <header className="fantasy-panel p-4 sm:p-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="flex min-w-0 items-start gap-3">
+        <header className="border-b border-[#c89a53]/30 pb-3">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
               <Link
                 href="/dashboard"
-                className="fantasy-action-button inline-grid size-10 shrink-0 place-items-center rounded-full border border-[#f3e7cd]/70 bg-[#211a16]/25 text-2xl font-bold leading-none text-[#fffaf0] transition-colors hover:bg-[#211a16]/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3e7cd]"
+                className="fantasy-action-button inline-grid size-9 shrink-0 place-items-center rounded-full border border-[#f3e7cd]/70 bg-[#211a16]/25 text-xl font-bold leading-none text-[#fffaf0] transition-colors hover:bg-[#211a16]/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3e7cd]"
                 aria-label="Retour au dashboard"
               >
                 <span aria-hidden="true">‹</span>
               </Link>
 
               <div className="min-w-0">
-                <h1 className="fantasy-panel-title text-3xl font-bold tracking-normal sm:text-4xl">
+                <h1 className="fantasy-panel-title truncate text-2xl font-bold tracking-normal sm:text-3xl">
                   {campaign.name}
                 </h1>
-                <p className="fantasy-muted mt-2 text-sm">
+                <p className="fantasy-muted mt-1 text-sm">
                   Saison {campaign.season_number} - Tour{" "}
                   {campaign.current_turn_number || 1} -{" "}
                   {armyBasePoints} points de base
@@ -438,31 +447,23 @@ export default async function CampaignPage({
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 xl:items-end">
-              <div className="grid grid-cols-3 gap-2 text-sm">
-                <span className="fantasy-stat px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#c9a45d]">
-                    Carte
-                  </span>
-                  <span className="font-bold text-[#f3ead7]">
+            <div className="flex flex-col gap-2 xl:items-end">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#cbbda6] xl:justify-end">
+                <span>
+                  Carte{" "}
+                  <strong className="text-[#f3ead7]">
                     {campaign.map_width} x {campaign.map_height}
-                  </span>
+                  </strong>
                 </span>
-                <span className="fantasy-stat px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#c9a45d]">
-                    Territoires
-                  </span>
-                  <span className="font-bold text-[#f3ead7]">
-                    {territoryStats.total}
-                  </span>
+                <span>
+                  Territoires{" "}
+                  <strong className="text-[#f3ead7]">{territoryStats.total}</strong>
                 </span>
-                <span className="fantasy-stat px-3 py-2">
-                  <span className="block text-xs font-semibold text-[#c9a45d]">
-                    Neutres
-                  </span>
-                  <span className="font-bold text-[#f3ead7]">
+                <span>
+                  Neutres{" "}
+                  <strong className="text-[#f3ead7]">
                     {territoryStats.neutral}
-                  </span>
+                  </strong>
                 </span>
               </div>
 
@@ -650,116 +651,127 @@ export default async function CampaignPage({
         </section>
 
         <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <Card className="fantasy-panel">
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="fantasy-panel-title text-lg font-bold">
-                    Joueurs et ordres
-                  </h2>
-                  <p className="fantasy-muted text-sm">
-                    Classement, territoire et statut du tour courant.
-                  </p>
-                </div>
-                <Badge variant="neutral">
-                  {submittedOrderCount} / {activePlayers.length} ordres
-                </Badge>
-              </div>
+          <section className="min-w-0">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="fantasy-panel-title text-lg font-bold">
+                Joueurs et ordres
+              </h2>
+              <Badge variant="neutral">
+                {submittedOrderCount} / {activePlayers.length} ordres
+              </Badge>
+            </div>
 
-              <div className="mt-4 space-y-3">
-                {rankedPlayers.map((player, index) => {
-                  const playerRuleStats = playerTerritoryRuleStats.get(player.id) ?? {
+            <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+              {rankedPlayers.map((player, index) => {
+                const playerRuleStats = playerTerritoryRuleStats.get(player.id) ?? {
                     controlledCount: 0,
                     villageCount: 0,
                     mineCount: 0,
-                  };
-                  const controlledTerritories = playerRuleStats.controlledCount;
-                  const villageArmyBonus = getVillageArmyBonus(
-                    playerRuleStats.villageCount,
-                  );
-                  const effectiveArmyPoints = armyBasePoints + villageArmyBonus;
-                  const endTurnGloryIncome =
-                    getEndTurnGloryIncome(playerRuleStats);
-                  const legendaryRecruitsSummary = getLegendaryRecruitsSummary(
-                    player.dragon_recruits,
-                    player.giant_recruits,
-                  );
-                  const order = orderVisibilityByPlayerId.get(player.id);
-                  const displayedStatus = order?.can_view_details
-                    ? order.order_status
-                    : getPublicOrderStatus(order?.order_status);
+                };
+                const controlledTerritories = playerRuleStats.controlledCount;
+                const villageArmyBonus = getVillageArmyBonus(
+                  playerRuleStats.villageCount,
+                );
+                const effectiveArmyPoints = armyBasePoints + villageArmyBonus;
+                const endTurnGloryIncome =
+                  getEndTurnGloryIncome(playerRuleStats);
+                const legendaryRecruitsSummary = getLegendaryRecruitsSummary(
+                  player.dragon_recruits,
+                  player.giant_recruits,
+                );
+                const order = orderVisibilityByPlayerId.get(player.id);
+                const displayedStatus = order?.can_view_details
+                  ? order.order_status
+                  : getPublicOrderStatus(order?.order_status);
 
-                  return (
-                    <div
-                      key={player.id}
-                      className="fantasy-stat grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_210px]"
-                    >
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
+                return (
+                  <div
+                    key={player.id}
+                    className="fantasy-stat flex min-h-[190px] flex-col justify-between p-3"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                           <Badge variant="neutral">#{index + 1}</Badge>
                           {player.color ? (
-                            <Badge variant="neutral" className="gap-2">
+                            <span
+                              className="inline-flex items-center gap-1.5 text-xs text-[#cbbda6]"
+                              title={getColorLabel(player.color)}
+                            >
                               <ColorSwatch color={player.color} />
-                              {getColorLabel(player.color)}
-                            </Badge>
+                            </span>
                           ) : null}
                         </div>
-                        <p className="mt-3 font-semibold text-[#f3ead7]">
-                          {player.display_name}
-                        </p>
-                        <p className="fantasy-muted mt-1 text-sm">
-                          {player.aos_faction ?? "Faction non renseignée"}
-                        </p>
-                        <p className="fantasy-muted mt-2 text-sm">
-                          {controlledTerritories} territoire
-                          {controlledTerritories > 1 ? "s" : ""} contrôlé
-                          {controlledTerritories > 1 ? "s" : ""}
-                        </p>
-                        <p className="fantasy-muted mt-1 text-sm">
-                          Armée : {effectiveArmyPoints} pts
-                          {villageArmyBonus > 0
-                            ? ` (${armyBasePoints} + ${villageArmyBonus} villages)`
-                            : ""}
-                        </p>
-                        <p className="fantasy-muted mt-1 text-sm">
-                          Revenu fin de tour : +{endTurnGloryIncome} Gloire
-                        </p>
-                        {legendaryRecruitsSummary ? (
-                          <p className="fantasy-muted mt-1 text-sm">
-                            Renforts : {legendaryRecruitsSummary}
-                          </p>
-                        ) : null}
+                        <Badge variant={getOrderStatusVariant(displayedStatus)}>
+                          {getOrderStatusLabel(displayedStatus)}
+                        </Badge>
                       </div>
+                      <p className="mt-3 truncate font-semibold text-[#f3ead7]">
+                        {player.display_name}
+                      </p>
+                      <p className="fantasy-muted mt-1 truncate text-sm">
+                        {player.aos_faction ?? "Faction non renseignée"}
+                      </p>
+                    </div>
 
-                      <div className="flex flex-col gap-3 text-sm lg:items-end lg:text-right">
-                        <div>
-                          <p className="text-xl font-bold text-[#f4ce73]">
-                            {player.glory}
-                          </p>
-                          <p className="fantasy-muted">Gloire</p>
-                        </div>
-                        <div className="space-y-2">
-                          <Badge variant={getOrderStatusVariant(displayedStatus)}>
-                            {getOrderStatusLabel(displayedStatus)}
-                          </Badge>
-                          <p className="fantasy-muted">
-                            {getOrderVisibilitySummary(order, territoryNameById)}
-                          </p>
-                        </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-lg font-bold text-[#f4ce73]">
+                          {player.glory}
+                        </p>
+                        <p className="fantasy-muted">Gloire</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#f3ead7]">
+                          {controlledTerritories}
+                        </p>
+                        <p className="fantasy-muted">Territoires</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#f3ead7]">
+                          {effectiveArmyPoints} pts
+                        </p>
+                        <p className="fantasy-muted">
+                          Armée
+                          {villageArmyBonus > 0 ? ` +${villageArmyBonus}` : ""}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#f3ead7]">
+                          +{endTurnGloryIncome}
+                        </p>
+                        <p className="fantasy-muted">Fin de tour</p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
 
-              {pendingPlayers.length ? (
-                <p className="fantasy-alert fantasy-alert-info mt-3 p-3 text-sm">
-                  {pendingPlayers.length} demande
-                  {pendingPlayers.length > 1 ? "s" : ""} encore en attente.
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
+                    <div className="mt-3 space-y-1 text-xs">
+                      <p
+                        className="fantasy-muted truncate"
+                        title={getOrderVisibilitySummary(order, territoryNameById)}
+                      >
+                        {getOrderVisibilitySummary(order, territoryNameById)}
+                      </p>
+                      {legendaryRecruitsSummary ? (
+                        <p
+                          className="fantasy-muted truncate"
+                          title={`Renforts : ${legendaryRecruitsSummary}`}
+                        >
+                          Renforts : {legendaryRecruitsSummary}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {pendingPlayers.length ? (
+              <p className="fantasy-alert fantasy-alert-info mt-3 p-3 text-sm">
+                {pendingPlayers.length} demande
+                {pendingPlayers.length > 1 ? "s" : ""} encore en attente.
+              </p>
+            ) : null}
+          </section>
 
           <div className="space-y-4">
             <CampaignChat

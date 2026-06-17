@@ -109,17 +109,17 @@ Actions joueur : sélectionner un territoire, fortifier un territoire contrôlé
 
 Actions maître selon phase : Résultats, Finir le tour.
 
-Bloc progression : trois étapes visibles `Ordres`, `Révélation`, `Résultats`. L'étape `Révélation` devient active automatiquement quand tous les ordres sont validés. Le bloc résultats affiche l'avancement des batailles et propose la saisie des résultats ou la fin de tour.
+Bloc progression : ligne compacte de trois étapes visibles `Ordres`, `Révélation`, `Résultats`. L'étape `Révélation` devient active automatiquement quand tous les ordres sont validés. Le bloc résultats affiche seulement les compteurs essentiels et propose la saisie des résultats ou la fin de tour quand nécessaire.
 
 ## 12. Carte interactive `/campaigns/[campaignId]/map`
 
 Route conservée pour compatibilité, mais elle redirige vers `/campaigns/[campaignId]`.
 
-Layout desktop de la page campagne : carte à gauche, fiche territoire/actions à droite.
+Layout desktop de la page campagne : header compact, carte à gauche, fiche territoire/actions à droite.
 
 Mobile : carte en haut, fiche en dessous.
 
-Territoire hexagonal : nom du territoire, icône type, propriétaire, couleur du joueur ou couleur neutre, badge bataille/fortifié si utile. Le code technique du territoire n'est pas affiché sur la carte.
+Territoire hexagonal : nom du territoire, icône type, propriétaire, couleur du joueur ou couleur neutre, badge bataille/fortifié si utile. Le code technique du territoire n'est pas affiché sur la carte. La légende des tags est une ligne de badges cliquables avec détail affiché au clic/focus.
 
 Fiche : nom, propriétaire, statut utile et actions disponibles.
 

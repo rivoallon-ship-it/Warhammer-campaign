@@ -341,6 +341,7 @@ export function CampaignCommandCenter({
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string | null>(
     initialControlledTerritoryId,
   );
+  const [activeLegendType, setActiveLegendType] = useState<string | null>(null);
   const isHexMap = mapTemplate.startsWith("hex_");
 
   const playersById = useMemo(
@@ -388,6 +389,8 @@ export function CampaignCommandCenter({
   const selectedTerritory = selectedTerritoryId
     ? (territoryById.get(selectedTerritoryId) ?? territories[0] ?? null)
     : (territories[0] ?? null);
+  const activeLegend =
+    territoryTypeLegend.find((item) => item.type === activeLegendType) ?? null;
   const selectedOwner = selectedTerritory?.ownerCampaignPlayerId
     ? playersById.get(selectedTerritory.ownerCampaignPlayerId)
     : null;
@@ -666,28 +669,59 @@ export function CampaignCommandCenter({
             )}
           </div>
 
-          <div className="mt-4 border-t border-[#c89a53]/35 pt-4">
-            <h3 className="fantasy-panel-title text-sm font-bold">
-              Légende des tags
-            </h3>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {territoryTypeLegend.map((item) => (
-                <div
-                  key={item.type}
-                  className="fantasy-stat inline-flex max-w-[260px] items-start gap-2 px-2.5 py-2 text-xs"
-                >
-                  <TerritoryTypeBadge type={item.type} />
-                  <span>
-                    <span className="block font-semibold text-[#f3ead7]">
-                      {item.label}
+          <div className="mt-3">
+            <div className="flex items-center gap-2">
+              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[#c9a45d]">
+                Tags
+              </span>
+              <div
+                className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1"
+                aria-label="Légende des tags de territoire"
+              >
+                {territoryTypeLegend.map((item) => (
+                  <button
+                    key={item.type}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 rounded-md border p-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ce73]",
+                      activeLegendType === item.type
+                        ? "border-[#f4ce73] bg-[#3a2b18]"
+                        : "border-[#c89a53]/35 bg-[#0b1415]/70 hover:bg-[#d5a653]/12",
+                    )}
+                    aria-expanded={activeLegendType === item.type}
+                    aria-describedby={
+                      activeLegendType === item.type
+                        ? "territory-type-legend-tooltip"
+                        : undefined
+                    }
+                    title={`${item.label} - ${getTerritoryTypeEffectLabel(item.type)}`}
+                    onClick={() =>
+                      setActiveLegendType(
+                        activeLegendType === item.type ? null : item.type,
+                      )
+                    }
+                    onFocus={() => setActiveLegendType(item.type)}
+                  >
+                    <TerritoryTypeBadge type={item.type} />
+                    <span className="sr-only">
+                      {getTerritoryTypeMark(item.type)} - {item.label}
                     </span>
-                    <span className="mt-1 block leading-4 text-[#cbbda6]">
-                      {getTerritoryTypeEffectLabel(item.type)}
-                    </span>
-                  </span>
-                </div>
-              ))}
+                  </button>
+                ))}
+              </div>
             </div>
+            {activeLegend ? (
+              <p
+                id="territory-type-legend-tooltip"
+                role="tooltip"
+                className="mt-2 rounded-md border border-[#c89a53]/35 bg-[#0b1415]/82 px-3 py-2 text-xs leading-5 text-[#cbbda6]"
+              >
+                <span className="font-semibold text-[#f3ead7]">
+                  {activeLegend.label}
+                </span>{" "}
+                - {getTerritoryTypeEffectLabel(activeLegend.type)}
+              </p>
+            ) : null}
           </div>
         </CardContent>
       </Card>

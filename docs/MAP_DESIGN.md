@@ -109,7 +109,7 @@ Statut : Fortifié
 
 ## 11. Légende
 
-Ne pas afficher de légende permanente dans le bloc carte. Les états utiles restent visibles directement dans les territoires concernés : propriétaire, type, bataille et fortification.
+La carte affiche une légende compacte sur une seule ligne : uniquement les tags de territoire. Les effets détaillés ne sont pas affichés en permanence ; ils apparaissent au clic ou au focus sur un tag. Les états utiles restent visibles directement dans les territoires concernés : propriétaire, type, bataille et fortification.
 
 ## 12. Carte de campagne
 

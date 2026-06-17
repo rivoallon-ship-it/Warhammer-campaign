@@ -607,7 +607,7 @@ export function CampaignCommandCenter({
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_380px]">
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_380px]">
       <Card className="fantasy-panel">
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

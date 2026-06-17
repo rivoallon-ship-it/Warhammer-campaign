@@ -695,11 +695,7 @@ export function CampaignCommandCenter({
                         : undefined
                     }
                     title={`${item.label} - ${getTerritoryTypeEffectLabel(item.type)}`}
-                    onClick={() =>
-                      setActiveLegendType(
-                        activeLegendType === item.type ? null : item.type,
-                      )
-                    }
+                    onClick={() => setActiveLegendType(item.type)}
                     onFocus={() => setActiveLegendType(item.type)}
                   >
                     <TerritoryTypeBadge type={item.type} />

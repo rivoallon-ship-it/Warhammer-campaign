@@ -107,6 +107,8 @@ Renforts légendaires : pendant la résolution d'une bataille entre joueurs, cha
 
 Les nouvelles campagnes utilisent une carte hexagonale `hex_v1_*`. Deux territoires sont adjacents s'ils partagent un côté d'hexagone. Chaque territoire peut avoir jusqu'à six voisins.
 
+La génération de carte équilibre l'accès aux territoires neutres à fort impact (`village`, `mine`, `dragon`, `giant`) depuis les capitales. Les villages sont particulièrement surveillés, car ils ajoutent des points d'armée ; aucun joueur ne doit démarrer avec un accès nettement meilleur qu'un autre à ce type de bonus.
+
 ## 12. Lobby de campagne
 
 Le lobby affiche nom de campagne, code d’invitation, nombre de joueurs attendus, joueurs inscrits, faction, couleur, capitale, prêt/pas prêt.

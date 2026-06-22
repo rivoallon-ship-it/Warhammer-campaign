@@ -424,6 +424,12 @@ Commit principal :
 - À partir du tour 4, les seuils tactiques existants restent appliqués : 3+, 2+, ou automatique avec 3 soutiens adjacents.
 - La règle est appliquée côté interface et côté SQL dans `reveal_current_turn_orders`.
 
+### Mise à jour du 2026-06-22 : équilibrage des ressources de carte
+
+- La génération place désormais les `village`, `mine`, `dragon` et `giant` avec une logique d'accès équilibré depuis les capitales.
+- Les villages sont traités comme ressources prioritaires, car ils donnent +100 points d'armée.
+- Ajout d'un test automatisé qui vérifie, pour les cartes 2 à 6 joueurs, que la distance d'accès à ces types reste comparable entre capitales.
+
 ## Fichiers importants
 
 ### Application

@@ -89,6 +89,8 @@ export const MAP_CONFIGS = {
 
 Les nouvelles campagnes utilisent une carte hexagonale `hex_v1_*`. Chaque territoire peut avoir jusqu'à six voisins. Les lignes paires sont décalées visuellement et dans le calcul d'adjacence.
 
+La génération doit équilibrer l'accès aux types neutres à fort impact (`village`, `mine`, `dragon`, `giant`) depuis les capitales. Chaque capitale doit avoir une opportunité comparable sur ces ressources ; les exemplaires excédentaires doivent être placés comme ressources partagées plutôt qu'au voisinage d'un seul joueur.
+
 ### Ordres secrets
 
 Avant révélation : propriétaire voit son ordre, autres voient seulement statut, maître ne voit pas les détails. Après révélation : tous les joueurs actifs voient tous les ordres. La révélation se déclenche automatiquement à la soumission du dernier ordre actif ; ne pas réintroduire de bouton de validation maître pour passer en résolution.

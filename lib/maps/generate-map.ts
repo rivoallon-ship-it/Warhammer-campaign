@@ -4,13 +4,16 @@ import {
   generateHexAdjacencies,
   generateOrthogonalAdjacencies,
   generateTerritoryCoordinates,
+  stableHash,
   sortByStableSeed,
+  type TerritoryAdjacency,
   type TerritoryCoordinate,
 } from "@/lib/maps/map-utils";
 import {
   expandNonCapitalDistribution,
   getTerritoryDistribution,
   getTerritoryDistributionTotal,
+  TERRITORY_TYPE_ORDER,
 } from "@/lib/maps/territory-distribution";
 import { getTerritoryName } from "@/lib/maps/territory-names";
 import type { TerritoryType } from "@/types/campaign";
@@ -31,6 +34,13 @@ type GeneratedMapRows = {
   territories: TerritoryInsert[];
   adjacencies: AdjacencyInsert[];
 };
+
+const BALANCED_ACCESS_TYPES: TerritoryType[] = [
+  "village",
+  "mine",
+  "dragon",
+  "giant",
+];
 
 export type GenerateMapResult = {
   territoryCount: number;
@@ -68,6 +78,169 @@ function isHexTemplate(template: string) {
   return template.startsWith("hex_");
 }
 
+function getMapAdjacencies(campaign: CampaignRow) {
+  return isHexTemplate(campaign.map_template)
+    ? generateHexAdjacencies(campaign.map_width, campaign.map_height)
+    : generateOrthogonalAdjacencies(campaign.map_width, campaign.map_height);
+}
+
+function buildAdjacencyMap(adjacencies: TerritoryAdjacency[]) {
+  const adjacencyMap = new Map<string, string[]>();
+
+  for (const adjacency of adjacencies) {
+    const neighbors = adjacencyMap.get(adjacency.territoryCode) ?? [];
+
+    neighbors.push(adjacency.adjacentTerritoryCode);
+    adjacencyMap.set(adjacency.territoryCode, neighbors);
+  }
+
+  return adjacencyMap;
+}
+
+function getDistancesFrom(
+  startCode: string,
+  adjacencyMap: Map<string, string[]>,
+) {
+  const distances = new Map<string, number>([[startCode, 0]]);
+  const queue = [startCode];
+
+  for (let index = 0; index < queue.length; index += 1) {
+    const currentCode = queue[index];
+    const currentDistance = distances.get(currentCode) ?? 0;
+
+    for (const neighborCode of adjacencyMap.get(currentCode) ?? []) {
+      if (distances.has(neighborCode)) continue;
+
+      distances.set(neighborCode, currentDistance + 1);
+      queue.push(neighborCode);
+    }
+  }
+
+  return distances;
+}
+
+function getCapitalDistances(
+  capitalSlots: string[],
+  adjacencies: TerritoryAdjacency[],
+) {
+  const adjacencyMap = buildAdjacencyMap(adjacencies);
+
+  return new Map(
+    capitalSlots.map((capitalCode) => [
+      capitalCode,
+      getDistancesFrom(capitalCode, adjacencyMap),
+    ]),
+  );
+}
+
+function getDistanceToCapital(
+  coordinate: TerritoryCoordinate,
+  capitalCode: string,
+  capitalDistances: Map<string, Map<string, number>>,
+) {
+  return capitalDistances.get(capitalCode)?.get(coordinate.code) ?? Infinity;
+}
+
+function getDistancesToCapitals(
+  coordinate: TerritoryCoordinate,
+  capitalSlots: string[],
+  capitalDistances: Map<string, Map<string, number>>,
+) {
+  return capitalSlots
+    .map((capitalCode) =>
+      getDistanceToCapital(coordinate, capitalCode, capitalDistances),
+    )
+    .filter(Number.isFinite);
+}
+
+function getBestCoordinateForCapital(
+  availableCoordinates: TerritoryCoordinate[],
+  capitalCode: string,
+  capitalSlots: string[],
+  capitalDistances: Map<string, Map<string, number>>,
+  seed: string,
+) {
+  return [...availableCoordinates]
+    .filter((coordinate) =>
+      Number.isFinite(getDistanceToCapital(coordinate, capitalCode, capitalDistances)),
+    )
+    .sort((left, right) => {
+      const leftDistance = getDistanceToCapital(
+        left,
+        capitalCode,
+        capitalDistances,
+      );
+      const rightDistance = getDistanceToCapital(
+        right,
+        capitalCode,
+        capitalDistances,
+      );
+
+      if (leftDistance !== rightDistance) return leftDistance - rightDistance;
+
+      const leftNearestOtherDistance = Math.min(
+        ...capitalSlots
+          .filter((code) => code !== capitalCode)
+          .map((code) => getDistanceToCapital(left, code, capitalDistances)),
+      );
+      const rightNearestOtherDistance = Math.min(
+        ...capitalSlots
+          .filter((code) => code !== capitalCode)
+          .map((code) => getDistanceToCapital(right, code, capitalDistances)),
+      );
+
+      if (leftNearestOtherDistance !== rightNearestOtherDistance) {
+        return rightNearestOtherDistance - leftNearestOtherDistance;
+      }
+
+      return (
+        stableHash(`${seed}:${capitalCode}:${left.code}`) -
+        stableHash(`${seed}:${capitalCode}:${right.code}`)
+      );
+    })[0];
+}
+
+function getSharedBalancedCoordinates(
+  availableCoordinates: TerritoryCoordinate[],
+  count: number,
+  capitalSlots: string[],
+  capitalDistances: Map<string, Map<string, number>>,
+  seed: string,
+) {
+  return [...availableCoordinates]
+    .filter((coordinate) =>
+      getDistancesToCapitals(coordinate, capitalSlots, capitalDistances).length,
+    )
+    .sort((left, right) => {
+      const leftDistances = getDistancesToCapitals(
+        left,
+        capitalSlots,
+        capitalDistances,
+      );
+      const rightDistances = getDistancesToCapitals(
+        right,
+        capitalSlots,
+        capitalDistances,
+      );
+      const leftSpread = Math.max(...leftDistances) - Math.min(...leftDistances);
+      const rightSpread = Math.max(...rightDistances) - Math.min(...rightDistances);
+
+      if (leftSpread !== rightSpread) return leftSpread - rightSpread;
+
+      const leftAverage =
+        leftDistances.reduce((sum, distance) => sum + distance, 0) /
+        leftDistances.length;
+      const rightAverage =
+        rightDistances.reduce((sum, distance) => sum + distance, 0) /
+        rightDistances.length;
+
+      if (leftAverage !== rightAverage) return leftAverage - rightAverage;
+
+      return stableHash(`${seed}:shared:${left.code}`) - stableHash(`${seed}:shared:${right.code}`);
+    })
+    .slice(0, count);
+}
+
 function getTypeByCode(
   campaign: CampaignRow,
   coordinates: TerritoryCoordinate[],
@@ -88,6 +261,7 @@ function getTypeByCode(
   }
 
   const capitalSlots = new Set(getCapitalSlots(campaign));
+  const capitalSlotCodes = getCapitalSlots(campaign);
   const nonCapitalCoordinates = coordinates.filter(
     (coordinate) => !capitalSlots.has(coordinate.code),
   );
@@ -106,12 +280,75 @@ function getTypeByCode(
     typeByCode.set(code, "capital");
   });
 
+  const remainingCoordinates = new Map(
+    nonCapitalCoordinates.map((coordinate) => [coordinate.code, coordinate]),
+  );
+  const remainingTypeCounts = new Map<TerritoryType, number>();
+  const capitalDistances = getCapitalDistances(
+    capitalSlotCodes,
+    getMapAdjacencies(campaign),
+  );
+
+  nonCapitalTypes.forEach((type) => {
+    remainingTypeCounts.set(type, (remainingTypeCounts.get(type) ?? 0) + 1);
+  });
+
+  function assignTypeToCoordinate(type: TerritoryType, coordinate: TerritoryCoordinate) {
+    typeByCode.set(coordinate.code, type);
+    remainingCoordinates.delete(coordinate.code);
+    remainingTypeCounts.set(type, (remainingTypeCounts.get(type) ?? 0) - 1);
+  }
+
+  for (const type of BALANCED_ACCESS_TYPES) {
+    const typeCount = remainingTypeCounts.get(type) ?? 0;
+
+    if (typeCount <= 0) continue;
+
+    const fullRounds = Math.floor(typeCount / capitalSlotCodes.length);
+    const sharedCount = typeCount % capitalSlotCodes.length;
+
+    for (let round = 0; round < fullRounds; round += 1) {
+      for (const capitalCode of capitalSlotCodes) {
+        const coordinate = getBestCoordinateForCapital(
+          [...remainingCoordinates.values()],
+          capitalCode,
+          capitalSlotCodes,
+          capitalDistances,
+          `${campaign.id}:${type}:${round}`,
+        );
+
+        if (!coordinate) {
+          return {
+            typeByCode: null,
+            error: "Impossible d'equilibrer les territoires strategiques.",
+          };
+        }
+
+        assignTypeToCoordinate(type, coordinate);
+      }
+    }
+
+    getSharedBalancedCoordinates(
+      [...remainingCoordinates.values()],
+      sharedCount,
+      capitalSlotCodes,
+      capitalDistances,
+      `${campaign.id}:${type}:shared`,
+    ).forEach((coordinate) => {
+      assignTypeToCoordinate(type, coordinate);
+    });
+  }
+
+  const remainingTypes = TERRITORY_TYPE_ORDER.flatMap((type) =>
+    Array.from({ length: Math.max(remainingTypeCounts.get(type) ?? 0, 0) }, () => type),
+  );
+
   sortByStableSeed(
-    nonCapitalCoordinates,
+    [...remainingCoordinates.values()],
     campaign.id,
     (coordinate) => coordinate.code,
   ).forEach((coordinate, index) => {
-    typeByCode.set(coordinate.code, nonCapitalTypes[index]);
+    typeByCode.set(coordinate.code, remainingTypes[index] ?? "wild");
   });
 
   return { typeByCode, error: null };
@@ -201,9 +438,7 @@ function buildMapRows({ campaign, activePlayers }: MapGenerationData) {
     };
   });
 
-  const adjacencyRows = isHexTemplate(campaign.map_template)
-    ? generateHexAdjacencies(campaign.map_width, campaign.map_height)
-    : generateOrthogonalAdjacencies(campaign.map_width, campaign.map_height);
+  const adjacencyRows = getMapAdjacencies(campaign);
   const adjacencies: AdjacencyInsert[] = adjacencyRows.map((adjacency) => ({
     campaign_id: campaign.id,
     territory_code: adjacency.territoryCode,

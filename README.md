@@ -20,6 +20,7 @@ Le MVP doit permettre :
 - création de campagne ;
 - campagnes de **2 à 6 joueurs** ;
 - carte générée automatiquement selon le nombre de joueurs ;
+- accès équilibré aux villages, gisements et territoires légendaires autour des capitales ;
 - invitation par code ;
 - lobby ;
 - choix de faction, couleur et capitale ;

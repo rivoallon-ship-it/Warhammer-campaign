@@ -111,11 +111,17 @@ Statut : Fortifié
 
 La carte affiche une légende compacte sur une seule ligne : uniquement les tags de territoire. Les effets détaillés ne sont pas affichés en permanence ; ils apparaissent au clic ou au focus sur un tag. Les états utiles restent visibles directement dans les territoires concernés : propriétaire, type, bataille et fortification.
 
-## 12. Carte de campagne
+## 12. Équilibrage des ressources
+
+À la génération, les types neutres à fort impact (`village`, `mine`, `dragon`, `giant`) sont placés avec une logique d'accès équilibré autour des capitales. Chaque capitale reçoit d'abord une opportunité comparable pour ces types, puis les exemplaires excédentaires sont placés sur des cases plus partagées, à distance aussi équitable que possible des capitales.
+
+Cette règle vise surtout les villages, car ils donnent +100 points d'armée, mais elle protège aussi les gisements et les territoires légendaires contre un placement trop favorable à un seul joueur.
+
+## 13. Carte de campagne
 
 La page campagne affiche la carte complète, pas une miniature. Chaque hexagone affiche le tag de type en haut, le nom du territoire au centre, le propriétaire en bas et les états utiles comme bataille en cours ou fortification. Les couleurs principales de la carte correspondent aux joueurs, aux territoires neutres et aux territoires contestés.
 
-## 13. Ordres depuis la carte
+## 14. Ordres depuis la carte
 
 Les ordres se donnent directement depuis la carte.
 
@@ -128,33 +134,33 @@ Comportement actuel :
 
 Il n'y a plus de bouton préparatoire `Conquérir depuis ...` sur les territoires contrôlés.
 
-## 14. Comportement clic
+## 15. Comportement clic
 
 Sur la page campagne : sélectionner un territoire affiche sa fiche et propose seulement les actions réellement possibles selon propriétaire, phase et joueur courant. La carte ne surligne plus les adjacences, car l'information utile est donnée par les actions du panneau.
 
-## 15. Adjacences visuelles
+## 16. Adjacences visuelles
 
 Ne pas surligner les adjacences sur la carte. Elles restent utilisées en interne pour valider les conquêtes et afficher les actions possibles.
 
-## 16. Fortifications
+## 17. Fortifications
 
 Afficher `🛡️ Fortifié` ou badge `[Fortifié]`. Si attaqué, bonus affiché dans la fiche bataille.
 
-## 17. Accessibilité
+## 18. Accessibilité
 
 Ne jamais communiquer uniquement par couleur. Afficher nom, propriétaire et badge. Contraste suffisant. Hexagones assez grands, minimum recommandé 120px de large.
 
-## 18. États
+## 19. États
 
 Chargement : “Chargement de la carte…”
 Erreur : “Impossible de charger la carte. [Réessayer]”
 Carte vide : “La carte n’a pas encore été générée. Elle sera créée au lancement de la campagne.”
 
-## 19. Cas par taille
+## 20. Cas par taille
 
 2 joueurs : carte centrée, territoires grands. 3/4 joueurs : lisible desktop. 5/6 joueurs : plus large, scroll horizontal sur mobile.
 
-## 20. Style graphique actuel
+## 21. Style graphique actuel
 
 L'écran de campagne suit désormais une direction fantasy sombre inspirée d'un jeu de stratégie :
 
@@ -168,7 +174,7 @@ L'écran de campagne suit désormais une direction fantasy sombre inspirée d'un
 
 Éviter : carte dessinée main, drag/drop, animations lourdes, zoom/pan avancé, fonds trop illustrés, territoires trop petits, texte trop grand dans les hexagones.
 
-## 21. Composants conceptuels
+## 22. Composants conceptuels
 
 ```ts
 type TerritoryCardProps = {

@@ -252,7 +252,7 @@ RLS : seuls l'auteur actif et le destinataire actif peuvent lire un message. Un 
 - `joinCampaign` : appeler la RPC `request_join_campaign`; la base vérifie code/lobby/place/couleur/capitale puis crée joueur pending et log.
 - `approvePlayer` : maître seulement, pending -> active, log.
 - `launchCampaign` : vérifier conditions, générer carte, créer tour 1, status active, phase orders, log.
-- `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences.
+- `generateMap` : codes, capitales, propriétaires, fortifications centrales, types, noms, territoires, adjacences. Les types neutres à fort impact (`village`, `mine`, `dragon`, `giant`) sont placés avec une distance d'accès équilibrée depuis les capitales, puis le reste de la distribution est attribué de manière pseudo-aléatoire stable.
 - `submitOrder` : vérifier joueur actif, phase, source, cible, adjacence, action légale ; après enregistrement, tenter la révélation automatique si tous les joueurs actifs ont soumis leur ordre.
 - `cancelOrder` : vérifier joueur actif, phase orders, ordre non révélé, puis repasser l'ordre en draft.
 - `revealOrders` : joueur actif, tous submitted, ordres revealed, batailles/conquêtes automatiques/fortifications, log. Cette fonction est appelée automatiquement après la soumission du dernier ordre. Si elle crée au moins une bataille, la campagne passe en phase `resolving`; si elle ne crée aucune bataille, elle clôture le tour courant, crée le tour suivant et repasse la campagne en phase `orders`.

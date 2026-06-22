@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { cancelOrderAction } from "@/app/campaigns/[campaignId]/orders/actions";
 import { CampaignChat } from "@/components/campaign/campaign-chat";
 import { CampaignCommandCenter } from "@/components/campaign/campaign-command-center";
+import { DeleteCampaignForm } from "@/components/campaign/delete-campaign-form";
 import { CampaignLog } from "@/components/campaign/campaign-log";
 import { FinishTurnForm } from "@/components/results/finish-turn-form";
 import { Badge, Card, CardContent, buttonVariants } from "@/components/ui";
@@ -363,6 +364,7 @@ export default async function CampaignPage({
   ).length;
   const isGameMaster =
     currentPlayer?.role === "game_master" && currentPlayer.status === "active";
+  const canDeleteCampaign = campaign.owner_user_id === user.id;
   const existingPlayerOrder =
     currentPlayer && currentTurn
       ? (orders.find((order) => order.campaign_player_id === currentPlayer.id) ?? null)
@@ -634,6 +636,16 @@ export default async function CampaignPage({
                   >
                     Rejoindre
                   </Link>
+                ) : null}
+                {canDeleteCampaign ? (
+                  <DeleteCampaignForm
+                    campaignId={campaign.id}
+                    campaignName={campaign.name}
+                    returnTo="campaign"
+                    label="Supprimer"
+                    size="sm"
+                    className="w-full lg:w-auto"
+                  />
                 ) : null}
               </div>
             </div>

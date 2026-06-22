@@ -6,6 +6,7 @@ import {
   setLobbyReadyStateAction,
   updateLobbySettingsAction,
 } from "@/app/campaigns/[campaignId]/lobby/actions";
+import { DeleteCampaignForm } from "@/components/campaign/delete-campaign-form";
 import { InviteCodeCopy } from "@/components/campaign/invite-code-copy";
 import {
   Badge,
@@ -270,6 +271,20 @@ export default async function LobbyPage({ params, searchParams }: LobbyPageProps
                     Seul le maître de campagne pourra lancer la campagne.
                   </p>
                 )}
+                {lobby.canDeleteCampaign ? (
+                  <div className="border-t border-[#c89a53]/30 pt-4">
+                    <p className="fantasy-muted mb-3 text-sm">
+                      Le créateur peut supprimer cette campagne et toutes ses
+                      données associées.
+                    </p>
+                    <DeleteCampaignForm
+                      campaignId={lobby.campaign.id}
+                      campaignName={lobby.campaign.name}
+                      returnTo="lobby"
+                      className="w-full"
+                    />
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           </div>

@@ -430,6 +430,14 @@ Commit principal :
 - Les villages sont traités comme ressources prioritaires, car ils donnent +100 points d'armée.
 - Ajout d'un test automatisé qui vérifie, pour les cartes 2 à 6 joueurs, que la distance d'accès à ces types reste comparable entre capitales.
 
+### Mise à jour du 2026-06-22 : suppression de campagne par le créateur
+
+- Ajout d'une action serveur `deleteCampaignAction`.
+- La suppression est réservée au propriétaire réel de la campagne (`campaigns.owner_user_id`).
+- Le lobby, l'écran principal de campagne et les cartes du dashboard affichent le bouton de suppression uniquement pour ce propriétaire.
+- Une confirmation navigateur protège l'action destructive, puis un loader s'affiche pendant l'exécution.
+- La suppression s'appuie sur les clés étrangères `on delete cascade` et sur la policy RLS `Owners delete campaigns`, déjà présente dans les scripts Supabase.
+
 ## Fichiers importants
 
 ### Application
@@ -441,7 +449,7 @@ Commit principal :
 - `app/campaigns/join/page.tsx` : rejoindre une campagne.
 - `app/campaigns/[campaignId]/lobby/page.tsx` : lobby.
 - `app/campaigns/[campaignId]/page.tsx` : écran principal de campagne, carte interactive et ordres directs.
-- `app/campaigns/[campaignId]/actions.ts` : actions de campagne, recrutement et envoi de message.
+- `app/campaigns/[campaignId]/actions.ts` : actions de campagne, suppression, recrutement et envoi de message.
 - `app/campaigns/[campaignId]/map/page.tsx` : redirection vers l'écran principal.
 - `app/campaigns/[campaignId]/orders/page.tsx` : redirection vers l'écran principal.
 - `app/campaigns/[campaignId]/reveal/page.tsx` : révélation.

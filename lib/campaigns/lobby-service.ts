@@ -29,6 +29,7 @@ export type LobbyData = {
   pendingPlayers: CampaignPlayerRow[];
   currentPlayer: CampaignPlayerRow | null;
   isGameMaster: boolean;
+  canDeleteCampaign: boolean;
   colorOptions: { label: string; value: string }[];
   capitalOptions: { label: string; value: string }[];
   launchChecks: LobbyLaunchChecks;
@@ -301,6 +302,7 @@ export async function getLobbyData(
   const isGameMaster = Boolean(
     currentPlayer?.role === "game_master" && currentPlayer.status === "active",
   );
+  const canDeleteCampaign = campaign.owner_user_id === userId;
 
   return {
     lobby: {
@@ -310,6 +312,7 @@ export async function getLobbyData(
       pendingPlayers,
       currentPlayer,
       isGameMaster,
+      canDeleteCampaign,
       colorOptions: getColorOptions(lobbyPlayers, currentPlayer?.id),
       capitalOptions: getCapitalOptions(campaign, lobbyPlayers, currentPlayer?.id),
       launchChecks: getLobbyLaunchChecks(campaign, activePlayers),

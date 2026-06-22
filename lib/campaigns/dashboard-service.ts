@@ -24,6 +24,7 @@ export type DashboardCampaign = {
   turnNumber: number;
   mapWidth: number;
   mapHeight: number;
+  canDeleteCampaign: boolean;
 };
 
 function asCampaignStatus(status: string): CampaignStatus {
@@ -60,6 +61,7 @@ function mapDashboardCampaign(
     turnNumber: campaign.current_turn_number,
     mapWidth: campaign.map_width,
     mapHeight: campaign.map_height,
+    canDeleteCampaign: campaign.owner_user_id === player.user_id,
   };
 }
 

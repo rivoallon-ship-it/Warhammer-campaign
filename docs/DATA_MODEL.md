@@ -61,6 +61,11 @@ Contraintes : `id` référence `auth.users(id)` avec suppression cascade.
 
 Contraintes : `invite_code` unique, `player_count` entre 2 et 6, largeur/hauteur > 0, `owner_user_id` référence `auth.users(id)`.
 
+Le propriétaire (`owner_user_id`) est le seul utilisateur autorisé à supprimer
+une campagne. La suppression d'une ligne `campaigns` supprime en cascade les
+données liées : joueurs de campagne, territoires, adjacences, tours, ordres,
+batailles, explorations, logs et messages.
+
 `status` : `lobby`, `active`, `season_end`, `finished`, `archived`.
 
 `current_phase` : `lobby`, `orders`, `revealed`, `resolving`, `end_turn`, `season_summary`, `finished`.
@@ -306,6 +311,10 @@ Activer RLS sur toutes les tables applicatives.
 Règle générale : un utilisateur lit les données d’une campagne uniquement s’il est membre (`campaign_players.user_id = auth.uid()` et status `pending` ou `active`).
 
 Les campagnes en `lobby` ne sont pas lisibles globalement par tous les utilisateurs connectés. Un non-membre peut seulement fournir un code à `get_join_campaign_details`. La demande d'inscription passe par `request_join_campaign`; l'application ne doit pas contourner cette fonction par un `insert` direct dans `campaign_players`.
+
+La suppression d'une campagne est limitée au propriétaire par la policy
+`Owners delete campaigns`. Les autres maîtres de campagne éventuels peuvent
+gérer le jeu, mais pas supprimer la campagne.
 
 Règles spécifiques : ordres visibles uniquement au propriétaire avant révélation, puis aux membres actifs après révélation. Résultats, batailles, conquêtes automatiques (`explorations`), territoires : lecture par membres, modification par maître ou fonctions métier. Messages diplomatiques : lecture uniquement par l'auteur et le destinataire, insertion uniquement par l'auteur actif vers un autre joueur actif.
 

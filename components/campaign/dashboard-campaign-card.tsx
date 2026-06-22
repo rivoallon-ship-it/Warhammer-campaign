@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeleteCampaignForm } from "@/components/campaign/delete-campaign-form";
 import { Badge, Card, CardContent, CardHeader, CardTitle, buttonVariants } from "@/components/ui";
 import type { DashboardCampaign } from "@/lib/campaigns/dashboard-service";
 import type { CampaignPhase, CampaignStatus } from "@/types/campaign";
@@ -80,12 +81,27 @@ export function DashboardCampaignCard({ campaign }: DashboardCampaignCardProps) 
             <dd className="fantasy-muted mt-1">{campaign.glory}</dd>
           </div>
         </dl>
-        <Link
-          href={campaignHref}
-          className={buttonVariants({ variant: "outline", className: "w-full" })}
-        >
-          Ouvrir
-        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href={campaignHref}
+            className={buttonVariants({
+              variant: "outline",
+              className: campaign.canDeleteCampaign ? "flex-1" : "w-full",
+            })}
+          >
+            Ouvrir
+          </Link>
+          {campaign.canDeleteCampaign ? (
+            <DeleteCampaignForm
+              campaignId={campaign.id}
+              campaignName={campaign.name}
+              returnTo="dashboard"
+              label="Supprimer"
+              formClassName="flex-1"
+              className="w-full"
+            />
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );

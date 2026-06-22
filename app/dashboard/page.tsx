@@ -24,6 +24,8 @@ import { createClient } from "@/lib/supabase/server";
 
 type DashboardPageProps = {
   searchParams?: Promise<{
+    campaignDeleted?: string;
+    campaignDeleteError?: string;
     profileError?: string;
     profileSuccess?: string;
   }>;
@@ -80,6 +82,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           title={`Bonjour, ${displayName}`}
           description="Retrouve tes campagnes, ton rôle, ton statut de lobby et ton profil joueur."
         />
+
+        {params?.campaignDeleted ? (
+          <p className="fantasy-alert fantasy-alert-success mt-6 p-3 text-sm">
+            Campagne supprimée.
+          </p>
+        ) : null}
+        {params?.campaignDeleteError ? (
+          <p className="fantasy-alert fantasy-alert-danger mt-6 p-3 text-sm">
+            {params.campaignDeleteError}
+          </p>
+        ) : null}
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link href="/campaigns/new" className={buttonVariants()}>

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { deleteCampaign } from "@/lib/campaigns/delete-campaign";
 import { recruitLegendaryUnit } from "@/lib/campaigns/recruitment-service";
 import {
   getLegendaryRecruitmentCost,
@@ -33,6 +34,25 @@ function redirectToCampaignAnchor(
   redirect(`/campaigns/${campaignId}${query}#${anchor}`);
 }
 
+function getDeleteErrorRedirectPath(campaignId: string, returnTo: string) {
+  if (returnTo === "lobby") return `/campaigns/${campaignId}/lobby`;
+  if (returnTo === "campaign") return `/campaigns/${campaignId}`;
+
+  return "/dashboard";
+}
+
+function redirectToDeleteError(
+  campaignId: string,
+  returnTo: string,
+  error: string,
+): never {
+  const targetPath = getDeleteErrorRedirectPath(campaignId, returnTo);
+  const queryKey = returnTo === "dashboard" ? "campaignDeleteError" : "error";
+  const searchParams = new URLSearchParams({ [queryKey]: error });
+
+  redirect(`${targetPath}?${searchParams.toString()}`);
+}
+
 function getChatInstallError(errorMessage: string) {
   if (
     errorMessage.includes("campaign_messages") ||
@@ -43,6 +63,32 @@ function getChatInstallError(errorMessage: string) {
   }
 
   return "Impossible d'envoyer le message pour le moment.";
+}
+
+export async function deleteCampaignAction(formData: FormData) {
+  const campaignId = getFormValue(formData, "campaignId");
+  const returnTo = getFormValue(formData, "returnTo") || "dashboard";
+
+  if (!campaignId) {
+    redirect("/dashboard?campaignDeleteError=Campagne%20introuvable.");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/login?next=/campaigns/${campaignId}`);
+  }
+
+  const { error } = await deleteCampaign(supabase, user, campaignId);
+
+  if (error) {
+    redirectToDeleteError(campaignId, returnTo, error);
+  }
+
+  redirect("/dashboard?campaignDeleted=1");
 }
 
 export async function recruitLegendaryUnitAction(formData: FormData) {
